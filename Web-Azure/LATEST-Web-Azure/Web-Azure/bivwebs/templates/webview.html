@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BioInVision Web3DView</title>
+  <meta charset="UTF-8">
+  <meta name="description" content="BioInVision Web 3DView">
+  <meta name="keywords" content="CryoViz Imaging Service, CryoViz Imaging Instrument, Image Analysis">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bivstyle.css') }}">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="{{ url_for('static', filename='js/constwv.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/webview.js') }}"></script>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="modality">Modality</div>
+      <div class="form-check form-check-inline">
+        <input class="form-control-sm" type="radio" id="radioBR" name="modality" value="br" checked>
+        <label class="form-check-label" for="radioBR">Bright Field Light</label>
+      </div>
+      <div class="form-check form-check-inline">  
+        <input type="radio" id="radioFL" name="modality" value="fl">
+        <label class="form-check-label" for="radioFL">Fluorescent Light</label>
+      </div>
+    </div>
+    <!--<div class="mainareas">-->
+
+      <div class="row">
+        {% include 'view3d.html' %}
+      </div>
+      <div class="row">
+        <div class="col-7" id="xyQuadArea">
+          <div class="slider">
+            <label for="xySlider">XY: </label>
+            <span id="xySliderValue">80</span>
+            <span>0</span>
+            <input type="range" id="xySlider" name="xySlider" value="80" min="0" max="160">
+            <span>160</span>
+          </div>
+          <img id="xyImg">
+          <button id="annotateXY">Annotate</button>
+        </div>
+      
+        <div class="col-5" id="yzQuadArea">
+          <div class="slider">
+            <label for="yzSlider">YZ: </label>
+            <span id="yzSliderValue">540</span>
+            <span>0</span>
+            <input type="range" id="yzSlider" name="yzSlider" value="540" min="0" max="1081">
+            <span>1081</span>
+          </div>
+          <img id="yzImg">
+          <canvas id="yzImgCanvas"></canvas>
+
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-7" id="xzQuadArea">
+          <div class="slider">
+            <label for="xzSlider">XZ: </label>
+            <span id="xzSliderValue">256</span>
+            <span>0</span>
+            <input type="range" id="xzSlider" name="xzSlider" value="256" min="0" max="513">
+            <span>513</span>
+          </div>
+          <img id="xzImg">
+          <canvas id="xzImgCanvas"></canvas>
+        </div>
+      </div>
+    <!--</div> -->
+  </div>
+</body>
+
+</html>

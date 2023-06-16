@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST" enctype="multipart/form-data" action="" onsubmit="showLoader()">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Remove Background Test</legend>
+                <div class="form-group">
+                    {{ form.image.label(class="form-control-label") }}
+                    <br>
+                    {{ form.image }}
+                </div>
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+        <div id="loadingshade">
+            <div id="loader"></div>
+        </div>
+    </div>
+{% endblock content %}

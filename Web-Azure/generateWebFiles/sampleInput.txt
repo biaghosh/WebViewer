@@ -1,0 +1,2 @@
+Name|Lens|Exposure|Wavelength|Path|FileName
+MouseTest8|Brightfield|1|430|C:\Users\Yiyang\Desktop\Web-Azure\generateWebFiles\|brightfieldVolume-mostRecent.tif

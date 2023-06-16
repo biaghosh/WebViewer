@@ -1,0 +1,705 @@
+<!--
+    WebGL Volume Renderer
+    (c) by Norman Haensch and Stefan Roettger, June 2011
+    Published under the GPL 3 license
+    No warranty WHATSOEVER is expressed
+-->
+
+
+<script type="text/javascript" src="/static/js/glMatrix-0.9.6.js"></script>
+<!-- #version 300 es   WORKS-->
+<script id="volren-frag-shader" type="x-shader/x-fragment">   
+    #ifdef GL_FRAGMENT_PRECISION_HIGH
+        precision highp float;
+    #else
+        precision mediump float;
+    #endif
+
+    varying vec2 vTextureCoord;
+
+    uniform float uAlpha;
+    uniform float uCutoff;
+
+    uniform sampler2D uSampler;
+
+    void main()
+    {
+        // compute 1 pixel in texture coordinates.
+        //vec2 onePixel = vec2(1.0, 1.0) / u_textureSize;
+        // threshold;
+        float t1 = 20.0 / 255.0;
+        float t2 = 180.0 / 255.0;
+        float a = 0.0;
+        vec4 textureColor = texture2D(uSampler, vTextureCoord);
+        // temporarily remove the background color
+        float r=textureColor.r;
+        float g=textureColor.g;
+        float b=textureColor.b;
+        if (uCutoff > 0.05) {
+            a = (r<uCutoff)?0.0:uAlpha;
+        }
+        else {
+            if ( r < t2 && g < t2 && b < t2 && (abs(r-g) > t1 || abs(r-b) > t1 || abs(g-b) > t1 )) {
+                a = 1.0;
+            }
+        }
+        gl_FragColor = vec4(textureColor.xyz, a);
+    }
+</script>
+
+<script id="volren-vrtx-shader" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec2 aTextureCoord;
+
+    varying vec2 vTextureCoord;
+
+    uniform mat4 mvpMatrix;
+
+    void main()
+    {
+        
+        vTextureCoord = aTextureCoord;
+        gl_Position = mvpMatrix * vec4(aVertexPosition, 1.0);
+    }
+</script>
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", (event) => {
+        webGLStart();
+    })
+    var gl;
+    var shader;
+
+    var mu;
+    var cutoff;
+    var xyslice;
+
+    var numSlicesXY;
+    var numSlicesYZ;
+    var numSlicesXZ;
+    var numTextures;
+
+    var planeVtxBuffer;
+    var planeTexCoordBuffer;
+
+    // we only need numTextures textures to save the memory
+    var planeTexture;
+    var planeImage;
+    var imageLoaded;
+    var textureBound;
+    var textureAllBound;
+    var imageAllLoaded;
+
+    var angle = 0;
+    var rotation = 0.0;
+    var eye_height = 1;
+    var radius = 3;
+
+    var requestId = undefined;
+    function startAnimation() {
+        if (!requestId) {
+            requestId = window.requestAnimationFrame(drawScene);
+        }
+    }
+
+    function stopAnimation() {
+        if (requestId) {
+            window.cancelAnimationFrame(requestId);
+            requestId = undefined;
+        }
+    }
+
+    function createBuffer(data, items, size)
+    {
+        var buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
+
+        buffer.numItems = items;
+        buffer.itemSize = size;
+
+        return(buffer);
+    }
+
+    function initBuffers()
+    {
+        // plane vertices
+        var vertices = [
+            -0.5, -0.5, -0.5,
+            0.5, -0.5, -0.5,
+            -0.5, 0.5, -0.5,
+            0.5, 0.5, -0.5
+        ];
+
+        planeVtxBuffer = createBuffer(vertices, 4, 3);
+
+        // texture coords for plane vertices
+        var texcoords = [
+            0.0, 0.0,
+            1.0, 0.0,
+            0.0, 1.0,
+            1.0, 1.0
+        ];
+
+        // map the texture onto the plane
+        planeTexCoordBuffer = createBuffer(texcoords, 4, 2);
+    }
+
+    function loadImage(index, src) {
+        var imgObj = new Image();
+        var idx = index;
+        imgObj.myCustomData = idx;
+        imgObj.onload = function () {
+            imageLoaded[this.myCustomData] = 1;
+        };
+        imgObj.onerror = function () {
+            imageLoaded[this.myCustomData] = -1;
+        };
+        imgObj.onabort = function () {
+            imageLoaded[this.myCustomData] = -2;
+        };
+        imgObj.src = src;
+        planeImage[index] = imgObj;
+    }
+    
+    // return the index to be available next;
+    function initTexture(startIdx, length, modalpath, createTex) {
+        let fileFormat = ".png";
+        var index = startIdx;
+        var src;
+        var link = window.location.origin;
+        for (var sliceNr = 0; sliceNr < length; sliceNr++) {
+            if (createTex) {
+                planeTexture[index] = gl.createTexture();
+            }
+            src = link + "/" + modalpath.slice(1) +
+                  ("0000"+sliceNr).slice(-4) + fileFormat;
+            loadImage(index, src);
+
+            index++;
+        }
+        return index;
+    }
+
+    function initTextures()
+    {
+        textureAllBound = false;
+        imageAllLoaded = false;
+        planeImage = new Array(numTextures);
+        imageLoaded = new Array(numTextures).fill(0);
+        planeTexture = new Array(numTextures);
+        textureBound = new Array(numTextures).fill(0);
+
+        var index = 0;
+        index = initTexture(index, numSlicesXY, window.parent.bivws.ModalPath.XY, true);
+        
+    }
+
+    function getShader(id)
+    {
+        var shaderScript = document.getElementById(id);
+
+        if (!shaderScript)
+           return(null);
+
+        var str = "";
+        var k = shaderScript.firstChild;
+        while (k)
+        {
+            if (k.nodeType == 3) str += k.textContent;
+            k = k.nextSibling;
+        }
+
+        var lshader;
+
+        if (shaderScript.type == "x-shader/x-fragment")
+            lshader = gl.createShader(gl.FRAGMENT_SHADER);
+        else if (shaderScript.type == "x-shader/x-vertex")
+            lshader = gl.createShader(gl.VERTEX_SHADER);
+        else
+            return(null);
+
+        gl.shaderSource(lshader, str);
+        gl.compileShader(lshader);
+
+        if (!gl.getShaderParameter(lshader, gl.COMPILE_STATUS))
+        {
+            alert(gl.getShaderInfoLog(lshader));
+            return(null);
+        }
+
+        return(lshader);
+    }
+
+    function initShader()
+    {
+        var fragmentShader = getShader("volren-frag-shader");
+        var vertexShader = getShader("volren-vrtx-shader");
+
+        shader = gl.createProgram();
+        gl.attachShader(shader, vertexShader);
+        gl.attachShader(shader, fragmentShader);
+        gl.linkProgram(shader);
+
+        if (!gl.getProgramParameter(shader, gl.LINK_STATUS)) {
+            alert("Could not create shader program!");
+            return;
+        }
+
+        gl.useProgram(shader);
+
+        // vertices
+        shader.vertexPositionAttribute = gl.getAttribLocation(shader, "aVertexPosition");
+        gl.enableVertexAttribArray(shader.vertexPositionAttribute);
+
+        // tex coords
+        shader.textureCoordAttribute = gl.getAttribLocation(shader, "aTextureCoord");
+        gl.enableVertexAttribArray(shader.textureCoordAttribute);
+
+        // combined modelview projection matrix
+        shader.mvpMatrixUniform = gl.getUniformLocation(shader, "mvpMatrix");
+
+        // alpha uniform for blending
+        shader.alphaUniform = gl.getUniformLocation(shader, "uAlpha");
+
+        // cutoff uniform for making low densities void
+        shader.cutoffUniform = gl.getUniformLocation(shader, "uCutoff");
+    }
+
+    function setMatrices(pMatrix, mvMatrix)
+    {
+        var z = 1
+        mvMatrix[4] *= z
+	    mvMatrix[5] *= z
+	    mvMatrix[6] *= z
+        mvMatrix[7] *= z
+        /*
+        mvMatrix[8] = mvMatrix[8]*z;
+	    mvMatrix[9] = mvMatrix[9]*z;
+	    mvMatrix[10] = mvMatrix[10]*z;
+        mvMatrix[11] = mvMatrix[11]*z;
+        */
+        //mat4.scale
+
+        var mvpMatrix = mat4.create();
+        mat4.multiply(pMatrix, mvMatrix, mvpMatrix);
+        gl.uniformMatrix4fv(shader.mvpMatrixUniform, false, mvpMatrix);
+    }
+
+    function renderStrip(vtxBuffer, texBuffer, texture)
+    {
+        gl.bindBuffer(gl.ARRAY_BUFFER, vtxBuffer);
+        gl.vertexAttribPointer(shader.vertexPositionAttribute, vtxBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, texBuffer);
+        gl.vertexAttribPointer(shader.textureCoordAttribute, texBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.uniform1i(gl.getUniformLocation(shader, "uSampler"), 0);
+
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, vtxBuffer.numItems);
+    }
+
+    // various keyboard related methods:
+
+    var currentlyPressedKeys = {};
+
+    function handleKeyDown(event)
+    {
+        currentlyPressedKeys[event.keyCode] = true;
+    }
+
+    function handleKeyUp(event)
+    {
+        currentlyPressedKeys[event.keyCode] = false;
+    }
+
+    function handleKeys()
+    {
+        /*
+        keycodes:
+            37 = left cursor
+            38 = up cursor
+            39 = right cursor
+            40 = down cursor
+            16 = shift
+            17 = ctrl
+        */
+
+        // rotate y-axis
+        if (currentlyPressedKeys[37]) rotation-=0.01;
+        if (currentlyPressedKeys[39]) rotation+=0.01;
+
+        // radius
+        if (currentlyPressedKeys[16]) radius-=0.1;
+        if (currentlyPressedKeys[17]) radius+=0.1;
+
+        // translate y-axis
+        if (currentlyPressedKeys[38]) eye_height+=0.2;
+        if (currentlyPressedKeys[40]) eye_height-=0.2;
+    }
+
+    // various mouse related methods:
+    // temporarily testing;
+    var currentlyMousePressed = {};
+    function handleMouseDown(event)
+    {
+        if (!currentlyMousePressed.hasOwnProperty("clickTotal")) {
+            currentlyMousePressed.clickTotal = 0;
+        }
+        currentlyMousePressed.clickTotal += 1;
+        //currentlyMousePressed[event.button] = true;
+        if (!currentlyMousePressed.hasOwnProperty("position")) {
+            currentlyMousePressed.position = { X: event.clientX, Y: event.clientY };
+            startAnimation();
+       }
+    }
+
+    function handleMouseUp(event)
+    {
+        if (currentlyMousePressed.hasOwnProperty("position")) {
+            event.clientX - currentlyMousePressed.position.X > 0 ? rotation=0.01 : rotation=-0.01;
+            if (currentlyMousePressed.clickTotal % 2 == 0) {
+                delete currentlyMousePressed.position;
+                stopAnimation();
+            }
+        }
+    }
+
+    function checkGUI()
+    {
+        mu = document.getElementById("mu").value;
+        cutoff = document.getElementById("cutoff").value;
+        xyslice = document.getElementById("xySlice").checked;
+    }
+    
+    function bindTextures() {
+        // create texture objects from loaded images
+        for (var index = 0; index < numTextures; index++) {
+            if (imageLoaded[index] > 0 &&
+                textureBound[index] <= 0) {
+                try
+                {
+                    textureBound[index] = 1;
+                    planeTexture[index].bad=false;
+                    gl.bindTexture(gl.TEXTURE_2D, planeTexture[index]);
+                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, planeImage[index]);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                    gl.bindTexture(gl.TEXTURE_2D, null);
+                    //gl.generateMipmaps(); //takes too much memory
+                }
+                catch (e)
+                {
+                    planeTexture[index].bad=true;
+                    textureBound[index] = -1
+                    // reset to ready for the next time of bindTextures();
+                    planeTexture[index] = gl.createTexture();
+                }
+            }
+        }
+    }
+    
+    function checkAllImagesLoaded() {
+        if (imageAllLoaded) {
+            return true;
+        }
+        else {
+            // original state imageLoaded[i] == 0
+            // reload the failed image if there is any in initTexture();
+            var allLoaded = true;
+            for (var i = 0; i < numTextures; i++) {
+                if (imageLoaded[i] == 0) {
+                    allLoaded = false;
+                    break;
+                }
+                else if (imageLoaded[i] < 0) {
+                    allLoaded = false;
+                    console.log(planeImage[i].src);
+                    loadImage(i, planeImage[i].src);
+                }
+            }
+            if (allLoaded) {
+                imageAllLoaded = true;
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    function checkTextureBound() {
+        if (textureAllBound) {
+            return true;
+        }
+        else {
+            // check if all the textures are bound;
+            var allBound = true;
+            for (var i = 0; i < numTextures; i++) {
+                if (textureBound[i] <= 0) {
+                     allBound = false;
+                     break;
+                }
+            }
+            if (allBound) {
+                textureAllBound = true;
+                return true;
+            }
+            else {
+                checkAllImagesLoaded();
+                bindTextures();
+            }
+        }
+        return false;
+    }
+    
+    function drawScene()
+    {
+        requestId = undefined;
+
+        var canvas = document.getElementById("webgl-canvas");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        gl.viewportWidth = canvas.width;
+        gl.viewportHeight = canvas.height;
+
+        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        var pMatrix = mat4.create();
+        var mvMatrix = mat4.create();
+
+        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+
+        // Eye point
+        if (angle > 2*Math.PI)
+            angle = 0.0;
+        var eye = [Math.cos(angle) * radius, eye_height, Math.sin(angle) * radius];
+
+        // Centre of world coordinates
+        var at = [0,0,0];
+
+        // Up-vector
+        var up = [0,1,0];
+
+        // Dir-vector
+        var dir = vec3.normalize(vec3.subtract(at,eye));
+
+        // define modelview matrix
+        mat4.lookAt(eye, at, up, mvMatrix);
+
+        checkGUI();
+        var p = getRenderParameters(dir);
+
+        // texture index range;
+        var texIndex = p[2][0];
+        var texIncr = p[2][1];
+        var texEndIndex = p[2][2];
+        var lambda = 1.0 / Math.abs(texEndIndex - texIndex);
+        //console.log(lambda) //will have to correctly calculate this, z distance
+        lambda = 0.002 //og is 00.625
+        var alpha = 1 - Math.exp(-lambda * mu);
+
+        // enable gl blending
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+        // set alpha via shader uniform (opacity)
+        gl.uniform1f(shader.alphaUniform, alpha);
+
+        // set void cutoff via uniform (light angle cutoff)
+        gl.uniform1f(shader.cutoffUniform, cutoff);
+
+        gl.disable(gl.DEPTH_TEST);
+
+        // initial transform of first slice
+        mat4.multiply(mvMatrix, p[0]);
+        //mat4.rotate(mvMatrix,5,[0,1,0]) - tyler
+        // incremental transform between slices
+        var dvec = p[1];
+        vec3.scale(dvec, lambda);
+
+        checkTextureBound();
+        // loop over slice from back to front depending on eye point via parameterization
+        // note: texIncr could be positive or negative
+        if (xyslice) {
+            if (texIncr > 0) {
+                texEndIndex = window.parent.bivws.CurSliderVal.xy;
+            }
+            else {
+                texIndex = window.parent.bivws.CurSliderVal.xy;
+            }
+        }
+        for (var i = texIndex; i != texEndIndex; i += texIncr) {
+            if (textureBound[i] > 0) {
+                setMatrices(pMatrix, mvMatrix);
+                renderStrip(planeVtxBuffer, planeTexCoordBuffer, planeTexture[i]);
+
+                // translate to next slice position
+                mat4.translate(mvMatrix, dvec);
+            }
+        }
+
+        gl.enable(gl.DEPTH_TEST);
+
+        angle += rotation;
+
+        handleKeys();
+
+        startAnimation();
+    }
+
+    function getRenderParameters(dir)
+    {
+        var result = new Array(3);
+
+        // initial transformation
+        result[0] = mat4.create();
+        mat4.identity(result[0]);
+
+        // incremental translate vector
+        result[1] = [0, 0, 0];
+
+        // texture index range
+        // first component: first texture index
+        // second component: index increment
+        // third component: end texture index (included)
+        result[2] = [0, 0, 0];
+
+        var dx = Math.abs(dir[0]);
+        var dy = Math.abs(dir[1]);
+        var dz = Math.abs(dir[2]);
+
+        if (dz>=dx && dz>=dy) // z-axis //XY=161
+        {
+            if (dir[2]<0.0)
+            {
+                result[1] = [0,0,1];
+                result[2] = [0, 1, numTextures-1];
+            }
+            else
+            {
+                mat4.translate(result[0], [0,0,1]);
+                result[1] = [0,0,-1];
+                result[2] = [numTextures-1, -1, 0];
+            }
+        }
+        else if (dy>=dx && dy>=dz)  // y-axis
+        {
+            mat4.rotate(result[0], Math.PI/2, [1,0,0]);
+            if (dir[1]<0.0)
+            {
+                mat4.translate(result[0], [0,0,1]);
+                result[1] = [0,0,-1];
+                result[2] = [numTextures-1, -1, 0];
+            }
+            else
+            {
+                result[1] = [0,0,1];
+                result[2] = [0, 1, numTextures-1];
+            }
+        }
+        else // x-axis
+        {
+            mat4.rotate(result[0], -Math.PI/2, [0,1,0]);
+            if (dir[0]<0.0)
+            {
+                mat4.translate(result[0], [0,0,1]);
+                result[1] = [0,0,-1];
+                result[2] = [numTextures-1, -1, 0];
+            }
+            else
+            {
+                result[1] = [0,0,1];
+                result[2] = [0, 1, numTextures-1];
+            }
+        }
+
+        return(result);
+    }
+
+    function initTexStartAnimation() {
+        initTextures();
+        checkGUI();
+        startAnimation();
+    }
+    
+    function webGLStart()
+    {
+        var canvas = document.getElementById("webgl-canvas");
+        if (canvas) {
+            gl = canvas.getContext("webgl2");
+            if (gl) {
+                setdimensions();
+                document.onkeydown = handleKeyDown;
+                document.onkeyup = handleKeyUp;
+                canvas.onmousedown = handleMouseDown;
+                canvas.onmouseup = handleMouseUp;
+                gl.enable(gl.DEPTH_TEST);
+                initBuffers();
+                initShader();
+                initTexStartAnimation();
+            }
+            else {
+                alert("Your browser does not support WebGL!");
+            }
+        }
+        else {
+            alert("There is no element of 'webgl-canvas' in the page.");
+        }
+    }
+
+    function setdimensions()
+    {
+        // set up numSlicesXY, numSlicesYZ, and numSlicesXZ;
+        numSlicesXY = window.parent.bivws.DIMENSIONS.XY;
+        numSlicesYZ = window.parent.bivws.DIMENSIONS.YZ;
+        numSlicesXZ = window.parent.bivws.DIMENSIONS.XZ;
+        numTextures = numSlicesXY;
+    }
+
+</script>
+<div class="col-9">
+    <canvas id="webgl-canvas" style="background-color:black;width: 100%;height: 400px;"></canvas>
+    <p id="loadingText"></p>
+    <div class="progress mb-2">
+        <div id="loadingProgressBar" class="progress-bar" role="progressbar"
+                                                          aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+</div>
+<div class="col-3">
+    <table class="table table-sm">
+        <tr>
+            <th colspan="2"><b><u>Options</u></b></th>
+            <th colspan="2"><b><u>Controls</u></b></th>
+        </tr>
+        <tr>
+            <!-- http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-10-transparency/-->
+            <td>Opacity &mu;: </td>
+            <td><input type="text" id="mu" value="1" /></td>
+            <td>left/right arrow: </td>
+            <td>change rotation speed</td>
+        </tr>
+        <tr>
+            <!--https://learnopengl.com/Lighting/Light-casters -->
+            <td>Light direction cutoff: </td>
+            <td><input type="text" id="cutoff" value="0.0" /></td>
+            <td>up/down arrow: </td>
+            <td>change height</td>
+        </tr>
+        <tr>
+            <td>XY Slice</td>
+            <td><input type="checkbox" id="xySlice" name="xySlice" value="xySlice"></td>
+            <td>shift/ctrl: </td>
+            <td>change distance</td>
+        </tr>
+    </table>
+</div>

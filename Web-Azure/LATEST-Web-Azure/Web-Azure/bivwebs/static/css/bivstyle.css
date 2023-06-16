@@ -1,0 +1,111 @@
+* {
+    box-sizing: border-box;
+    margin: 0px;
+    padding: 0px;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    background: #FFFFCC;
+}
+
+.operations {
+    width: 100%;
+    height: 10%;
+    display: flex;
+    align-items: center;
+}
+
+.modality {
+    padding: 0 20px;
+    font-size: 1.5em;
+}
+
+.modradios {
+    font-size: 1.3em;
+}
+
+.modradios input {
+    margin-right: 5px;
+}
+
+.mainareas {
+    width: 100%;
+    height: 90%;
+    border-top: 2px solid #f00;
+}
+
+.quadrant {
+    width: 50%;
+    float: left;
+    position: relative;
+}
+
+.quadrant:nth-of-type(1) {
+    height: 100%;
+    border-right: 2px solid #f00;
+}
+
+.quadrant:nth-of-type(2) {
+    height: 60%;
+}
+
+.quadrant:nth-of-type(3) {
+    height: 20%;
+    border-top: 1px solid #f00;
+}
+
+.quadrant:nth-of-type(4) {
+    height: 20%;
+    border-top: 1px solid #f00;
+}
+
+.quadrant > iframe {
+    width: 100%;
+    height: 100%;
+}
+
+.quadrant > img {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+}
+
+/* hardcoded 1082 x 514 x 161 */
+.quadrant#yzQuadArea > img {
+    max-width: 100%;
+    width: calc(514 / 1082 * 100%);
+}
+
+
+.slider label {
+    float: left;
+}
+
+#xySliderValue,
+#xzSliderValue,
+#yzSliderValue {
+    float: left;
+    width: 50px;
+}
+
+@media screen and (max-width: 700px) {
+    body {
+        flex-direction: column;
+    }
+    .quadrant {
+        width: 100%;
+        height: auto;
+    }
+    .quadrant:nth-of-type(1) {
+        border: none;
+    }
+    .quadrant:nth-of-type(2) {
+        border-top: 1px solid #f00;
+    }
+}

@@ -1,0 +1,1015 @@
+{% extends 'layout.html' %}
+{% block content %}
+<!-- page only css/js-->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css" />
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<!-- animate -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+<script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.es5.min.js"></script>
+<style>
+    .row {
+        margin-top: 10px;
+    }
+
+    .cust-full {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        font-size: 12px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+    }
+
+    .cust-full:hover {
+        background-color: #0056b3;
+    }
+
+    * 按钮禁用时的样式 */ .cust-full:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+
+    /* 控制按钮的间距 */
+    #arrowControls button {
+        margin: 0 4px;
+    }
+
+    ::backdrop {
+        background-color: white;
+    }
+
+    i.icon {
+        display: inline-block;
+        /* chrome-fix */
+    }
+
+    .spinner {
+        height: 60px;
+        width: 60px;
+        margin: auto;
+        display: flex;
+        -webkit-animation: rotation .6s infinite linear;
+        -moz-animation: rotation .6s infinite linear;
+        -o-animation: rotation .6s infinite linear;
+        animation: rotation .6s infinite linear;
+        border-left: 6px solid rgba(0, 174, 239, .15);
+        border-right: 6px solid rgba(0, 174, 239, .15);
+        border-bottom: 6px solid rgba(0, 174, 239, .15);
+        border-top: 6px solid rgba(0, 174, 239, .8);
+        border-radius: 100%;
+    }
+
+    @-webkit-keyframes rotation {
+        from {
+            -webkit-transform: rotate(0deg);
+        }
+
+        to {
+            -webkit-transform: rotate(359deg);
+        }
+    }
+
+    @-moz-keyframes rotation {
+        from {
+            -moz-transform: rotate(0deg);
+        }
+
+        to {
+            -moz-transform: rotate(359deg);
+        }
+    }
+
+    @-o-keyframes rotation {
+        from {
+            -o-transform: rotate(0deg);
+        }
+
+        to {
+            -o-transform: rotate(359deg);
+        }
+    }
+
+    @keyframes rotation {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(359deg);
+        }
+    }
+
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 2;
+        cursor: pointer;
+    }
+
+    .always-on-top {
+        z-index: 100000 !important;
+    }
+
+
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+</style>
+<div class="container-fluid" style="height: 100vh;">
+    <div class="row">
+        <div id="leftMainDiv" class="col-lg-6 col-md-12 float-left d-none">
+            <div class="card shadow">
+                <div class="card-header py-1 ">
+                    <div id="xyType" class="float-right form-inline">
+                        <button id="2dFullIconBtnXY" class="btn btn-primary" type="button" disabled><i
+                                class="fas fa-expand"></i>&nbsp Fullscreen&nbspXY</button>
+                    </div>
+                </div>
+                <div class="card-body" style="height: 100%;">
+                    <div id="xyDiv" style="cursor: crosshair;"></div>
+                    <div class="row h-100">
+                        <form id="xyForm" class="form-inline" onSubmit="return false;">
+                            <div id="arrowControls"
+                                class="form-group mb-2 col-sm-12 col-md-4 d-flex justify-content-center">
+                                <button id="stepBackBtn" class="cust-full" type="button" disabled><i
+                                        class="mx-1 fa-lg fas fa-step-backward"></i></button>
+                                <button id="backBtn" class="cust-full" type="button" disabled><i
+                                        class="mx-1 fa-lg fas fa-arrow-left"></i></button>
+                                <button id="forwardBtn" class="cust-full" type="button" disabled><i
+                                        class="mx-1 fa-lg fas fa-arrow-right"></i></button>
+                                <button id="stepForwardBtn" class="cust-full" type="button" disabled><i
+                                        class="mx-1 fa-lg fas fa-step-forward"></i></button>
+                            </div>
+                            <div id="sliceDiv" class="form-group mb-2 col-sm-12 col-md-4">
+                                <label for="sliceInput">Slice Navigator: </label>
+                                <input id="sliceInput" class="mx-1 form-control col-10" type="number" type="button"
+                                    max="700" disabled>
+                            </div>
+                            <div id="sliderDiv" class="form-group mb-2 col-sm-12 col-md-4">
+                                <input id="sliceRange" class="form-control-range col-10 mt-3" type="range" disabled>
+                            </div>
+                        </form>
+
+                        <div id="xyOverlayDiv" class="d-none justify-content-center align-items-center overlay">
+                            <div class="w-100 justify-content-center align-items-center">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="toolsCol" class="col-lg-6 col-md-12 float-right">
+            <div class="card mt-1 shadow">
+                <div class="card-header pt-1">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active px-2" data-toggle="tab" href="#datasetCard"><i
+                                    class="fas fa-window-restore"></i> Data browser</a>
+                        </li>
+                        <li id="tab1" class="nav-item d-none">
+                            <a id="imageTab" class="nav-link px-2" data-toggle="tab" href="#imageCard"><i
+                                    class="fas fa-tools"></i> Image Tools</a>
+                        </li>
+                        <li id="tab2" class="nav-item d-none">
+                            <a class="nav-link px-2" data-toggle="tab" href="#annCard"><i class="fas fa-comments"></i>
+                                Annotations</a>
+                        </li>
+                        <li id="tab3" class="nav-item d-none">
+                            <a class="nav-link px-2" data-toggle="tab" href="#viewCard"><i class="fas fa-eye"></i>
+                                Views</a>
+                        </li>
+                        <li id="tab4" class="nav-item d-none">
+                            <a class="nav-link px-2" data-toggle="tab" href="#maskCard"><i class="fas fa-crop"></i>
+                                Masks</a>
+                        </li>
+                        <li id="tab5" class="nav-item d-none">
+                            <a class="nav-link px-2" data-toggle="tab" href="#exportCard"><i
+                                    class="fas fa-file-export"></i> Export</a>
+                        </li>
+                        <li id="tab6" class="nav-item d-none">
+                            <a class="nav-link px-2" data-toggle="tab" href="#dsCard"><i class="fas fa-info"></i>
+                                Info</a>
+                        </li>
+                        {% if session['level'] == 'admin' %}
+                        <li id="tab7" class="nav-item d-none">
+                            <a class="nav-link px-2" data-toggle="tab" href="#fileCard"><i class="fas fa-file"></i>
+                                File</a>
+                        </li>
+                        {% endif %}
+                        {% if session['level'] == 'user' %}
+                        <li id="tab8" class="nav-item d-none">
+                            <a class="nav-link px-2" data-toggle="tab" href="#fileList"><i class="fas fa-file"></i>
+                                FileList</a>
+                        </li>
+                        {% endif %}
+                        <li id="tab9" class="nav-item d-none">
+                            <a class="nav-link px-2" data-toggle="tab" href="#settingsCard">Settings</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="tab-content">
+                    <div id="datasetCard" class="card-body tab-pane active">
+                        <form class="form">
+                            <div class="form-row mx-2 my-1">
+                                <div class="form-group col">
+                                    <label for="dsSelect" class="mr-1">Dataset:</label>
+                                    <select id="dsSelect" class="form-control">
+                                        <option value="" selected>Choose..</option>
+                                        {% for ds in datasets %}
+                                        <option value="{{ ds }}">{{ ds }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group col">
+                                    <label for="modSelect" class="mr-1">Modality:</label>
+                                    <select id="modSelect" class="form-control" disabled>
+                                    </select>
+                                </div>
+                                <div class="form-group col">
+                                    <label for="exposureSelect" class="mr-1">Exposure:</label>
+                                    <select id="exposureSelect" class="form-control" disabled></select>
+                                </div>
+                                <div class="form-group col">
+                                    <label for="wavelengthSelect" class="mr-1">Wavelength:</label>
+                                    <select id="wavelengthSelect" class="form-control" disabled></select>
+                                </div>
+                            </div>
+                            <div class="form-row mx-2 my-1">
+                                <div class="form-group col">
+                                    <button id="loadDatasetBtn" type="button"
+                                        class="btn btn-primary btn-md btn-block rounded-pill" disabled>Load</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+
+                    <div id="imageCard" class="card-body tab-pane">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="col-12 text-center bg-secondary text-white rounded"><b>2D</b></div>
+                                <form class="form-inline" onSubmit="return false;">
+                                    <div class="form-group col-12">
+                                        <input id="pixelBox" class="ml-2 form-check-input" type="checkbox" disabled>
+                                        <label class="form-check-label mr-1" for="pixelBox">Pixel Value</label>
+                                        <span id="pixelSpan" class="text-center"></span>
+                                    </div>
+                                    <div class="form-group col-12">
+                                        <button id="measureBtn" type="button" class="btn btn-info"
+                                            disabled>Measure</button>
+                                        <button id="measureClearBtn" type="button" class="btn btn-danger mr-1"
+                                            disabled>Clear</button>
+                                        <small class="mb-1 text-wrap" style="width: 11rem;">Click twice in the XY plane
+                                            to display a measurement in µm.</small>
+                                    </div>
+                                    <div class="form-group col-12">
+                                        <label class="form-label" for="annFontNumber">Annotation Font Scaling</label>
+                                        <input id="annFontNumber" class="form-control ml-2 col-4" type="number"
+                                            min="0.5" max="3" step=".25" value="1" disabled>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-6">
+                                <div class="col-12 text-center bg-secondary text-white rounded"><b>Shared</b></div>
+                                <form class="form-inline" onSubmit="return false;">
+                                    <div class="form-group col-12">
+                                        <label for="threshold" class="mb-0 mr-1">Threshold</label>
+                                        <input type="range" id="threshold2D" min="0" max="3" step=".05" value="0.0">
+                                    </div>
+                                    <div class="form-group col-12">
+                                        <label class="form-label mt-1 mr-1">Background Color&nbsp;</label>
+                                        <div class="pickr" id="bg2"></div>
+                                    </div>
+
+                                    <div class="form-group col-12">
+                                        <label class="form-check-label mr-1" for="zoomCheckbox">Auto Zooming:
+                                            <i class="fas fa-info-circle d-none" data-toggle="popover"
+                                                data-placement="top" title="Auto Zooming"
+                                                data-content="The views will share the same view level"></i>&nbsp;</label>
+                                        <input class="form-check-input" type="checkbox" id="zoomCheckbox" checked>
+                                    </div>
+                                    <div class="form-group col-12">
+                                        <label class="form-check-label mr-1" for="zLockCheckbox">Z Lock:
+                                            <i class="fas fa-info-circle d-none" data-toggle="popover"
+                                                data-placement="top" title="Z Lock"
+                                                data-content="The 3D viewer will clip at the Z slice selected in the 2D viewer"></i>&nbsp;</label>
+                                        <input class="form-check-input" type="checkbox" id="zLockCheckbox" checked>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="annCard" class="card-body tab-pane">
+                        <div class="row">
+                            <button id="createAnnBtn" type="button" class="btn btn-primary col-6" disabled>Create
+                                Annotation</button>
+                            <button id="toggleAnnBtn" type="button" class="btn btn-danger col-6" disabled>Hide
+                                Annotations</button>
+                        </div>
+                        <hr class="m-1" />
+
+                        <div style="overflow: scroll; max-height: 200px;">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Text</th>
+                                        <th scope="col">Instance</th>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">User</th>
+                                        <th scope="col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="annTbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="viewCard" class="card-body tab-pane">
+                        <p>This will save the camera viewport, slice, and image type to be able to return to.
+                        </p>
+                        <form onSubmit="return false;">
+                            <div class="form-row">
+                                <div class="col">
+                                    <input id="viewName" type="text" class="form-control" placeholder="View name">
+                                </div>
+                                <div class="col">
+                                    <button id="saveViewBtn" type="button" class="btn btn-success btn-block"
+                                        disabled>Save View</button>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="viewsSelect">Go to View:</label>
+                                <select size="5" id="viewsSelect" class="form-control">
+                                </select>
+                                <div id="viewsTable"></div>
+                            </div>
+                            <div class="col-6">
+                                <br>
+                                <button id="loadViewBtn" type="button" class="btn btn-primary btn-block" disabled>Load
+                                    View</button>
+                                <button id="delViewBtn" type="button" class="btn btn-danger btn-block" disabled>Delete
+                                    View</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div id="maskCard" class="card-body tab-pane" style="padding-top: 10px; padding-bottom: 10px;">
+                        <!-- <p>Draw a mask or series of masks on the xy plane for segmentation purposes or highlighting
+                            areas of interest.
+                            After entering a name, click in the scene and hold the mouse down to outline a feature.
+                            Clicking the Finished button
+                            will save the entries to the database and interpolate masks for slices without an entry.
+                        </p> -->
+                        <div class="row mx-2 my-1 p-1">
+                            <label class="mt-2" for="maskInput">Mask Name</label>
+                            <input id="maskInput" type="text" class="form-control col-6 mx-1" disabled>
+                            <button id="startMaskBtn" type="button" class="btn btn-success col-3" disabled>Start
+                                Drawing</button>
+                        </div>
+                        <div class="row mx-2 my-1 p-1">
+                            <label class="mt-2" for="maskInput">Start</label>
+                            <input id="minSlice" type="text" class="form-control col-2 mx-1" disabled>
+                            <label class="mt-2" for="maskInput">End</label>
+                            <input id="maxSlice" type="text" class="form-control col-2 mx-1" disabled>
+                            <label class="mt-2" for="totalSlices">Total</label>
+                            <input id="totalSlices" type="text" class="form-control col-2 mx-1" disabled>
+                        </div>
+                        <div class="form-group form-check ml-2">
+                            <input type="checkbox" class="form-check-input" id="copySliceBox">
+                            <label class="form-check-label" for="copySliceBox">Copy to next slice</label>
+                            <button id="eraseMaskBtn" type="button" class="btn btn-warning col-4" disabled>Erase
+                                Current</button>
+                            <button id="finishedMaskBtn" type="button" class="btn btn-primary col-4 ml-1"
+                                disabled>Save</button>
+                        </div>
+                        <div class="row md-8 mx-2 p-1">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Interpolated</th>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">User</th>
+                                        <!--<th scope="col"></th> -->
+                                    </tr>
+                                </thead>
+                                <tbody id="maskTbody">
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row mx-2 my-1 p-1">
+                            <label class="mt-2" for="maskLoadInput">Mask Name</label>
+                            <input id="maskLoadInput" type="text" class="form-control col-4 mx-1" disabled>
+                            <button id="loadMaskBtn" type="button" class="btn btn-primary col-4" disabled>Load</button>
+                            <p class="mb-1"></p>
+                        </div>
+                    </div>
+
+                    <div id="exportCard" class="card-body tab-pane">
+                        <div class="row mx-2 my-1 p-1">
+                            <form class="form-inline" onSubmit="return false;">
+                                <!--
+                                <input id="exportWidthInput" type="number" class="form-control col-xs-12  col-md-3 mx-1">
+                                -->
+                                <div class="form-group">
+                                    <label for="exportXYZSelect">Axis</label>
+                                    <select id="exportXYZSelect" class="form-control mx-1">
+                                        <option value="0" selected> XY </option>
+                                        <option value="1"> XZ </option>
+                                        <option value="2"> YZ </option>
+                                    </select>
+
+                                    <label for="exportSizeSelect">Size</label>
+                                    <select id="exportSizeSelect" class="form-control mx-1">
+                                        <option value="0" selected> 1000 * 475 pixels</option>
+                                        <option value="1"> 2000 * 950 pixels</option>
+                                        <option value="2"> 3000 * 1425 pixels</option>
+                                        <option value="3"> 4000 * 1900 pixels</option>
+                                    </select>
+
+                                    <!-- <label for="exportWidthSelect">Width</label>
+
+                                    <select id="exportWidthSelect" class="form-control mx-1">
+                                        <option value="0" selected> 1000 </option>
+                                        <option value="1"> 2000 </option>
+                                        <option value="2"> 3000 </option>
+                                        <option value="3"> 4000 </option>
+                                    </select>
+                                    <label for="exportHeightInput">Height</label>
+                                    <input id="exportHeightInput" type="number"
+                                        class="form-control col-xs-12 col-md-3 mx-1" disabled> -->
+                                </div>
+
+
+
+                                <button id="exportBtn" class="btn btn-info" role="button" disabled>Download
+                                    Image</button>
+                            </form>
+                        </div>
+
+                    </div>
+
+                    <div id="dsCard" class="card-body tab-pane">
+                        <!-- JS automated-->
+                        <dl class="row">
+                            <dt class="col-sm-3">Specimen Name</dt>
+                            <dd id="specimenInfo" class="col-sm-9"></dd>
+
+                            <dt class="col-sm-3">PI</dt>
+                            <dd id="piInfo" class="col-sm-9"></dd>
+
+                            <dt class="col-sm-3">Voxel Size</dt>
+                            <dd id="voxelInfo" class="col-sm-9"></dd>
+
+                            <dt class="col-sm-3">Section Thickness</dt>
+                            <dd id="thicknessInfo" class="col-sm-9"></dd>
+                        </dl>
+                    </div>
+
+
+                    <div id="fileCard" class="card-body tab-pane">
+                        <div class="row mx-2 p-1">
+                            <button id="fileDownloadBtn" type="button" class="btn btn-primary col-5 m-1" disabled>File
+                                Download</button>
+                            <button id="fileManageBtn" type="button" class="btn btn-primary col-5 m-1" disabled>File
+                                Management</button>
+                            <!-- <button id="imgContentBtn" type="button" class="btn btn-primary col-5 m-1" disabled>View Images</button>
+                            <button id="movieContentBtn" type="button" class="btn btn-primary col-5 m-1" disabled>View Movies</button> -->
+                        </div>
+                    </div>
+
+                    <div id="fileList" class="card-body tab-pane">
+                        <div class="row p-1">
+                            <div style="overflow: scroll; max-height: 250px;width:100%;">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col"> </th>
+                                            <th scope="col">File Name</th>
+                                            <th scope="col">Tag</th>
+                                            <th scope="col">Tools</th>
+                                    </thead>
+                                    <tbody id="fileTlistbody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="downloadFileBtnUser" type="button" class="btn btn-primary">Download</button>
+                        </div>
+                    </div>
+
+                    <div id="settingsCard" class="card-body tab-pane">
+
+                        <div class="form-row form-check form-check-inline">
+
+                            <!---
+                            <label class="form-check-label ml-2" for="thresholdLockCheckbox">Threshold Lock:
+                                <i class="fas fa-info-circle" data-toggle="popover" data-placement="top" title="Threshold Lock"
+                                data-content="The 3D viewer will share the same threshold for removing artifacts from the 
+                                images as the 2D viewer."></i>&nbsp;</label>
+                            <input class="form-check-input" type="checkbox" id="thresholdLockCheckbox" checked>
+                            -->
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- row -->
+    <div class="row flex-grow-1">
+        <div id="rightMainDiv" class="col-lg-12 col-md-6 d-none"
+            style="position: relative;top: 10px;left: 0; right: 0;">
+            <div class="card shadow">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a id="orthoTab" class="nav-link active px-2" data-toggle="tab"
+                                href="#orthoCard">Orthographic
+                                Views</a>
+                        </li>
+                        <li class="nav-item">
+                            <a id="vrTab" class="nav-link px-2" data-toggle="tab" href="#vrCard">Volume
+                                Rendering</a>
+                        </li>
+                </div>
+                <div class="tab-content">
+                    <div id="orthoCard" class="card-body tab-pane active">
+                        <div style="display: flex;">
+                            <div id="xzDiv" style="cursor: crosshair; flex: 1;">
+                                <button id="2dFullIconBtnXZ" class="btn btn-primary" type="button" disabled>
+                                    <i class="fas fa-expand"></i>&nbsp Fullscreen&nbspXZ
+                                </button>
+                            </div>
+                            <div id="yzDiv" style="cursor: crosshair; flex: 1;">
+                                <button id="2dFullIconBtnYZ" class="btn btn-primary" type="button" disabled>
+                                    <i class="fas fa-expand"></i>&nbsp Fullscreen&nbspYZ
+                                </button>
+                            </div>
+                        </div>
+                        <div id="orthoOverlayDiv" class="d-none justify-content-center align-items-center overlay">
+                            <div class="w-100 justify-content-center align-items-center">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="vrCard" class="card-body tab-pane">
+                        <div id="progressDiv" class="progress d-none">
+                            <div id="3dProgress" class="progress-bar " role="progressbar" style="width: 0%;"
+                                aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <canvas id="c"></canvas>
+                        </div>
+                        <div class="height: 160px">
+                            <form class="form-inline" onSubmit="return false;">
+                                <div class="form-group">
+                                    <label for="zSliceInput">Z Clip:
+                                        <input class="form-check-input ml-1" type="checkbox" id="clipZCheckbox"
+                                            disabled>
+                                    </label>
+                                    <input id="zSliceInput" class="mx-1 form-control" step="1" type="number" max="700"
+                                        disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label for="ySliceInput">Y Clip:
+                                        <input class="form-check-input ml-1" type="checkbox" id="clipYCheckbox"
+                                            disabled>
+                                    </label>
+                                    <input id="ySliceInput" class="mx-1 form-control" step="4" type="number" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label for="ySliceInput">X Clip:
+                                        <input class="form-check-input ml-1" type="checkbox" id="clipXCheckbox"
+                                            disabled>
+                                    </label>
+                                    <input id="xSliceInput" class="mx-1 form-control" step="4" type="number" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label for="shaderSelect">Shader</label>
+                                    <select id="shaderSelect" class="form-control ml-1">
+                                        <option value="2" selected> Surface </option>
+                                        <option value="0"> MIP </option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="opacity" class="ml-1">Opacity</label>
+                                    <input type="range" class="ml-1" id="opacity" min="0" max="10" step=".1" value="10">
+                                </div>
+                                <div class="form-group">
+                                    <input class="form-check-input ml-1" type="checkbox" id="edgesCheckbox">
+                                    <label class="form-check-label ml-1" for="edgesCheckbox">Bounding Box</label>
+                                </div>
+                                <div class="form-group">
+                                    <input class="form-check-input ml-1" type="checkbox" id="cellModalbox">
+                                    <label class="form-check-label ml-1" for="cellModalbox">Cell Detection</label>
+                                </div>
+                                <button id="3dFullIconBtn" class="btn btn-primary" type="button"
+                                    style="margin-left: 0.75rem;" disabled><i class="fas fa-expand"></i>&nbsp
+                                    Fullscreen&nbsp3D </button>
+                            </form>
+                        </div>
+                        <div id="vrOverlayDiv" class="d-none justify-content-center align-items-center overlay">
+                            <div class="w-100 justify-content-center align-items-center">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid d-none">
+    <div class="row col-12 px-0 float-left">
+        <div class="col-10 mt-3" style="width: 100%;">
+            <div class="card shadow">
+            </div>
+        </div>
+        <div class="col-2 float-right ml-0 mt-3">
+            <div class="card shadow">
+                <div class="card-header pt-1">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active px-2" data-toggle="tab" href="#mainCard">Main</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-2" data-toggle="tab" href="#optCard">Options</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="tab-content">
+                    <div id="mainCard" class="card-body tab-pane active">
+                        <button id="visBtn" class="btn btn-primary btn-block" type="button" disabled>3D on</button><br>
+                        <button id="3dFullIcon" class="cust-full" type="button"><i class="fas fa-expand"></i>&nbsp
+                            Fullscreen</button>
+
+                        <br>
+                        <label for="threshold" class="mb-0">Threshold</label>
+                        <input type="range" id="threshold" min="0" max="3" step=".05" value=".55">
+                        <small>Background Color</small>
+                        <div class="pickr" id="bg"></div>
+
+                    </div>
+                    <div id="optCard" class="card-body tab-pane">
+                        <div class="form-row form-check form-check-inline">
+                            <label for="cellModal">Stem Cells
+                                <input class="form-check-input" type="checkbox" id="cellModalBox">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <canvas id="pixelHolder" class="d-none"></canvas>
+        <button id="dsBtnEvent" class="d-none" role="button"></button>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="modal fade" id="annotationModal" tabindex="-1" role="dialog" aria-labelledby="annotationModal"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Annotation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input id="annModalTxt" class="form-control" type="text"
+                        onkeyup="this.value = this.value.replace(/[-]/g, '')">
+                    <input id="annModalOldTxt" class="form-control" type="text" hidden>
+                    <input id="annModalInstance" class="form-control" type="text" disabled>
+                    <div class="form-group">
+                        <label for="annModalComments">Additional Comments</label>
+                        <textarea class="form-control" id="annModalComments" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="annModalSave" type="button" class="btn btn-primary">Save</button>
+                    <button id="annModalDelete" type="button" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="modal fade" id="contentFiledownload" tabindex="-1" role="dialog" aria-labelledby="contentModal"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="width: 140% !important; height: 400px !important;">
+                <div class="modal-header">
+                    <h5 id="contentFileTitle" class="modal-title">File download</h5>
+                </div>
+                <div class="modal-body">
+                    <div style="overflow: scroll; max-height: 200px;">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col"> </th>
+                                    <th scope="col">File Name</th>
+                                    <th scope="col">Tag</th>
+                                    <th scope="col">Tools</th>
+                            </thead>
+                            <tbody id="fileTbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="downloadFileBtn" type="button" class="btn btn-primary">Download</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade always-on-top" id="filePreviewModal" tabindex="-1" role="dialog"
+    aria-labelledby="filePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="file-info"></h5>
+            </div>
+            <div class="modal-body">
+                <div id="file-preview-container" style="
+                    width: 800px;
+                    height: 300px;;
+                    overflow: auto;
+                ">
+                    <div id="file-contents"></div>
+                    <pre id="file-preview"></pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade always-on-top" id="imagePreviewModal" tabindex="-1" role="dialog"
+    aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imagePreviewModalLabel">Image Preview</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="image-preview"></div>
+            </div>
+            <div class="modal-footer">
+                <div id="image-info"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade always-on-top" id="videoPreviewModal" tabindex="-1" role="dialog"
+    aria-labelledby="videoPreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="video-info"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <video id="video-preview" width="100%" height="auto" controls></video>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<div class="container-fluid">
+    <div class="modal fade" id="contentFileManagement" tabindex="-1" role="dialog" aria-labelledby="contentModal"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="width: 140% !important; height: 420px !important;">
+                <div class="modal-header">
+                    <h5 id="contentFileTitle" class="modal-title">File Management</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div style="overflow: scroll;max-height: 200px;">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col"> </th>
+                                    <th scope="col">File Name</th>
+                                    <th scope="col">Tag</th>
+                                    <th scope="col">Tools</th>
+                            </thead>
+                            <tbody id="fileMTbody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="File-selector" style="margin-top: 20px;">
+                        <button type="button" id="FileChooseBtn" class="btn btn-primary"
+                            style="margin-left: 30px;margin-right: 10px;">File Choose</button>
+                        <input type="text" id="file-name" placeholder="File Name" readonly style="width: 300px;">
+                        <input type="file" name="file" id="file-input" style="display: none;">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="DeleteFileBtn" type="button" class="btn btn-primary">Delete</button>
+                    <button id="UploadFileBtn" type="button" class="btn btn-primary">Upload</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    //Globals (shared between 2D and 3D)
+    dsInfo = ''
+    pickr2 = ''
+    let clipCoords = { x: -1, y: -1, z: -1 }
+    let zLockBox = document.getElementById("zLockCheckbox"),
+        zclip = document.getElementById("zSliceInput")
+    let yclip = document.getElementById("ySliceInput")
+    let xclip = document.getElementById("xSliceInput")
+    let threshold = document.getElementById("threshold")
+    let threshold2D = document.getElementById("threshold2D"),
+        thresholdBox = document.getElementById("thresholdLockCheckbox")
+    let clipXCheckbox = document.getElementById("clipXCheckbox")
+    let clipYCheckbox = document.getElementById("clipYCheckbox")
+    let clipZCheckbox = document.getElementById("clipZCheckbox")
+    let modSelect = document.getElementById("modSelect"),
+        exposureSelect = document.getElementById("exposureSelect"),
+        wavelengthSelect = document.getElementById("wavelengthSelect")
+    //TODO page resize should update this
+    let vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+</script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.5.0/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip-utils@0.0.2/dist/jszip-utils.min.js"></script>
+<!-- In house scripts -->
+<script type="module" src="/static/js/twoBIV.js"></script>
+<!-- version 100 MIP shader but THREE translates it to 300-->
+<script src="./static/js/orthogonal-shader.js"></script>
+<script src="./static/js/cellDensityShader.js"></script>
+<!-- 3D rendering-->
+<script type="module" src="/static/js/threeBIV.js"></script>
+<script>
+
+
+    //var pickr, pickr2, pickrCreated = false
+    $(function () {
+        $('[data-toggle="popover"]').popover({
+            trigger: 'hover'
+        })
+
+        document.addEventListener('focus', (e) => {
+            console.log(e)
+        })
+
+        //document.getElementById('imageTab').addEventListener('click', () => {
+        /*
+        window.addEventListener("DOMContentLoaded", () => {
+        pickrCreated = true
+        pickr = Pickr.create({
+        el: '#bg',
+        theme: 'nano', // or 'monolith', or 'nano'
+        default: 'rgba(255, 0, 0, 1)',
+        swatches: [
+            'rgba(244, 67, 54, 1)',
+            'rgba(255, 255, 224, 1)',
+            'rgba(233, 30, 99, 0.95)',
+            'rgba(156, 39, 176, 0.9)',
+            'rgba(103, 58, 183, 0.85)',
+            'rgba(63, 81, 181, 0.8)',
+            'rgba(33, 150, 243, 0.75)',
+            'rgba(3, 169, 244, 0.7)',
+            'rgba(0, 188, 212, 0.7)',
+            'rgba(0, 150, 136, 0.75)',
+            'rgba(76, 175, 80, 0.8)',
+            'rgba(139, 195, 74, 0.85)',
+            'rgba(205, 220, 57, 0.9)',
+            'rgba(255, 235, 59, 0.95)',
+            'rgba(255, 193, 7, 1)'
+        ],
+
+        components: {
+
+            // Main components
+            preview: true,
+            opacity: true,
+            hue: true,
+
+            // Input / output Options
+            interaction: {
+                clear: true,
+                save: true
+            }
+        }
+        }).on('save', () => { 
+            
+            
+            pickr.hide() 
+        }).on('hide', () => {
+            console.log('NOT WORKING') 
+            let pickrs = document.getElementsByClassName('pcr-button')
+            for ( let i=0; i<pickrs.length; i++)
+                pickrs.style.color = "rgba(250,0,0,1)"
+        
+
+        })
+    })*/
+    })
+
+    $('#annotationModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var text = button.data('text') // Extract info from data-* attributes
+        var iter = button.data('instance')
+        var comments = button.data('comments')
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var modal = $(this)
+        modal.find('#annModalTxt').val(text)
+        modal.find('#annModalOldTxt').val(text)
+        modal.find('#annModalInstance').val(iter)
+        modal.find('#annModalComments').val(comments)
+
+    })
+
+
+
+</script>
+<!-- Basis vert shader-->
+<script id="vertex_shader" type="x-shader/x-vertex">
+
+varying vec2 vUv;
+
+void main() {
+
+    vUv = uv;
+    
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+    
+}
+
+</script>
+<!-- Basis frag shader-->
+<script id="fragment_shader" type="x-shader/x-fragment">
+
+uniform sampler2D u_texture;
+uniform float u_threshold;
+uniform float u_mod;
+varying vec2 vUv;
+
+void main() {
+    
+    vec4 tColor = texture( u_texture, vUv ).rgba;
+    float fauxAlpha = abs( tColor.r - tColor.g);
+    if (u_mod == 1.0) fauxAlpha =  abs(tColor.g - tColor.b);
+    if ( tColor.a == 0.)
+        gl_FragColor = vec4(0.,0.,0.,0.);
+    else if ( fauxAlpha < u_threshold)
+        gl_FragColor = vec4(0.,0.,0.,0.);
+    else gl_FragColor = tColor;
+    
+}
+</script>
+
+{% endblock %}

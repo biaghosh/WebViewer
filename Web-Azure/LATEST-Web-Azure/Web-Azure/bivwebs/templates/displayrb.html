@@ -1,0 +1,8 @@
+{% extends "layout.html" %}
+{% block content %}
+<legend class="border-bottom mb-4">Remove Background Test</legend>
+<h2>Before:</h2>
+<img src=" {{url_for('static', filename=src_name)}}">
+<h2>After:</h2>
+<img src=" {{url_for('static', filename=dest_name)}}">
+{% endblock content %}

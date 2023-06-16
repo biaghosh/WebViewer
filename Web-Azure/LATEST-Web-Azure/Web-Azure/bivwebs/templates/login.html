@@ -1,0 +1,138 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<head>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
+        integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+
+</head>
+<style>
+    .form-group {
+        margin-bottom: 1rem;
+        top: 17px;
+    }
+
+    .btn-spacing {
+        border-radius: 5px;
+        height: 50px;
+        width: 150px;
+    }
+
+    .input-group {
+        position: relative;
+    }
+
+    .input-group .fa-question-circle {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        cursor: pointer;
+    }
+
+    .tooltip {
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    .tooltip.show {
+        opacity: 1 !important;
+        /* use !important to override the inline style */
+    }
+</style>
+<div class="container-fluid">
+    <form method="POST" action="{{ url_for('login') }}">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Log In</legend>
+            <div class="form-group col-md-3">
+                {{ form.email.label(class="form-control-label") }}
+                {% if form.email.errors %}
+                {{ form.email(id="email", class="form-control form-control-lg is-invalid") }}
+
+                <div class="invalid-feedback">
+                    {% for error in form.email.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.email(id="email", class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <button type="button" id="send-otp" class="btn btn-primary btn-spacing">Send OTP</button>
+                    <i class="fas fa-question-circle" data-placement="right"
+                        title="Please enter a valid email address above, a one-time password will be sent to this email"></i>
+                </div>
+            </div>
+            <div class="form-group col-md-3">
+
+                {{ form.otp.label(class="form-control-label") }}
+                {% if form.otp.errors %}
+
+                {{ form.otp(class="form-control form-control-lg is-invalid") }}
+
+                <div class="invalid-feedback">
+                    {% for error in form.otp.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.otp(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    {{ form.submit(class="btn btn-primary btn-spacing") }}
+                    <i class="fas fa-question-circle" data-placement="right"
+                        title="Please enter a valid one-time password above, the system will verify"></i>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script>
+    document.getElementById("send-otp").addEventListener("click", function () {
+        const email = document.getElementById("email").value;
+        if (email) {
+            fetch("{{ url_for('send_otp') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email: email }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                });
+        } else {
+            alert("Please enter a valid email.");
+        }
+    });
+    window.onload = function () {
+        const tooltips = document.querySelectorAll('[data-toggle="tooltip"]');
+        tooltips.forEach(tooltip => {
+            const originalTitle = tooltip.getAttribute('title');
+            tooltip.removeAttribute('title');
+
+            new bootstrap.Tooltip(tooltip, {
+                title: originalTitle,
+                animation: true
+            });
+
+            tooltip.addEventListener('show.bs.tooltip', function () {
+                this.setAttribute('title', '');
+            });
+
+            tooltip.addEventListener('hidden.bs.tooltip', function () {
+                this.setAttribute('title', '');
+            });
+        });
+    }
+</script>
+{% endblock %}

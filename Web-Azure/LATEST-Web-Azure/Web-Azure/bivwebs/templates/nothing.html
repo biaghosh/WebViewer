@@ -1,0 +1,55 @@
+https://vr.unh.edu/aframe-apps/nrrd/
+ABOVE LINK FOR SHADER IDEA AND USAGE
+https://github.com/mrdoob/three.js/pull/14847/files/7cbf6e9c69c6be83c2c46f8bc192456691bc6023
+
+
+Rough stats
+8_8_4 @ 88mb = 300mb ram and 30% gpu 
+Would have to lookup how to accurately do performance tests
+4secs to load 8x8x4 (86mb) for using basic SHADER https://github.com/mrdoob/three.js/blob/dev/examples/jsm/shaders/BasicShader.js
+
+8secs to load 8x8x4 (86mb) for raycasting
+
+
+#Write this into a python driver script once we're done tweaking
+Let's try https://gis.stackexchange.com/questions/142760/jpg-to-geotiff-transformation-with-gdal-translate-and-gcps-fails
+#useless math
+x = 360 degrees / 1082 = .32 degrees per pixel
+y = 180 degrees / 514 = .35 degrees per pixel 
+1082 / 514 = 2.10 ratio
+360 / 2.1 = 171.4285   || 180 - 171.4285 = -8.5714 start
+gdal_translate.exe -of GTiff -a_srs EPSG:4326 -gcp 0 0 -180 90 -gcp 1082 0 180 90 -gcp 0 514 -180 -81.4285 C:\websw\bivwebs\static\BrData\RAW\wholeMouseBrightfield_8_8_4.tif temp.tif
+
+C:\OSGeo4W64\bin>gdalwarp.exe -s_srs EPSG:4326 -t_srs EPSG:4326 temp.tif warped.tif
+Using band 4 of source image as alpha.
+# I would adjust zoom level to be more like 5-8?
+C:\OSGeo4W64\bin>python gdal2tiles.py  -v -z 2-5  warped.tif C:\websw\tiles
+
+1 slice of 1082x514 for 4 levels of zoom = 460KB ~ .00046gb
+644 slices of this resolution would be = .296gb  || so not bad yet
+
+#Compare...openseadragon appears to be a much more attractive option
+#Had to remove safe open for it to work
+https://github.com/openzoom/deepzoom.py/blob/master/examples/helloworld/helloworld-dzi.py
+#dzi images, pay attention to size
+#X:\Projects\Fate Therapeutics\Rat Brain PKH67\brightfield
+# EO_FTH_00060_01_t20_iBC_s0311_e3.75.jpg 3265 x 2036 200kb 24bit depth jpg
+# End result with default settings is 3.43MB ~  ~ 0.00343gb
+
+------------------------------------------------------------------------
+Important shader lines
+// Get starting location and step vector in texture coordinates //v_position sent from vertex shader
+		"				vec3 step = ((v_position - front) / u_size) / float(nsteps);",
+        "				vec3 start_loc = front / u_size;",
+        
+
+//Background removal algo idea
+//each row remove until color hit from each direction basically...
+
+PS C:\Program Files\MongoDB\Server\4.2\bin> .\mongod.exe
+PS C:\websw> python -m flask run
+
+THREE JS Distance is measured in meters (1 three.js unit = 1 meter)
+
+All textures with the same dimensions are the same size in memory,
+ so JPG may have a smaller file size than PNG, but it will take up the same amount of memory on your GPU

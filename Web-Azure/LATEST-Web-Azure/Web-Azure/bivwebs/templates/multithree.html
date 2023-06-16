@@ -1,0 +1,95 @@
+{% extends 'layout.html' %}
+{% block content %}
+<style>
+    .card {
+        min-width: 100%;
+    }
+</style>
+<div class="container-fluid">
+    <div class="row">
+        <div id="leftMainDiv" class="col-sm-12 float-left">
+            <div class="card shadow">
+                <div class="card-header py-1 ">
+                    <p class="float-left">BioInvision Modal</p>
+                    <p class="float-right">MR Modal</p>
+                </div>
+                <div class="card-body" id="mainCard">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div id="toolsCol" class="col-12 float-left">
+            <div class="card mt-1 shadow">
+                <div class="card-header pt-1">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active px-2" data-toggle="tab" href="#datasetCard">Data browser</a>
+                        </li>
+                        <li id="tab1" class="nav-item">
+                            <a id="clipTab" class="nav-link px-2" data-toggle="tab" href="#clipCard">Clipping</a>
+                        </li>
+                        <li id="tab2" class="nav-item">
+                            <a class="nav-link px-2" data-toggle="tab" href="#viewCard">Views</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+
+                <div class="tab-content">
+                    <div id="datasetCard" class="card-body tab-pane active">
+                        <form class="form" >
+                            <div class="form-row mx-2 my-1">
+                                <div class="form-group col">
+                                    <label for="dsSelect" class="mr-1">Dataset:</label>
+                                    <select id="dsSelect" class="form-control" disabled>
+                                        <option value="" selected>Mouse884</option>
+                                        <!--{% for ds in datasets %}
+                                        <option value="{{ ds }}">{{ ds }}</option>
+                                        {% endfor %}-->
+                                    </select>
+                                </div>
+                                <div class="form-group col">
+                                    <label for="modSelect" class="mr-1">Modality:</label>
+                                    <select id="modSelect" class="form-control" disabled>
+                                        <option value="" selected>Brightfield</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col">
+                                    <label for="exposureSelect" class="mr-1">Exposure:</label>
+                                    <select id="exposureSelect" class="form-control" disabled></select>
+                                </div>    
+                                <div class="form-group col">
+                                    <label for="wavelengthSelect" class="mr-1">Wavelength:</label>
+                                    <select id="wavelengthSelect" class="form-control" disabled></select>
+                                </div>
+                                
+                            </div>
+                            <div class="form-row mx-2 my-1">
+                                <div class="form-group col">
+                                    <button id="loadDatasetBtn" type="button" class="btn btn-primary btn-block" disabled>Load</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="clipCard" class="card-body tab-pane">
+                        todo
+                    </div>
+
+                    <div id="viewCard" class="card-body tab-pane">
+                        todo
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.5.0/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip-utils@0.0.2/dist/jszip-utils.min.js"></script>
+<script src="./static/js/orthogonal-shader.js"></script>
+<!-- 3D rendering-->
+<script type="module" src="/static/js/multithreeBIV.js"></script>
+{% endblock %}

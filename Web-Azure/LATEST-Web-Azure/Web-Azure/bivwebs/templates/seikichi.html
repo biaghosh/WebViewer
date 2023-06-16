@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+		integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+		crossorigin="anonymous">
+	<title>WebGL 3D Viewer</title>
+</head>
+<body>
+	<div class="container mt-4 mb-4">
+		<div class="row">
+			<div class="col-12 text-center" id="topDiv">
+				<canvas id="glcanvas" class="img-fluid" width="640" height="480"></canvas>
+			</div>
+			<div class="mx-auto col-12 col-lg-8 row">
+                <div class="col-12 col-lg-12 h6">
+					<p id="volumeName">Volume:</p>
+				</div>
+
+				<div class="col-12 mb-lg-2 mb-2 mt-2">
+					<label for="threshold">Volume Threshold</label>
+					<input type="range" class="form-control-range" id="threshold"
+							min="0.0" max="1.0" step="0.01">
+				</div>
+
+				<div class="col-12 mb-lg-2 mb-2 mt-2">
+					<label for="saturationThreshold">Saturation Threshold</label>
+					<input type="range" class="form-control-range" id="saturationThreshold"
+							min="0.0" max="1.0" step="0.01">
+				</div>
+
+                <div class="col-12 col-lg-12 mt-0 mb-2">
+                    <i id="loadingText"></i>
+                    <div class="progress mb-2">
+                        <div id="loadingProgressBar" class="progress-bar" role="progressbar"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+
+				<div id="uiText" class="col-12 col-lg-12 mt-2 mb-0">
+					<h4>Controls</h4>
+					<p>Desktop: Left-click + drag to rotate, scroll to zoom,
+					right-click + drag to pan.
+					<br/>
+					Touch: One finger drag to rotate, pinch to zoom, two finger drag to pan.
+                    </p>
+				</div>
+
+				
+			</div>
+		</div>
+    </div>
+
+    <script src="./static/js/gl-matrix-min.js"></script>
+    <script src="./static/js/webgl-util.js"></script>
+    <script src="./static/js/shader-srcs.js"></script>
+    <!-- https://github.com/Twinklebear/tiff.js  best so far -->
+    
+	<!--  Exploring Tiff libs-->
+	
+	<!--  Okay so I can load the RGBA tiff with this -->
+	<script src="./static/js/seikichi-tiff.js"></script>
+	<script>
+        var cubeStrip = [
+            1, 1, 0,
+            0, 1, 0,
+            1, 1, 1,
+            0, 1, 1,
+            0, 0, 1,
+            0, 1, 0,
+            0, 0, 0,
+            1, 1, 0,
+            1, 0, 0,
+            1, 1, 1,
+            1, 0, 1,
+            0, 0, 1,
+            1, 0, 0,
+            0, 0, 0
+        ];
+        var proj = null
+        var camera = null
+        var projView = null
+        var tabFocused = true
+        var newVolumeUpload = true
+        var targetFrameTime = 32
+        var samplingRate = 1.0
+        var WIDTH = 640
+        var HEIGHT = 480
+        var gl = null
+        var canvas = null
+        var volumeVao
+        var blitImageShader = null
+        var volValueRange = [0, 1]
+        var volumeIsInt = 0
+        var volumeThreshold = {"value" : 0.1} //slider control eventually
+        var newVolumeUpload = true
+        //for ArcBall usage
+        const defaultEye = vec3.set(vec3.create(), 0.5, 0.5, 1.5);
+        const center = vec3.set(vec3.create(), 0.5, 0.5, 0.5);
+        const up = vec3.set(vec3.create(), 0.0, 1.0, 0.0);
+
+        function getTiff()
+        {
+            var xhr = new XMLHttpRequest();
+            xhr.responseType = 'arraybuffer';
+            xhr.open('GET', "http://localhost:5000/static/BrData/RAW/wholeMouseBrightfield_8_8_4.tif");
+            xhr.onload = function (e) {
+                Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
+                var tiff = new Tiff({buffer: xhr.response});
+                //console.log(tiff.readRGBAImage())
+                //this seems better - example had new Uint8Array(w*h*b)
+                var tiffData = new Uint8Array(xhr.response)
+                
+                //slicing returns a copy, so be careful to garbace collect when done
+                var responseFormat = new Uint8Array(tiffData.slice(2,3))
+                if ( responseFormat[0] !== 42)
+                    alert("Retrieved data is not the correct format")
+                console.log("IFD DIR Location\n" + tiffData.slice(4,8))
+                //226 + 167 = 383 is the offset of the 0th IFD WRONG it's 167.226 for 16bits = 42978
+                console.log("Number of Directory Entries\n" + tiffData.slice(42978,42980))
+                //13,0 = 0,13 dir entries
+                //should be the 0th IFD tag
+                console.log("IFD Tag 0:\n" + tiffData.slice(42980,42982))
+                //0,1 = 256 = ImageWidth
+                console.log("IFD Type 0:\n" + tiffData.slice(42982,42984))
+                //3,0 = 3 so SHORT
+                console.log("IFD Count of the indicated type 0:\n" + tiffData.slice(42984,42988)) //1
+                console.log("IFD value 0:\n" + tiffData.slice(42988,42992)) //1082
+
+                console.log("IFD Tag 1:\n" + tiffData.slice(42992,42994))
+                //257 = imageLength
+                console.log("IFD Type 1:\n" + tiffData.slice(42994,42996))
+                //3,0 = 3 so SHORT
+                console.log("IFD Count of the indicated type 1:\n" + tiffData.slice(42996,43000)) //1
+                console.log("IFD value 1:\n" + tiffData.slice(43000,43004)) //514
+                //var canvas = tiff.toCanvas();
+                //document.getElementById("topDiv").append(canvas);
+                //for (var i = 0, len = tiff.countDirectory(); i < len; ++i) 
+                    //tiff.setDirectory(i);
+            };
+            xhr.send();
+        }
+        
+        var renderLoop = function() {
+            // Save them some battery if they're not viewing the tab
+            if (document.hidden) {
+                return;
+            }
+            // Reset the sampling rate and camera for new volumes
+            if (newVolumeUpload) {
+                camera = new ArcballCamera(defaultEye, center, up, 2, [WIDTH, HEIGHT]);
+                samplingRate = 1.0;
+                shader.use(gl);
+                gl.uniform1f(shader.uniforms["dt_scale"], samplingRate);
+            }
+            projView = mat4.mul(projView, proj, camera.camera);
+            var eye = [camera.invCamera[12], camera.invCamera[13], camera.invCamera[14]];
+            var volDims = [1082,514,161]
+            var longestAxis = Math.max(volDims[0], Math.max(volDims[1], volDims[2]));
+            var voxelSpacing = [1,1,1.95]
+            var volScale = [volDims[0] / longestAxis * voxelSpacing[0],
+                volDims[1] / longestAxis * voxelSpacing[1],
+                volDims[2] / longestAxis * voxelSpacing[2]];
+            gl.bindFramebuffer(gl.FRAMEBUFFER, depthColorFbo);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            gl.enable(gl.DEPTH_TEST);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, colorFbo);
+
+            gl.activeTexture(gl.TEXTURE4);
+            gl.bindTexture(gl.TEXTURE_2D, renderTargets[1]);
+            shader.use(gl);
+            gl.uniform2fv(shader.uniforms["value_range"], volValueRange);
+            gl.uniform3iv(shader.uniforms["volume_dims"], volDims);
+            gl.uniform3fv(shader.uniforms["volume_scale"], volScale);
+            gl.uniformMatrix4fv(shader.uniforms["proj_view"], false, projView);
+            gl.uniformMatrix4fv(shader.uniforms["inv_proj"], false, invProj);
+            gl.uniform1i(shader.uniforms["volume_is_int"], volumeIsInt);
+
+            var invView = mat4.invert(mat4.create(), camera.camera);
+            gl.uniformMatrix4fv(shader.uniforms["inv_view"], false, invView);
+            gl.uniform3fv(shader.uniforms["eye_pos"], eye);
+            gl.uniform1i(shader.uniforms["highlight_trace"], true);
+            gl.uniform1f(shader.uniforms["threshold"], volumeThreshold.value);
+            gl.uniform1f(shader.uniforms["saturation_threshold"], saturationThreshold.value);
+
+            gl.bindVertexArray(volumeVao);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, cubeStrip.length / 3);
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            gl.disable(gl.BLEND);
+            gl.disable(gl.CULL_FACE);
+            blitImageShader.use(gl);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            gl.enable(gl.CULL_FACE);
+            gl.enable(gl.BLEND);
+
+            // Wait for rendering to actually finish
+            gl.finish();
+            
+            newVolumeUpload = false;
+
+        }
+
+        function main(){
+            canvas = document.getElementById("glcanvas");
+            gl = canvas.getContext("webgl2", {antialias: false});
+            if (!gl) {
+                alert("Unable to initialize WebGL2. Your browser may not support it");
+                return;
+            }
+            WIDTH = canvas.getAttribute("width");
+            HEIGHT = canvas.getAttribute("height");
+
+            proj = mat4.perspective(mat4.create(), 60 * Math.PI / 180.0,
+            WIDTH / HEIGHT, 0.01, 100);
+            invProj = mat4.invert(mat4.create(), proj);
+
+            camera = new ArcballCamera(defaultEye, center, up, 2, [WIDTH, HEIGHT]);
+            projView = mat4.create();
+
+            // Register mouse and touch listeners
+            var controller = new Controller();
+            controller.mousemove = function(prev, cur, evt) {
+                if (evt.buttons == 1) {
+                    camera.rotate(prev, cur);
+                } else if (evt.buttons == 2) {
+                    camera.pan([cur[0] - prev[0], prev[1] - cur[1]]);
+                }
+            };
+            controller.wheel = function(amt) { camera.zoom(amt); };
+            controller.pinch = controller.wheel;
+            controller.twoFingerDrag = function(drag) { camera.pan(drag); };
+
+            controller.registerForCanvas(canvas);
+
+            // Setup VAO and VBO to render the cube to run the raymarching shader
+            volumeVao = gl.createVertexArray();
+            gl.bindVertexArray(volumeVao);
+            var vbo = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeStrip), gl.STATIC_DRAW);
+
+            gl.enableVertexAttribArray(0);
+            gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+
+            blitImageShader = new Shader(gl, quadVertShader, quadFragShader);
+            blitImageShader.use(gl);
+            gl.uniform1i(blitImageShader.uniforms["colors"], 3);
+
+            shader = new Shader(gl, vertShader, fragShader);
+            shader.use(gl);
+
+            gl.uniform1i(shader.uniforms["volume"], 0);
+            gl.uniform1i(shader.uniforms["ivolume"], 5);
+            gl.uniform1i(shader.uniforms["colormap"], 1);
+            gl.uniform1i(shader.uniforms["depth"], 4);
+            gl.uniform1f(shader.uniforms["dt_scale"], 1.0);
+            gl.uniform2iv(shader.uniforms["canvas_dims"], [WIDTH, HEIGHT]);
+
+            // Setup required OpenGL state for drawing the back faces and
+            // composting with the background color
+            gl.enable(gl.CULL_FACE);
+            gl.cullFace(gl.FRONT);
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
+            gl.clearColor(0.01, 0.01, 0.01, 1.0);
+            gl.clearDepth(1.0);
+
+            // Setup the render targets for the splat rendering pass
+            renderTargets = [gl.createTexture(), gl.createTexture()]
+            gl.bindTexture(gl.TEXTURE_2D, renderTargets[0]);
+            gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, WIDTH, HEIGHT);
+
+            gl.bindTexture(gl.TEXTURE_2D, renderTargets[1]);
+            gl.texStorage2D(gl.TEXTURE_2D, 1, gl.DEPTH_COMPONENT32F, WIDTH, HEIGHT);
+
+            for (var i = 0; i < 2; ++i) {
+                gl.bindTexture(gl.TEXTURE_2D, renderTargets[i]);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            }
+
+            gl.activeTexture(gl.TEXTURE3);
+            gl.bindTexture(gl.TEXTURE_2D, renderTargets[0]);
+            gl.activeTexture(gl.TEXTURE4);
+            gl.bindTexture(gl.TEXTURE_2D, renderTargets[1]);
+
+            depthColorFbo = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, depthColorFbo);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
+                gl.TEXTURE_2D, renderTargets[0], 0);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
+                gl.TEXTURE_2D, renderTargets[1], 0);
+            gl.drawBuffers([gl.COLOR_ATTACHMENT0]);
+
+            colorFbo = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, colorFbo);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
+                gl.TEXTURE_2D, renderTargets[0], 0);
+            gl.drawBuffers([gl.COLOR_ATTACHMENT0]);
+
+            getTiff()
+            setInterval(renderLoop, targetFrameTime);
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                main()
+            })
+	</script> 
+</body>
+</html>
+

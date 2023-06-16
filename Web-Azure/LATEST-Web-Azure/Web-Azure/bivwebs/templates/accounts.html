@@ -1,0 +1,399 @@
+{% extends 'layout.html' %}
+{% block content %}
+
+<head>
+    <style>
+        .selected-user {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            background-color: #e6e6e6;
+            /* 将所选行的背景颜色设置为灰色 */
+            color: #000;
+            /* 将所选行的文本颜色设置为黑色，以确保可读性 */
+        }
+
+
+        .selected-dataset,
+        .selected-user {
+            background-color: #e6e6e6;
+        }
+
+        .selectable-user:hover,
+        li:hover {
+            cursor: pointer;
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<div class="container-fluid">
+    <div class="row" style="margin-top: 70px;">
+        <!-- View Users-->
+        <div class="col-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    Active Users
+
+                </div>
+                <div id="viewUsersCard" class="card-body">
+                    <!-- table -->
+                </div>
+            </div>
+        </div>
+        <!-- Create User-->
+        <div class="col-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    Create User
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="email">Email address</label>
+                        <input id="email" class="form-control" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label for="levelSelect">Access Level</label>
+                        <select id="levelSelect" class="form-control">
+                            <option value="admin">Admin</option>
+                            <option value="user">User</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button id="createUserBtn" type="submit" class="btn btn-primary">Create</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin: 10px;">
+        <div class="col-6">
+            <div class="card shadow">
+                <div id="assignedDatasetsHead" class="card-header">
+                    Assign Datasets
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card border-0">
+                                <div class="card-body">
+                                    <h5 class="card-title">Dataset List</h5>
+                                    <div id="datasetList" class="table table-striped table-hover"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-center justify-content-center">
+                            <div class="btn-group-vertical">
+                                <button id="addDatasetBtn" type="button" class="btn btn-primary mb-2"
+                                    onclick="addAssignedDataset(selectedUserEmail, selectedDatasetName)">
+                                    <i class="bi bi-arrow-right-circle-fill"></i> Add
+                                </button>
+                                <button id="removeDatasetBtn" type="button" class="btn btn-primary"
+                                    onclick="removeAssignedDataset(selectedUserEmail, selectedAssignedDatasetName)">
+                                    <i class="bi bi-arrow-left-circle-fill"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0">
+                                <div class="card-body">
+                                    <h5 id="assignedDatasetsTitle" class="card-title">Assigned Datasets for </h5>
+                                    <ul id="assignedDatasets" class="list-group"></ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <button id="deleteUserBtn" type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    window.addEventListener("DOMContentLoaded", usersTable())
+    // window.addEventListener("DOMContentLoaded", renderUserList())
+    window.addEventListener("DOMContentLoaded", renderDatasetList())
+    let selectedUserEmail;
+    let selectedDatasetName;
+    let selectedAssignedDatasetName;
+    const assignedDatasetsTitle = document.getElementById('assignedDatasetsTitle');
+
+
+    function addAssignedDataset(email, datasetName) {
+        console.log(email, datasetName)
+        fetch(`/addAssignedDataset/${email}/${datasetName}`, { method: 'POST' })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data)
+                handleSelectedUser(selectedUserEmail);
+                alert(data.message)
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    }
+
+    // 从 Assigned Datasets 列表中删除数据集
+    function removeAssignedDataset(email, datasetName) {
+        fetch(`/removeUserDataset/${email}/${datasetName}`, { method: 'POST' })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                    alert(data.message)
+                }
+                return response.json();
+            })
+            .then(data => {
+                handleSelectedUser(selectedUserEmail);
+                alert(data.message)
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    }
+
+    document.getElementById("createUserBtn").addEventListener('click', () => {
+        //validate
+        let email = document.getElementById("email")
+        let pass = document.getElementById("pass")
+        let level = document.getElementById("levelSelect")
+        //fetch
+        fetch('/createUser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                'email': email.value,
+                'level': level.value
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                //clearform
+                email.value = ''
+                //updateTable
+                usersTable()
+            })
+            .catch((error) => {
+                console.error('Error:', error)
+            })
+
+    })
+
+    document.getElementById("deleteUserBtn").addEventListener('click', () => {
+        //validate
+        let email = selectedUserEmail
+        //fetch
+        fetch('/deleteUser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                'email': email,
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    //updateTable
+                    usersTable()
+                    selectedUserEmail = " "
+                    assignedDatasetsHead.textContent = `Assigned Datasets for ${selectedUserEmail}`;
+                    handleSelectedUser(selectedUserEmail)
+                } else {
+                    // 显示错误消息
+                    alert(data.message);
+                }
+
+            })
+            .catch((error) => {
+                console.error('Error:', error)
+            })
+
+    })
+
+    function getUsers() {
+        return fetch('/getUsers')
+            .then(response => response.json())
+            .then(data => {
+                return data.map(user => user.email);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                return [];
+            });
+    }
+
+    function handleSelectedUser(selectedUserEmail) {
+        assignedDatasetsTitle.textContent = `Assigned Datasets for ${selectedUserEmail}`;
+        const assignedDatasets = document.getElementById('assignedDatasets');
+        // 先清空已分配数据集列表
+        assignedDatasets.innerHTML = '';
+        // 显示当前选择的用户
+        const selectedUserHeading = document.createElement('h5');
+        assignedDatasets.appendChild(selectedUserHeading);
+        // 查询当前选择的用户所拥有的数据集
+        fetch(`/getUserDatasets/${selectedUserEmail}`, {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(datasets => {
+                const datasetList = document.createElement('ul');
+                datasetList.classList.add('list-group');
+                datasets.forEach(dataset => {
+                    const li = document.createElement('li');
+                    li.classList.add('list-group-item');
+                    li.textContent = dataset;
+                    // 添加点击事件监听器
+                    datasetList.appendChild(li);
+                });
+                assignedDatasets.appendChild(datasetList);
+                // 添加事件监听器
+                datasetList.addEventListener('click', (event) => {
+                    const selectedLi = event.target.closest('li');
+                    if (selectedLi) {
+                        // 在控制台上打印选中的数据集名称
+                        // console.log('Selected dataset:', selectedLi.textContent);
+                        selectedAssignedDatasetName = selectedLi.textContent
+                        // 从所有其他li元素中删除selected-dataset类
+                        const allLiElements = document.querySelectorAll('#assignedDatasets li');
+                        allLiElements.forEach((li) => {
+                            if (li !== selectedLi) {
+                                li.classList.remove('selected-dataset');
+                            }
+                        });
+                        // 向选定的li元素添加selected-dataset类
+                        selectedLi.classList.add('selected-dataset');
+                    }
+                });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+
+
+
+    function usersTable() {
+        fetch('/getUsers', {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(data => {
+                let tableHTML = `<table class="table table-sm"><tbody>
+                                                    <tr>
+                                                        <th scope="row">Email</th>
+                                                        <td>Level</td>
+                                                        <td>Logins</td>
+                                                        <td>Last Login</td>
+                                                    </tr>`
+                for (let i = 0; i < data.length; i++) {
+                    let date = ''
+                    if (typeof data[i]['lastLogin'] == 'object')
+                        date = new Date(data[i]['lastLogin']['$date'])
+                    tableHTML = tableHTML + `<tr class="selectable-user" onclick="handleTableRowClick(event)">
+                                                                <th scope="row">${data[i]['email']}</th>
+                                                                <td>${data[i]['level']}</td>
+                                                                <td>${data[i]['logins']}</td>
+                                                                <td>${date}</td>
+                                                            </tr>`
+                }
+                tableHTML = tableHTML + `</tbody></table>`
+                document.getElementById("viewUsersCard").innerHTML = tableHTML
+            })
+            .catch((error) => {
+                console.error('Error:', error)
+            })
+
+    }
+
+    function handleTableRowClick(event) {
+        const selectedRow = event.target.closest('tr');
+        if (selectedRow) {
+            const rowData = {
+                email: selectedRow.querySelector('th').textContent,
+                level: selectedRow.querySelector('td:nth-child(2)').textContent,
+                logins: selectedRow.querySelector('td:nth-child(3)').textContent,
+                lastLogin: selectedRow.querySelector('td:nth-child(4)').textContent,
+            };
+            selectedUserEmail = rowData['email']
+            assignedDatasetsHead.textContent = `Assigned Datasets for ${selectedUserEmail}`;
+            handleSelectedUser(selectedUserEmail);
+            // Remove the selected-row class from all other tr elements
+            const allRows = document.querySelectorAll('tr');
+            allRows.forEach((row) => {
+                if (row !== selectedRow) {
+                    row.classList.remove('selected-user');
+                }
+            });
+            // Add the selected-row class to the selected tr element, if it does not already have it
+            if (!selectedRow.classList.contains('selected-user')) {
+                selectedRow.classList.add('selected-user');
+            }
+        }
+    }
+
+
+    function getDatasets() {
+        return fetch('getDatasets')
+            .then(response => response.json())
+            .then(datasets => {
+                return datasets;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                return [];
+            });
+    }
+
+    function renderDatasetList() {
+        getDatasets().then(datasets => {
+            const datasetList = document.getElementById('datasetList');
+            datasetList.innerHTML = ''; // clear existing content
+            const ul = document.createElement('ul');
+            ul.classList.add('list-group');
+
+            datasets.forEach(dataset => {
+                const li = document.createElement('li');
+                li.classList.add('list-group-item');
+                li.dataset.name = dataset.name;
+                li.textContent = dataset.name;
+                ul.appendChild(li)
+            });
+            datasetList.appendChild(ul);
+
+            ul.addEventListener('click', (event) => {
+                const selectedLi = event.target.closest('li');
+                if (selectedLi) {
+                    selectedDatasetName = selectedLi.dataset.name;
+                    // Remove the selected-dataset class from all other li elements
+                    const allLiElements = document.querySelectorAll('#datasetList li');
+                    allLiElements.forEach((li) => {
+                        if (li !== selectedLi) {
+                            li.classList.remove('selected-dataset');
+                        }
+                    });
+                    // Add the selected-dataset class to the selected li element
+                    selectedLi.classList.add('selected-dataset');
+                }
+            });
+
+        });
+    }
+
+
+
+
+</script>
+{% endblock %}

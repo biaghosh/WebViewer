@@ -1,0 +1,16 @@
+'*.jpg
+*.jpeg
+*.png
+*.gif
+*.tif
+*.basis
+*.txt
+*.zip
+*.svg
+*.woff
+*.ttf
+*.woff2
+*.eot
+*.pyc
+*.less
+*.scss

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <meta name="description" content="BioInVision Web 3DView">
+  <meta name="keywords" content="CryoViz Imaging Service, CryoViz Imaging Instrument, Image Analysis">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+  <link href="/static/fa5/css/all.css" rel="stylesheet">
+  
+  <!-- Material Design Bootstrap -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.19.1/css/mdb.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <!-- JS, Popper.js, and jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+  <!--<script src="/static/js/popper.min.js"></script> -->
+  <script src="/static/js/bootstrap.bundle.min.js"></script>
+  <script defer src="/static/fa5/js/all.js"></script>
+  <style>
+    /* body {
+      font-family: 'Roboto', serif;
+    } */
+
+    a {
+      color: #5F698E;
+      /* 设置链接颜色为深灰色 */
+    }
+
+    a:hover {
+      color: #0F71F2;
+      /* 设置鼠标悬停时的链接颜色为浅灰色 */
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg bg-white fixed-top">
+    <a class="navbar-brand" href="/home">
+      <img src="/static/img/BIV_Logo.png" width="120" height="30" alt="">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <ul class="navbar-nav mr-auto">
+        {% if 'email' in session %}
+        <a class="nav-link" id="viewer-link" href="/viewer"> <i class="fas fa-eye"></i> Viewer </a>
+        {% if session['multiAvailable'] == true %}
+        <a class="nav-link" id="multiviewer-link" href="/multiviewer"> <i class="fas fa-images"></i>
+          Multi-Viewer </a>
+        {% else %}
+        <a class="nav-link" href="/multiviewer" style="pointer-events: none"> <i class="fas fa-images"></i>
+          Multi-Viewer </a>
+        {% endif %}
+        {% endif %}
+        {% if session['level'] == 'admin' %}
+
+        <a class="nav-link" id="accounts-link" href="/accounts"> <i class="fas fa-users-cog"></i> Accounts
+        </a>
+        {% endif %}
+      </ul>
+
+      {% if 'email' in session %}
+      Welcome, {{ session['email'] }}
+      <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i></a>
+      {% else %}
+      <a class="nav-link" href="/login"><i class="fas fa-sign-in-alt"></i> Login</a>
+      {% endif %}
+
+
+    </div>
+  </nav>
+  {% block content %}{% endblock %}
+  {% block scripts %}
+  {% endblock %}
+</body>
+
+</html>
