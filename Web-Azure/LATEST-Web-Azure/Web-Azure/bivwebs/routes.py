@@ -293,7 +293,7 @@ def deleteAnnotation():
 
 @app.route('/addAssignedDataset/<email>/<datasetName>', methods=['POST'])
 def add_assigned_dataset(email, datasetName):
-  print(email,datasetName)
+#   print(email,datasetName)
   client = MongoClient(app.config['mongo'])
   db = client.BIV
   users = db.Users
@@ -535,7 +535,7 @@ def deleteUser():
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     users = db.Users
-    print(json['email'])
+    # print(json['email'])
     usersResult = users.delete_one({"email": json['email']})
     send = '{ "success": "cookie"}'
     return jsonify({'status': 'success', 'message': 'Delete successfully'})
@@ -963,7 +963,7 @@ def store_image():
         
         # Generate a unique blob name
         blob_name = file.filename
-        print(blob_name)
+        # print(blob_name)
         # Get a reference to the container
         container_client = blob_service_client.get_container_client(CONTAINER_NAME)
 
@@ -1016,7 +1016,7 @@ def store_image():
             expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         )
         blob_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{CONTAINER_NAME}/{blob_name}"
-        print(blob_url)
+        # print(blob_url)
         doc = {
             "name" : filename,
             'upload_date': datetime.datetime.now(),
@@ -1052,7 +1052,7 @@ def store_image():
             expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         )
         blob_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{CONTAINER_NAME}/{blob_name}"
-        print(blob_url)
+        # print(blob_url)
         doc = {
             "name" : filename,
             'upload_date': datetime.datetime.now(),
@@ -1074,7 +1074,7 @@ def download_files():
     if len(file_name) == 0:
         return
     format = file_name.split(".")[-1] 
-    print(format)
+    # print(format)
     fs = db['files.files']
 
     file_url = fs.find_one({'name':file_name})['URL']
