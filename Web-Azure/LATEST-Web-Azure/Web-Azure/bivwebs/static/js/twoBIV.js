@@ -207,7 +207,7 @@ let forwardBtn = document.getElementById("forwardBtn"),
     fileInput = document.getElementById("file-input"),
     filename = document.getElementById("file-name"),
     UploadFileBtn = document.getElementById("UploadFileBtn")
-    
+
 //THREE JS ELEMENTS
 let cameraXY, sceneXY, controlsXY, rendererXY, mesh, geometry, material2, loader, maskGeometry, maskMaterial, dControls
 let lineTextGroup = new THREE.Group(), annTextGroup = new THREE.Group(), brushGroup = new THREE.Group(),
@@ -298,7 +298,11 @@ function loadDynamic2D(fullLoad) {
         loader.detectSupport(rendererXY)
     supportPass = true
 
-    loader.load(`./static/cryoData/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/xy/${slider.value}.basis`, function (texture) {
+    // 将以下 URL 替换为你的 SAS URL
+    let SAS = 'sp=r&st=2023-06-16T19:54:09Z&se=2023-06-17T19:54:09Z&spr=https&sv=2022-11-02&sig=EPHWs%2BcyjlRSPmnKlaL5TWJ3g8T9aYobbdtTwHB2G1s%3D&sr=s'
+    let sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/xy/${slider.value}.basis?${SAS}`;
+
+    loader.load(sasUrl, function (texture) {
         texture.encoding = THREE.sRGBEncoding
         xyShader.uniforms.u_texture.value = texture
         xyShader.uniforms.u_threshold.value = threshold2D.value / 10
@@ -1269,7 +1273,7 @@ function addAnnotationEvents() {
 }
 
 function loadAnnotationsFast() {
-    console.log("loadAnnotationsFast")
+    // console.log("loadAnnotationsFast")
     annTextGroup.remove(...annTextGroup.children)
     annTableBody.innerHTML = ``
     let data = annSlices
@@ -1399,7 +1403,10 @@ function hideLoading(which) {
 
 function updateSlice() {
     //showLoading('xy')
-    loader.load(`./static/cryoData/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/xy/${slider.value}.basis`, function (texture) {
+    let SAS = 'sp=r&st=2023-06-16T19:54:09Z&se=2023-06-17T19:54:09Z&spr=https&sv=2022-11-02&sig=EPHWs%2BcyjlRSPmnKlaL5TWJ3g8T9aYobbdtTwHB2G1s%3D&sr=s'
+    let sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/xy/${slider.value}.basis?${SAS}`;
+
+    loader.load(sasUrl, function (texture) {
         texture.encoding = THREE.sRGBEncoding
         xyShader.uniforms.u_texture.value = texture
         loadAnnotationsFast()
@@ -1642,7 +1649,7 @@ forwardStepBtn.addEventListener('click', () => {
 //     exportHeightInput.value = Math.round((dsInfo["imageDims"]["y"] / dsInfo["imageDims"]["x"]) * exportWidthSelect.options[exportWidthSelect.selectedIndex].text)
 // })
 exportHeightInput = exportSizeSelect.options[exportSizeSelect.selectedIndex].text.split(" ")[2],
-exportWidthSelect = exportSizeSelect.options[exportSizeSelect.selectedIndex].text.split(" ")[0]
+    exportWidthSelect = exportSizeSelect.options[exportSizeSelect.selectedIndex].text.split(" ")[0]
 
 exportSizeSelect.addEventListener('change', () => {
     exportHeightInput = exportSizeSelect.options[exportSizeSelect.selectedIndex].text.split(" ")[2]
@@ -1867,8 +1874,10 @@ function loadOrthos(fullLoad = true) {
         }
 
         animateOrtho(oRenderers[ortho], oScenes[ortho], oCameras[ortho], oMaterials[ortho], oAnimate[ortho])
+        let SAS = 'sp=r&st=2023-06-16T19:54:09Z&se=2023-06-17T19:54:09Z&spr=https&sv=2022-11-02&sig=EPHWs%2BcyjlRSPmnKlaL5TWJ3g8T9aYobbdtTwHB2G1s%3D&sr=s'
+        let sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/xy/${slider.value}.basis?${SAS}`;
 
-        loader.load(`./static/cryoData/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis`, function (texture) {
+        loader.load(sasUrl, function (texture) {
             texture.encoding = THREE.sRGBEncoding
             oMaterials[ortho].uniforms.u_texture.value = texture
             oMaterials[ortho].uniforms.u_threshold.value = threshold2D.value / 10
@@ -2355,7 +2364,7 @@ function loadFiles() {
                         }
                     }
                     xhr.send(JSON.stringify(filename));
-                    xhr.responseType = 'blob';  
+                    xhr.responseType = 'blob';
                     xhr.onload = function () {
                         if (xhr.status === 200) {
                             const link = document.createElement('a');
@@ -2419,7 +2428,7 @@ function loadFiles() {
                             .then(data => {
                                 var imageUrl = data['file_url']
                                 console.log(imageUrl)
-                                var filename = preview_filename; 
+                                var filename = preview_filename;
                                 openImagePreviewModal(imageUrl, filename);
                             })
                             .catch(error => console.error(error));
@@ -2431,7 +2440,7 @@ function loadFiles() {
                             .then(data => {
                                 var txtUrl = data['file_url']
                                 console.log(txtUrl)
-                                var filename = preview_filename; 
+                                var filename = preview_filename;
                                 openFilePreviewModal(txtUrl, filename);
                             })
                             .catch(error => console.error(error));
@@ -2442,7 +2451,7 @@ function loadFiles() {
                             .then(data => {
                                 var videoUrl = data['file_url']
                                 console.log(videoUrl)
-                                var filename = preview_filename; 
+                                var filename = preview_filename;
                                 openVideoPreviewModal(videoUrl, filename);
                             })
                             .catch(error => console.error(error));
