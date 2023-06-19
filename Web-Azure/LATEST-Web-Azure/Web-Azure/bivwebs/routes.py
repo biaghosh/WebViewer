@@ -4,6 +4,7 @@ import io
 import datetime
 from flask import render_template, url_for, flash, redirect, request, abort, jsonify, make_response, send_file, session
 import requests
+from azure.storage.fileshare import ShareFileClient
 from azure.storage.blob import BlobServiceClient, ContentSettings,generate_blob_sas, BlobSasPermissions
 from bivwebs import app, bcrypt
 from bivwebs.forms import LoginForm
@@ -466,14 +467,15 @@ def accounts():
         return redirect(url_for('login'))
     if session['level'] != 'admin':
         return render_template('403.html'), 403
-    # if current_user.level != Admin kick
-    # client = MongoClient(app.config['mongo'])
-    # db = client.BIV
-    # users = db.Users
-    # user = users.find_one({"id": current_user.id})
-    # bcrypt.generate_password_hash("zxcvb1",form.password.data)})
-    # ds = user["datasets"]
     return render_template('accounts.html', title='Accounts')
+
+@app.route("/datasets")
+def datasets():
+    if 'email' not in session:
+        return redirect(url_for('login'))
+    if session['level'] != 'admin':
+        return render_template('403.html'), 403
+    return render_template('datasets.html', title='Datasets')
 
 
 @app.route("/getUsers", methods=['GET'])
@@ -553,6 +555,7 @@ def volRender():
 
 @app.route("/getSlice", methods=['POST'])
 def getSlice():
+    print("getSlice")
     if 'email' not in session:
         return redirect(url_for('login'))
     json = request.get_json()
@@ -1154,3 +1157,41 @@ def send_otp():
     return jsonify({'status': 'success', 'message': f"OTP has been sent to '{email}, if you do not receive it, please check your spam'."})
 
 
+
+
+@app.route('/dataset_upload', methods=['POST'])
+def upload_file():
+    print("upload")
+    print("ds")
+    # Azure存储账户名和账户密钥，这些信息应该从Azure门户中获得
+    azure_storage_account_name = "bivlargefiles"
+    azure_storage_account_key = "PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw=="
+
+    # 创建 Azure ShareFileClient
+    share = "data"
+    share_file_client = ShareFileClient.from_connection_string(
+    conn_str=f"DefaultEndpointsProtocol=https;AccountName={azure_storage_account_name};AccountKey={azure_storage_account_key};EndpointSuffix=core.windows.net",
+    share_name=share,
+    file_path="")
+
+    # 尝试列出分享下的文件或目录
+    try:
+        my_files = share_file_client.list_directories_and_files()
+        for file in my_files:
+            print(file.name)
+        print('Connection to Azure Share Files successful.')
+    except Exception as e:
+        print(f'Failed to connect to Azure Share Files: {e}')
+
+    file = request.files['file']
+
+    # 这里我们直接使用文件名作为Azure存储中的名字，注意在实际项目中可能需要处理文件名冲突或者使用其他方式生成存储中的文件名
+    azure_file_name = file.filename
+
+    # 创建一个新的FileClient用于上传文件
+    file_client = share_file_client.get_file_client(azure_file_name)
+
+    # 上传文件到Azure
+    file_client.upload_file(file)
+
+    return 'File Uploaded Successfully'

@@ -11,6 +11,7 @@ var keyEvent = new Event('keyup')
 let xyInputTimeout
 var previousSlice
 let session
+var SAS = 'sp=r&st=2023-06-19T14:24:14Z&se=2052-05-20T14:24:00Z&sv=2022-11-02&sig=GgEEXxG39P5af3489EXLKTpLO2g9Q2xyNO8CCjUZnrQ%3D&sr=s'
 
 dsSelect.addEventListener("change", () => {
     if (!dsSelect.value)
@@ -24,6 +25,7 @@ dsSelect.addEventListener("change", () => {
     })
         .then(response => response.json())
         .then(data => {
+            console.log(data)
             session = data['session']
             dsName = data['dataset_info'][0]['name']
             dsInfo = data['dataset_info'][0]
@@ -299,8 +301,7 @@ function loadDynamic2D(fullLoad) {
     supportPass = true
 
     // 将以下 URL 替换为你的 SAS URL
-    let SAS = 'sp=r&st=2023-06-16T19:54:09Z&se=2023-06-17T19:54:09Z&spr=https&sv=2022-11-02&sig=EPHWs%2BcyjlRSPmnKlaL5TWJ3g8T9aYobbdtTwHB2G1s%3D&sr=s'
-    let sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/xy/${slider.value}.basis?${SAS}`;
+    var sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/xy/${slider.value}.basis?${SAS}`;
 
     loader.load(sasUrl, function (texture) {
         texture.encoding = THREE.sRGBEncoding
@@ -858,7 +859,7 @@ maskLoadInput = document.getElementById("maskLoadInput"),
 
 
 function getSceneClicks(evt) {
-
+    console.log("getScene")
     let rect = canvasXY.getBoundingClientRect()
     mouse.x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1;
     mouse.y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1;
@@ -875,7 +876,6 @@ function getSceneClicks(evt) {
 }
 
 function drawLine() {
-    console.log("dramLine")
     var material3 = new THREE.LineBasicMaterial({
         color: 0xFF0000,
         linewidth: 6,
@@ -1403,8 +1403,8 @@ function hideLoading(which) {
 
 function updateSlice() {
     //showLoading('xy')
-    let SAS = 'sp=r&st=2023-06-16T19:54:09Z&se=2023-06-17T19:54:09Z&spr=https&sv=2022-11-02&sig=EPHWs%2BcyjlRSPmnKlaL5TWJ3g8T9aYobbdtTwHB2G1s%3D&sr=s'
-    let sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/xy/${slider.value}.basis?${SAS}`;
+    console.log("updateSlice")
+    var sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/xy/${slider.value}.basis?${SAS}`;
 
     loader.load(sasUrl, function (texture) {
         texture.encoding = THREE.sRGBEncoding
@@ -1874,8 +1874,7 @@ function loadOrthos(fullLoad = true) {
         }
 
         animateOrtho(oRenderers[ortho], oScenes[ortho], oCameras[ortho], oMaterials[ortho], oAnimate[ortho])
-        let SAS = 'sp=r&st=2023-06-16T19:54:09Z&se=2023-06-17T19:54:09Z&spr=https&sv=2022-11-02&sig=EPHWs%2BcyjlRSPmnKlaL5TWJ3g8T9aYobbdtTwHB2G1s%3D&sr=s'
-        let sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/xy/${slider.value}.basis?${SAS}`;
+        let sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis?${SAS}`;
 
         loader.load(sasUrl, function (texture) {
             texture.encoding = THREE.sRGBEncoding
@@ -2128,7 +2127,7 @@ function updateOrthoMeshes() {
     xclip.value = clipCoords[oClip['yz']]
     yclip.value = clipCoords[oClip['xz']]
     orthos.forEach(ortho => {
-        loader.load(`./static/cryoData/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis`, function (texture) {
+        loader.load(`https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis?${SAS}`, function (texture) {
             texture.encoding = THREE.sRGBEncoding
             //texture.wrapS = THREE.RepeatWrapping;
             //texture.repeat.x = - 1;
