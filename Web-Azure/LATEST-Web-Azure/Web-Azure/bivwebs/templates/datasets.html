@@ -14,65 +14,86 @@
 <div class="container-fluid">
     <!-- 省略你已经有的HTML代码... -->
     <div class="row" style="margin-top: 70px;">
-        <div class="col-6">
+        <div class="col-4">
             <div class="card shadow">
                 <div class="card-header">Upload Dataset</div>
                 <div class="card-body">
-                    <form action="/upload" method="post" enctype="multipart/form-data">
-                        <div class="upload-form-group">
-                            <label for="dataset-name">Dataset Name:</label>
-                            <input type="text" id="dataset-name" name="dataset-name" class="form-control" required>
-                        </div>
-                        <div class="upload-form-group">
-                            <label for="type">Modality:</label>
-                            <select id="type" name="type" class="form-control" required>
-                                <option value="Brightfield">Brightfield</option>
-                                <option value="fluorescent">Fluorescent</option>
-                            </select>
-                        </div>
-
-                        <div class="upload-form-group">
-                            <label for="type">Exposure:</label>
-                            <select id="type" name="type" class="form-control" required>
-                                <option value="1">1</option>
-                                <option value="0">0</option>
-                            </select>
-                        </div>
-
-                        <div class="upload-form-group">
-                            <label for="type">Wavelenght:</label>
-                            <select id="type" name="type" class="form-control" required>
-                                <option value="430">430nm</option>
-                                <option value="650">650nm</option>
-                            </select>
-                        </div>
-
-
-                        <div class="upload-form-group">
-                            <label for="direction">Axis:</label><br>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="direction" id="xy" value="xy">
-                                <label class="form-check-label" for="xy">xy</label>
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="upload-form-group">
+                                <label for="dataset-name">Dataset Name:</label>
+                                <input type="text" id="dataset-name" name="dataset-name" class="form-control" required>
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="direction" id="xz" value="xz">
-                                <label class="form-check-label" for="xz">xz</label>
+                            <div class="upload-form-group">
+                                <label for="type">Modality:</label>
+                                <select id="modality" name="type" class="form-control" required>
+                                    <option value="Brightfield">Brightfield</option>
+                                    <option value="fluorescent">Fluorescent</option>
+                                </select>
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="direction" id="yz" value="yz">
-                                <label class="form-check-label" for="yz">yz</label>
+
+                            <div class="upload-form-group">
+                                <label for="type">Exposure:</label>
+                                <select id="exposure" name="type" class="form-control" required>
+                                    <option value="1">1</option>
+                                    <option value="0">0</option>
+                                </select>
+                            </div>
+
+                            <div class="upload-form-group">
+                                <label for="type">Wavelength:</label>
+                                <select id="wavelength" name="type" class="form-control" required>
+                                    <option value="430">430nm</option>
+                                    <option value="650">650nm</option>
+                                </select>
+                            </div>
+
+
+                            <div class="upload-form-group">
+                                <label for="direction">Axis:</label><br>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="direction" id="xy" value="xy">
+                                    <label class="form-check-label" for="xy">xy</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="direction" id="xz" value="xz">
+                                    <label class="form-check-label" for="xz">xz</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="direction" id="yz" value="yz">
+                                    <label class="form-check-label" for="yz">yz</label>
+                                </div>
+                            </div>
+                            <div class="upload-form-group">
+                                <label for="file">上传文件:</label>
+                                <input type="file" id="file" name="file" class="form-control-file" multiple required
+                                    onchange="updateFileList()">
+                            </div>
+                            <div id="fileList"></div>
+                            <div class="upload-form-group">
+                                <button id="upload-button" class="btn btn-primary"
+                                    onclick="uploadDataset()">Upload</button>
                             </div>
                         </div>
-                        <div class="upload-form-group">
-                            <label for="file">上传文件:</label>
-                            <input type="file" id="file" name="file" class="form-control-file" multiple required
-                                onchange="updateFileList()">
+                        <div class="col-5">
+                            <div class="upload-form-group">
+                                <label for="specimen-name">Specimen Name:</label>
+                                <input type="text" id="specimen-name" name="dataset-name" class="form-control" required>
+                            </div>
+                            <div class="upload-form-group">
+                                <label for="PI">PI:</label>
+                                <input type="text" id="PI" name="PI" class="form-control" required>
+                            </div>
+                            <div class="upload-form-group">
+                                <label for="voxels">voxels:</label>
+                                <input type="text" id="voxels" name="voxels" class="form-control" required>
+                            </div>
+                            <div class="upload-form-group">
+                                <label for="thickness">thickness:</label>
+                                <input type="text" id="thickness" name="thickness" class="form-control" required>
+                            </div>
                         </div>
-                        <div id="fileList"></div>
-                        <div class="upload-form-group">
-                            <button id="upload-button" class="btn btn-primary" onclick="uploadDataset()">Upload</button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -93,14 +114,27 @@
 
     async function uploadDataset() {
         const datasetNameInput = document.getElementById('dataset-name');
-        const datasetTypeInput = document.getElementById('dataset-type');
+        const modality = document.getElementById('modality');
+        const exposure = document.getElementById('exposure');
+        const wavelength = document.getElementById('wavelength');
         const directionInput = document.querySelector('input[name="direction"]:checked');
+        const specimenName = document.getElementById('specimen-name');
+        const PI = document.getElementById('PI');
+        const voxels = document.getElementById('voxels');
+        const thickness = document.getElementById('thickness');
+
+
+
         const fileInput = document.getElementById('file');
 
         const formData = new FormData();
         formData.append('dataset-name', datasetNameInput.value);
-        formData.append('type', datasetTypeInput.value);
+        formData.append('modality', modality.value);
         formData.append('direction', directionInput.value);
+        formData.append('spcimenName',specimenName.value);
+        formData.append('PI',PI.value);
+        formData.append('voxels',voxels.value);
+        formData.append('thickness',thickness.value);
 
         // 遍历所有文件并添加到formData
         for (const file of fileInput.files) {

@@ -37,21 +37,17 @@ import mimetypes
 def home():
     return render_template('home.html', title="Home")
 
-
 @app.route("/applications")
 def applications():
     return render_template('applications.html', title="Applications")
-
 
 @app.route("/events")
 def events():
     return render_template('events.html', title="News and Events")
 
-
 @app.route("/collaborators")
 def collaborators():
     return render_template('collaborators.html', title="Collaborators")
-
 
 @app.route("/about")
 def about():
@@ -61,7 +57,6 @@ def is_safe_url(target):
     ref_url = urlparse(request.host_url)
     test_url = urlparse(urljoin(request.host_url, target))
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -260,7 +255,6 @@ def updateAnnotationComments():
 
     data = '{}'
     return make_response(dumps(data), 200)
-
 
 @app.route("/deleteAnnotation", methods=['POST'])
 def deleteAnnotation():
@@ -1161,8 +1155,28 @@ def send_otp():
 
 @app.route('/dataset_upload', methods=['POST'])
 def upload_file():
-    print("upload")
-    print("ds")
+
+    dataset_name = request.form['dataset-name']
+    modality = request.form['modality']
+    exposure = request.form['exposure']
+    wavelength = request.form['wavelength']
+    direction = request.form['direction']
+    spcimenName = request.form['spcimenName']
+    PI = request.form['PI']
+    voxels = request.form['voxels']
+    thickness = request.form['thickness']
+
+
+    # 将数据保存到MongoDB
+    doc = {
+        'dataset_name': dataset_name,
+        'modality': modality,
+        'info':{'spcimenName': spcimenName,'PI': PI,'voxels': voxels,'thickness':thickness},
+        'types':{'Brightfield':{'exposure':[wavelength]}}
+    }
+
+
+
     # Azure存储账户名和账户密钥，这些信息应该从Azure门户中获得
     azure_storage_account_name = "bivlargefiles"
     azure_storage_account_key = "PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw=="

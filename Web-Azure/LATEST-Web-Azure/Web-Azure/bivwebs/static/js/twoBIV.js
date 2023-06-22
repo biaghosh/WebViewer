@@ -11,7 +11,7 @@ var keyEvent = new Event('keyup')
 let xyInputTimeout
 var previousSlice
 let session
-var SAS = 'sp=r&st=2023-06-19T14:24:14Z&se=2052-05-20T14:24:00Z&sv=2022-11-02&sig=GgEEXxG39P5af3489EXLKTpLO2g9Q2xyNO8CCjUZnrQ%3D&sr=s'
+var SAS = 'sp=r&st=2023-06-22T17:29:05Z&se=2023-12-21T21:29:00Z&sv=2022-11-02&sig=e4x7sd%2FQ%2FQyVH54RI6k3Y2btt9wTYfz%2FOIBE34UXyGY%3D&sr=s'
 
 dsSelect.addEventListener("change", () => {
     if (!dsSelect.value)
@@ -2479,7 +2479,6 @@ function openFilePreviewModal(url, fileName) {
     filePreviewInfo.innerText = fileName;
     $(filePreviewModal).modal('show');
 }
-
 
 
 function openImagePreviewModal(url, filename) {
