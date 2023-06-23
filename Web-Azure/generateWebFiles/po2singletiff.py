@@ -10,7 +10,7 @@ import glob
 from datetime import datetime
 
 def startProcess(mongoRecord, jobNum, zdown):
-    
+    print("startprocess")
     po2Dims(mongoRecord,jobNum)
 
     maxWorkers = 4
@@ -38,7 +38,8 @@ def startProcess(mongoRecord, jobNum, zdown):
     os.makedirs(mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/yz', exist_ok=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
         for index in range(0, mongoRecord[jobNum]['imageDims']['x']-1, 4):
-            executor.submit(createYzViewTIFF, index)
+            executor.submit(createYzViewTIFF, index,mongoRecord, jobNum)
+            
     #os.remove(file) for file in os.listdir('path/to/directory') if file.endswith('.png')
 
 def create3dPngZip(mongoRecord, jobNum, zdown):
@@ -73,7 +74,7 @@ def create3dPngZip(mongoRecord, jobNum, zdown):
     zipf.close()
 
 def createXyViewTIFF(index, mongoRecord, jobNum):
-    
+    print("xy合成")
     filename = mongoRecord[jobNum]['fp'] #% index
     tiff = Image.open(filename)
     tiff.seek(index)
@@ -103,24 +104,41 @@ def createXzViewTIFF(index, mongoRecord, jobNum):
     cmd = 'basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
     subprocess.call(cmd)
 
-def createYzViewTIFF(index):
-    #initalize tiff here to avoid race conditions
-    tiff = Image.open(mongoRecord[jobNum]['fp'])
-    #yz
-    i = index
-    imgX = Image.new('RGBA',(mongoRecord['dims2']['y'],mongoRecord['dims2']['z']),color=(0,0,0,0))
-    for z in range(mongoRecord['dims']['z']):
+def createYzViewTIFF(index, mongoRecord, jobNum):
+    print("YZ合成!")
+    filename = mongoRecord[jobNum]['fp'] #% index #3.7 supports this but not 3.8
+    tiff = Image.open(filename)
+    #tiff.seek(index)
+    fn = "%d.png" % (index)
+    background = Image.new('RGBA', (mongoRecord[jobNum]['dims2']['y'], mongoRecord[jobNum]['dims2']['z']), (0, 0, 0, 0))
+    for z in range(mongoRecord[jobNum]['imageDims']['z']):
         tiff.seek(z)
-        cropped = tiff.crop((i,0,i+1,mongoRecord['dims']['y']))
-        rot = cropped.transpose(method=Image.ROTATE_90) #270 if xy isn't flipped
-        #imgX.paste(rot,(0,mongoRecord['dims']['z'] - z,mongoRecord['dims']['y'],mongoRecord['dims']['z'] - z+1))
-        imgX.paste(rot,(0,z,mongoRecord['dims']['y'],z+1)) 
-    fn = "%d.png" % (i)
+        cropped = tiff.crop((0,index,mongoRecord[jobNum]['imageDims']['y'],index+1))
+        background.paste(cropped,(0,z,mongoRecord[jobNum]['imageDims']['y'],z+1))	
     outputPath = mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/yz/'
     outputFile = outputPath + fn
-    imgX.save(outputFile)
-    cmd = 'basisu.exe -tex_type 2d -output_path %s -file %s' % (outputPath, outputFile)
-    subprocess.call(cmd)
+    background.save(outputFile)
+    cmd = 'basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
+    subprocess.call(cmd)   
+
+# def createYzViewTIFF(index):
+#     #initalize tiff here to avoid race conditions
+#     tiff = Image.open(mongoRecord[jobNum]['fp'])
+#     #yz
+#     i = index
+#     imgX = Image.new('RGBA',(mongoRecord['dims2']['y'],mongoRecord['dims2']['z']),color=(0,0,0,0))
+#     for z in range(mongoRecord['dims']['z']):
+#         tiff.seek(z)
+#         cropped = tiff.crop((i,0,i+1,mongoRecord['dims']['y']))
+#         rot = cropped.transpose(method=Image.ROTATE_90) #270 if xy isn't flipped
+#         #imgX.paste(rot,(0,mongoRecord['dims']['z'] - z,mongoRecord['dims']['y'],mongoRecord['dims']['z'] - z+1))
+#         imgX.paste(rot,(0,z,mongoRecord['dims']['y'],z+1)) 
+#     fn = "%d.png" % (i)
+#     outputPath = mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/yz/'
+#     outputFile = outputPath + fn
+#     imgX.save(outputFile)
+#     cmd = 'basisu.exe -tex_type 2d -output_path %s -file %s' % (outputPath, outputFile)
+#     subprocess.call(cmd)
 
 def createXzViewTIFFASync(index, mongoRecord, jobNum):
     

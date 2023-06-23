@@ -130,6 +130,8 @@
         const formData = new FormData();
         formData.append('dataset-name', datasetNameInput.value);
         formData.append('modality', modality.value);
+        formData.append('exposure',exposure.value);
+        formData.append('wavelength',wavelength.value)
         formData.append('direction', directionInput.value);
         formData.append('spcimenName',specimenName.value);
         formData.append('PI',PI.value);

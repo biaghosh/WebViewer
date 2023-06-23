@@ -439,6 +439,7 @@ def viewer():
     user = users.find_one({"email": session['email']})
     # bcrypt.generate_password_hash("zxcvb1",form.password.data)})
     ds = user["datasets"]
+    print(ds)
     return render_template('three_new popup.html', title='Viewer', datasets=ds)
 
 
@@ -1155,6 +1156,9 @@ def send_otp():
 
 @app.route('/dataset_upload', methods=['POST'])
 def upload_file():
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV
+    datasets = db.datasets
 
     dataset_name = request.form['dataset-name']
     modality = request.form['modality']
@@ -1169,43 +1173,45 @@ def upload_file():
 
     # 将数据保存到MongoDB
     doc = {
-        'dataset_name': dataset_name,
+        'name': dataset_name,
         'modality': modality,
         'info':{'spcimenName': spcimenName,'PI': PI,'voxels': voxels,'thickness':thickness},
-        'types':{'Brightfield':{'exposure':[wavelength]}}
+        'types':{'Brightfield':{exposure:[wavelength]}}
     }
 
+    datasets.insert_one(doc)
 
 
-    # Azure存储账户名和账户密钥，这些信息应该从Azure门户中获得
-    azure_storage_account_name = "bivlargefiles"
-    azure_storage_account_key = "PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw=="
 
-    # 创建 Azure ShareFileClient
-    share = "data"
-    share_file_client = ShareFileClient.from_connection_string(
-    conn_str=f"DefaultEndpointsProtocol=https;AccountName={azure_storage_account_name};AccountKey={azure_storage_account_key};EndpointSuffix=core.windows.net",
-    share_name=share,
-    file_path="")
+    # # Azure存储账户名和账户密钥，这些信息应该从Azure门户中获得
+    # azure_storage_account_name = "bivlargefiles"
+    # azure_storage_account_key = "PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw=="
 
-    # 尝试列出分享下的文件或目录
-    try:
-        my_files = share_file_client.list_directories_and_files()
-        for file in my_files:
-            print(file.name)
-        print('Connection to Azure Share Files successful.')
-    except Exception as e:
-        print(f'Failed to connect to Azure Share Files: {e}')
+    # # 创建 Azure ShareFileClient
+    # share = "data"
+    # share_file_client = ShareFileClient.from_connection_string(
+    # conn_str=f"DefaultEndpointsProtocol=https;AccountName={azure_storage_account_name};AccountKey={azure_storage_account_key};EndpointSuffix=core.windows.net",
+    # share_name=share,
+    # file_path="")
 
-    file = request.files['file']
+    # # 尝试列出分享下的文件或目录
+    # try:
+    #     my_files = share_file_client.list_directories_and_files()
+    #     for file in my_files:
+    #         print(file.name)
+    #     print('Connection to Azure Share Files successful.')
+    # except Exception as e:
+    #     print(f'Failed to connect to Azure Share Files: {e}')
 
-    # 这里我们直接使用文件名作为Azure存储中的名字，注意在实际项目中可能需要处理文件名冲突或者使用其他方式生成存储中的文件名
-    azure_file_name = file.filename
+    # file = request.files['file']
 
-    # 创建一个新的FileClient用于上传文件
-    file_client = share_file_client.get_file_client(azure_file_name)
+    # # 这里我们直接使用文件名作为Azure存储中的名字，注意在实际项目中可能需要处理文件名冲突或者使用其他方式生成存储中的文件名
+    # azure_file_name = file.filename
 
-    # 上传文件到Azure
-    file_client.upload_file(file)
+    # # 创建一个新的FileClient用于上传文件
+    # file_client = share_file_client.get_file_client(azure_file_name)
+
+    # # 上传文件到Azure
+    # file_client.upload_file(file)
 
     return 'File Uploaded Successfully'
