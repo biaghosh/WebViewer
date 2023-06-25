@@ -1,12 +1,13 @@
 azure-storage-file-share
-azure.storage.blob
-email
+Azure-storage-blob
 cffi==1.14.0
 click==7.1.1
 Flask>=1.1.1
 Flask-Bcrypt>=0.7.1
 Flask-Login>=0.5.0
 Flask-WTF==0.14.3
+Flask-Mail
+Cython
 imagecodecs==2020.5.30
 itsdangerous==1.1.0
 Jinja2==2.11.1
@@ -14,7 +15,7 @@ MarkupSafe==1.1.1
 Pillow==7.1.2
 pycparser==2.20
 pymongo==4.3.3
-scikit-image==0.17.2pip
+scikit-image==0.17.2
 six==1.14.0
 Werkzeug==1.0.1
 WTForms==2.2.1
