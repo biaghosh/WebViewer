@@ -23,6 +23,7 @@ from scipy.interpolate import interpn
 import gridfs
 import json
 import zipfile
+from bson import json_util
 import bson
 import base64
 import random
@@ -334,6 +335,7 @@ def get_user_datasets(email):
 
 @app.route('/getDatasets', methods=['GET'])
 def get_datasets():
+    print("get_datasets")
     datasets = []
     client = MongoClient(app.config['mongo'])
     db = client.BIV
@@ -1156,6 +1158,7 @@ def send_otp():
 
 @app.route('/dataset_upload', methods=['POST'])
 def upload_file():
+    
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     datasets = db.datasets
@@ -1164,10 +1167,24 @@ def upload_file():
     modality = request.form['modality']
     exposure = request.form['exposure']
     wavelength = request.form['wavelength']
-    direction = request.form['direction']
+    axis = request.form['axis']
+    voxels_x = request.form['voxels_x']
+    voxels_y = request.form['voxels_y']
+    voxels_z = request.form['voxels_z']
+    ImageDim_x = request.form['ImageDims_x']
+    ImageDim_y = request.form['ImageDims_y']
+    ImageDim_z = request.form['ImageDims_z']
+    Dims2_x = request.form['Dims2_x']
+    Dims2_y = request.form['Dims2_y']
+    Dims2_z = request.form['Dims2_z']
+    Dims3_x = request.form['Dims3_x']
+    Dims3_y = request.form['Dims3_y']
+    Dims3_z = request.form['Dims3_z']
+    pixelLengthUM = request.form['pixelLengthUM']
+    zskip = request.form['zskip']
     spcimenName = request.form['spcimenName']
     PI = request.form['PI']
-    voxels = request.form['voxels']
+    voxel_size = request.form['voxel_size']
     thickness = request.form['thickness']
     files = request.files.getlist('files')
 
@@ -1176,9 +1193,15 @@ def upload_file():
     # 将数据保存到MongoDB
     doc = {
         'name': dataset_name,
-        'modality': modality,
-        'info':{'spcimenName': spcimenName,'PI': PI,'voxels': voxels,'thickness':thickness},
-        'types':{'Brightfield':{exposure:[wavelength]}}
+        'types':{modality:{exposure:[wavelength]}},
+        'voxels':{'x':voxels_x,'y':voxels_y,'z':voxels_z},
+        'dims2':{'x':Dims2_x,'y': Dims2_y,'z': Dims2_z},
+        'dims3':{'x':Dims3_x,'y': Dims3_y,'z': Dims3_z},
+        'pixelLengthUM':pixelLengthUM,
+        'imageDims':{'x':ImageDim_x,'y':ImageDim_y,'z':ImageDim_z},
+        'zskip':zskip,
+        'info':{'spcimenName': spcimenName,'PI': PI,'voxels': voxel_size,'thickness':thickness},
+        
     }
     if not datasets.find_one({'name': dataset_name}):   
         datasets.insert_one(doc)
@@ -1199,7 +1222,7 @@ def upload_file():
     share_client = ShareClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name="data", credential=azure_storage_account_key)
     # 需要创建的目录路径
     # 需要创建的目录路径
-    dirs = [dataset_name,"basis", modality, exposure, wavelength, direction]
+    dirs = [dataset_name,"basis", modality, exposure, wavelength, axis]
 
  # 创建 ShareDirectoryClient 对象，并逐级创建目录
     dir_path = ""
@@ -1226,3 +1249,16 @@ def upload_file():
     
 
     return 'File Uploaded Successfully'
+
+
+@app.route('/getdatasetsdetail/<name>', methods=['GET'])
+def get_dataset(name):
+    print(name)
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV
+    datasets = db.datasets
+    dataset = datasets.find_one({'name':name})
+    # Make sure the '_id' key is a string
+    if dataset is not None and '_id' in dataset:
+        dataset['_id'] = str(dataset['_id'])
+    return jsonify(dataset)

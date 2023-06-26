@@ -9,23 +9,48 @@
         .upload-form-group {
             margin-bottom: 15px;
         }
+
+        .required {
+            color: red;
+        }
     </style>
 </head>
 <div class="container-fluid">
     <!-- 省略你已经有的HTML代码... -->
     <div class="row" style="margin-top: 70px;">
-        <div class="col-4">
+        <div class="col-6">
+            <div class="card shadow">
+                <div class="card-header">Dataset Management</div>
+                <div class="card-body">
+                    <div class="card border-0">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-3">
+                                    <h5 class="card-title">Dataset List</h5>
+                                    <div id="datasetList" class="table table-striped table-hover"></div>
+                                </div>
+                                <div class="col-9">
+                                    <h5 class="card-title">Dataset Details</h5>
+                                    <pre id="dataset-details"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
             <div class="card shadow">
                 <div class="card-header">Upload Dataset</div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-5">
+                        <div class="col-2">
                             <div class="upload-form-group">
-                                <label for="dataset-name">Dataset Name:</label>
+                                <label for="dataset-name">Dataset Name:<span class="required">*</span></label>
                                 <input type="text" id="dataset-name" name="dataset-name" class="form-control" required>
                             </div>
                             <div class="upload-form-group">
-                                <label for="type">Modality:</label>
+                                <label for="type">Modality:<span class="required">*</span></label>
                                 <select id="modality" name="type" class="form-control" required>
                                     <option value="Brightfield">Brightfield</option>
                                     <option value="fluorescent">Fluorescent</option>
@@ -33,7 +58,7 @@
                             </div>
 
                             <div class="upload-form-group">
-                                <label for="type">Exposure:</label>
+                                <label for="type">Exposure:<span class="required">*</span></label>
                                 <select id="exposure" name="type" class="form-control" required>
                                     <option value="1">1</option>
                                     <option value="0">0</option>
@@ -41,56 +66,102 @@
                             </div>
 
                             <div class="upload-form-group">
-                                <label for="type">Wavelength:</label>
+                                <label for="type">Wavelength:<span class="required">*</span></label>
                                 <select id="wavelength" name="type" class="form-control" required>
                                     <option value="430">430nm</option>
                                     <option value="650">650nm</option>
                                 </select>
                             </div>
-
-
                             <div class="upload-form-group">
-                                <label for="direction">Axis:</label><br>
+                                <label for="axis">Axis:<span class="required">*</span></label><br>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="direction" id="xy" value="xy">
+                                    <input class="form-check-input" type="radio" name="axis" id="xy" value="xy">
                                     <label class="form-check-label" for="xy">xy</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="direction" id="xz" value="xz">
+                                    <input class="form-check-input" type="radio" name="axis" id="xz" value="xz">
                                     <label class="form-check-label" for="xz">xz</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="direction" id="yz" value="yz">
+                                    <input class="form-check-input" type="radio" name="axis" id="yz" value="yz">
                                     <label class="form-check-label" for="yz">yz</label>
                                 </div>
                             </div>
                             <div class="upload-form-group">
-                                <label for="file">上传文件:</label>
-                                <input type="file" id="file" name="file" class="form-control-file" multiple required
-                                    onchange="updateFileList()">
+                                <label for="pixelLengthUM">pixelLengthUM:<span class="required">*</span></label>
+                                <input type="text" id="pixelLengthUM" name="pixelLengthUM" class="form-control"
+                                    required>
                             </div>
-                            <div id="fileList"></div>
                             <div class="upload-form-group">
-                                <button id="upload-button" class="btn btn-primary"
-                                    onclick="uploadDataset()">Upload</button>
+                                <label for="zskip">zskip:<span class="required">*</span></label>
+                                <input type="text" id="zskip" name="zskip" class="form-control" required>
                             </div>
                         </div>
-                        <div class="col-5">
+                        <div class="col-2">
+                            <div class="upload-form-group">
+                                <label for="voxels">voxels:<span class="required">*</span></label>
+                                <input type="text" id="voxels-x" name="voxels-x" placeholder="x" class="form-control"
+                                    required>
+                                <input type="text" id="voxels-y" name="voxels-y" placeholder="y" class="form-control"
+                                    required>
+                                <input type="text" id="voxels-z" name="voxels-z" placeholder="z" class="form-control"
+                                    required>
+                            </div>
+                            <div class="upload-form-group">
+                                <label for="ImageDims">ImageDims:<span class="required">*</span></label>
+                                <input type="text" id="ImageDims-x" name="ImageDims-x" placeholder="x"
+                                    class="form-control" required>
+                                <input type="text" id="ImageDims-y" name="ImageDims-y" placeholder="y"
+                                    class="form-control" required>
+                                <input type="text" id="ImageDims-z" name="ImageDims-z" placeholder="z"
+                                    class="form-control" required>
+                            </div>
+                            <div class="upload-form-group">
+                                <label for="Dims2">Dims2:<span class="required">*</span></label>
+                                <input type="text" id="Dims2-x" name="Dims2-x" placeholder="x" class="form-control"
+                                    required>
+                                <input type="text" id="Dims2-y" name="Dims2-y" placeholder="y" class="form-control"
+                                    required>
+                                <input type="text" id="Dims2-z" name="Dims2-z" placeholder="z" class="form-control"
+                                    required>
+                            </div>
+                            <div class="upload-form-group">
+                                <label for="Dims3">Dims3:<span class="required">*</span></label>
+                                <input type="text" id="Dims3-x" name="Dims3-x" placeholder="x" class="form-control"
+                                    required>
+                                <input type="text" id="Dims3-y" name="Dims3-y" placeholder="y" class="form-control"
+                                    required>
+                                <input type="text" id="Dims3-z" name="Dims3-z" placeholder="z" class="form-control"
+                                    required>
+                            </div>
+                        </div>
+                        <div class="col-2">
                             <div class="upload-form-group">
                                 <label for="specimen-name">Specimen Name:</label>
-                                <input type="text" id="specimen-name" name="dataset-name" class="form-control" required>
+                                <input type="text" id="specimen-name" name="dataset-name" class="form-control">
                             </div>
                             <div class="upload-form-group">
                                 <label for="PI">PI:</label>
-                                <input type="text" id="PI" name="PI" class="form-control" required>
+                                <input type="text" id="PI" name="PI" class="form-control">
                             </div>
                             <div class="upload-form-group">
-                                <label for="voxels">voxels:</label>
-                                <input type="text" id="voxels" name="voxels" class="form-control" required>
+                                <label for="voxel_size">Voxel Size:</label>
+                                <input type="text" id="voxel_size" name="voxel_size" class="form-control">
                             </div>
                             <div class="upload-form-group">
                                 <label for="thickness">thickness:</label>
-                                <input type="text" id="thickness" name="thickness" class="form-control" required>
+                                <input type="text" id="thickness" name="thickness" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="upload-form-group">
+                                <label for="file">Upload:</label>
+                                <input type="file" id="file" name="file" class="form-control-file" multiple required
+                                    onchange="updateFileList()">
+                            </div>
+                            <div class="upload-form-group">
+                                <button id="upload-button" class="btn btn-primary"
+                                    onclick="uploadDataset()">Upload</button>
                             </div>
                         </div>
                     </div>
@@ -98,65 +169,201 @@
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    function updateFileList() {
-        var input = document.getElementById('file');
-        var output = document.getElementById('fileList');
+    <script>
+        window.addEventListener("DOMContentLoaded", renderDatasetList())
 
-        output.innerHTML = '<ul>';
-        for (var i = 0; i < input.files.length; ++i) {
-            output.innerHTML += '<li>' + input.files.item(i).name + '</li>';
-        }
-        output.innerHTML += '</ul>';
-    }
+        function jsonToTable(json) {
+            let table = document.createElement('table');
+            table.style.width = '100%';  // 可以修改为你需要的宽度
+            table.setAttribute('border', '1');
+            for (let key in json) {
+                let row = document.createElement('tr');
 
-    async function uploadDataset() {
-        const datasetNameInput = document.getElementById('dataset-name');
-        const modality = document.getElementById('modality');
-        const exposure = document.getElementById('exposure');
-        const wavelength = document.getElementById('wavelength');
-        const directionInput = document.querySelector('input[name="direction"]:checked');
-        const specimenName = document.getElementById('specimen-name');
-        const PI = document.getElementById('PI');
-        const voxels = document.getElementById('voxels');
-        const thickness = document.getElementById('thickness');
+                let keyCell = document.createElement('td');
+                keyCell.textContent = key;
+                row.appendChild(keyCell);
 
+                let valueCell = document.createElement('td');
 
+                // 检查值的类型
+                if (typeof json[key] === 'object' && json[key] !== null) {
+                    // 如果值是一个对象或数组，递归调用 jsonToTable 函数
+                    valueCell.appendChild(jsonToTable(json[key]));
+                } else {
+                    // 否则，直接将值转换为文本
+                    valueCell.textContent = json[key];
+                }
 
-        const fileInput = document.getElementById('file');
+                row.appendChild(valueCell);
 
-        const formData = new FormData();
-        formData.append('dataset-name', datasetNameInput.value);
-        formData.append('modality', modality.value);
-        formData.append('exposure', exposure.value);
-        formData.append('wavelength', wavelength.value)
-        formData.append('direction', directionInput.value);
-        formData.append('spcimenName', specimenName.value);
-        formData.append('PI', PI.value);
-        formData.append('voxels', voxels.value);
-        formData.append('thickness', thickness.value);
+                table.appendChild(row);
+            }
 
-        // 遍历所有文件并添加到formData
-        for (const file of fileInput.files) {
-            formData.append('files', file);
+            return table;
         }
 
-        const response = await fetch('/dataset_upload', {
-            method: 'POST',
-            body: formData
+        function showDatasetDetails(name) {
+            // 使用 fetch API 获取数据集细节
+            fetch(`/getdatasetsdetail/${name}`)
+                .then(response => response.json())
+                .then(data => {
+                    // 获取展示数据的容器
+                    const detailsContainer = document.getElementById('dataset-details');
+
+                    // 调用 jsonToTable 函数将 JSON 数据转换为 HTML 表格
+                    const table = jsonToTable(data);
+
+                    // 清空容器并添加新的内容
+                    detailsContainer.innerHTML = '';
+                    detailsContainer.appendChild(table);
+                })
+                .catch(err => console.error(err));
+        }
+
+
+        // 获取数据集列表并添加点击事件
+        const datasetList = document.getElementById('datasetList');
+        datasetList.addEventListener('click', event => {
+            if (event.target && event.target.nodeName === 'LI') {
+                const name = event.target.textContent;
+                console.log(name)
+                showDatasetDetails(name);
+            }
         });
+        async function uploadDataset() {
+            const datasetNameInput = document.getElementById('dataset-name');
+            const modality = document.getElementById('modality');
+            const exposure = document.getElementById('exposure');
+            const wavelength = document.getElementById('wavelength');
+            const axisInput = document.querySelector('input[name="axis"]:checked');
+            const voxels_x = document.getElementById('voxels-x');
+            const voxels_y = document.getElementById('voxels-y');
+            const voxels_z = document.getElementById('voxels-z');
+            const ImageDims_x = document.getElementById('ImageDims-x');
+            const ImageDims_y = document.getElementById('ImageDims-y');
+            const ImageDims_z = document.getElementById('ImageDims-z');
+            const Dims2_x = document.getElementById('Dims2-x');
+            const Dims2_y = document.getElementById('Dims2-y');
+            const Dims2_z = document.getElementById('Dims2-z');
+            const Dims3_x = document.getElementById('Dims3-x');
+            const Dims3_y = document.getElementById('Dims3-y');
+            const Dims3_z = document.getElementById('Dims3-z');
+            const pixelLengthUM = document.getElementById('pixelLengthUM');
+            const zskip = document.getElementById('zskip')
 
-        if (!response.ok) {
-            // 如果响应失败，打印错误信息
-            console.error('Upload failed:', response.statusText);
-        } else {
-            const data = await response.json();
-            // 打印成功信息和上传的数据集详情
-            console.log(data.message, data);
-            document.getElementById('file-names').innerText = data.files.join('\n');
+            const specimenName = document.getElementById('specimen-name');
+            const PI = document.getElementById('PI');
+            const voxel_size = document.getElementById('voxel_size');
+            const thickness = document.getElementById('thickness');
+            const fileInput = document.getElementById('file');
+
+
+
+            // 创建一个数组，包含所有需要检查的输入框
+            const requiredInputs = [datasetNameInput, axisInput, voxels_x, voxels_y, voxels_z, ImageDims_x, ImageDims_y, ImageDims_z, Dims3_x, Dims3_y, Dims3_z, pixelLengthUM, zskip];
+
+            // 遍历每个输入框，如果它们中的任何一个是空的，则停止上传并显示一个警告
+            for (let input of requiredInputs) {
+                if (input.value.trim() === '') {
+                    alert('Please fill out all required fields.');
+                    return;  // 退出函数，停止上传
+                }
+            }
+
+            const formData = new FormData();
+            formData.append('dataset-name', datasetNameInput.value);
+            formData.append('modality', modality.value);
+            formData.append('exposure', exposure.value);
+            formData.append('wavelength', wavelength.value)
+            formData.append('axis', axisInput.value);
+            formData.append('voxels_x', voxels_x.value);
+            formData.append('voxels_y', voxels_y.value);
+            formData.append('voxels_z', voxels_z.value);
+            formData.append('ImageDims_x', ImageDims_x.value);
+            formData.append('ImageDims_y', ImageDims_y.value);
+            formData.append('ImageDims_z', ImageDims_z.value);
+            formData.append('Dims2_x', Dims2_x.value);
+            formData.append('Dims2_y', Dims2_y.value);
+            formData.append('Dims2_z', Dims2_z.value);
+            formData.append('Dims3_x', Dims3_x.value);
+            formData.append('Dims3_y', Dims3_y.value);
+            formData.append('Dims3_z', Dims3_z.value);
+            formData.append('pixelLengthUM', pixelLengthUM.value);
+            formData.append('zskip', zskip.value);
+            formData.append('spcimenName', specimenName.value);
+            formData.append('PI', PI.value);
+            formData.append('voxel_size', voxel_size.value);
+            formData.append('thickness', thickness.value);
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ', ' + pair[1]);
+            }
+            // 遍历所有文件并添加到formData
+            for (const file of fileInput.files) {
+                formData.append('files', file);
+            }
+
+            const response = await fetch('/dataset_upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                // 如果响应失败，打印错误信息
+                console.error('Upload failed:', response.statusText);
+            } else {
+                const data = await response.json();
+                // 打印成功信息和上传的数据集详情
+                console.log(data.message, data);
+                document.getElementById('file-names').innerText = data.files.join('\n');
+            }
         }
-    }
-</script>
-{% endblock %}
+
+        function getDatasets() {
+            return fetch('getDatasets')
+                .then(response => response.json())
+                .then(datasets => {
+                    return datasets;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    return [];
+                });
+        }
+
+        function renderDatasetList() {
+            getDatasets().then(datasets => {
+                const datasetList = document.getElementById('datasetList');
+                datasetList.innerHTML = ''; // clear existing content
+                const ul = document.createElement('ul');
+                ul.classList.add('list-group');
+
+                datasets.forEach(dataset => {
+                    const li = document.createElement('li');
+                    li.classList.add('list-group-item');
+                    li.dataset.name = dataset.name;
+                    li.textContent = dataset.name;
+                    ul.appendChild(li)
+                });
+                datasetList.appendChild(ul);
+
+                ul.addEventListener('click', (event) => {
+                    const selectedLi = event.target.closest('li');
+                    if (selectedLi) {
+                        selectedDatasetName = selectedLi.dataset.name;
+                        // Remove the selected-dataset class from all other li elements
+                        const allLiElements = document.querySelectorAll('#datasetList li');
+                        allLiElements.forEach((li) => {
+                            if (li !== selectedLi) {
+                                li.classList.remove('selected-dataset');
+                            }
+                        });
+                        // Add the selected-dataset class to the selected li element
+                        selectedLi.classList.add('selected-dataset');
+                    }
+                });
+
+            });
+        }
+    </script>
+    {% endblock %}

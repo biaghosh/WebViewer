@@ -1,2 +1,2 @@
 Name|Lens|Exposure|Wavelength|Path|FileName
-New_case|Brightfield|1|430|C:\Users\Yiyang\WebViewer\Web-Azure\generateWebFiles\|new_test_case_1_brightfield.tif
+test_case|Brightfield|1|430|C:\Users\Yiyang\WebViewer\Web-Azure\generateWebFiles\|testData1_fluorescence.tif

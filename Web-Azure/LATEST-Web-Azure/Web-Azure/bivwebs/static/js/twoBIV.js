@@ -25,7 +25,7 @@ dsSelect.addEventListener("change", () => {
     })
         .then(response => response.json())
         .then(data => {
-            console.log(data)
+            // console.log(data)
             session = data['session']
             dsName = data['dataset_info'][0]['name']
             dsInfo = data['dataset_info'][0]
@@ -145,7 +145,7 @@ document.getElementById('loadDatasetBtn').addEventListener('click', () => {
         // Dispatches the click event to the vrTab element
         vrTabElement.dispatchEvent(clickEvent);
     } else {
-        console.log("vrTab is not selected");
+        // console.log("vrTab is not selected");
     }
     // exportHeightInput.value = Math.round((dsInfo["imageDims"]["y"] / dsInfo["imageDims"]["x"]) * exportWidthSelect.options[exportWidthSelect.selectedIndex].text)
     addAnnotationEvents()
@@ -156,7 +156,7 @@ document.getElementById('loadDatasetBtn').addEventListener('click', () => {
     }
 
     if (dsChanged || modChanged)
-        console.log("changed")
+        // console.log("changed")
     document.getElementById("dsBtnEvent").click()
     dsChanged = false
 })
@@ -2426,19 +2426,19 @@ function loadFiles() {
                             .then(response => response.json())
                             .then(data => {
                                 var imageUrl = data['file_url']
-                                console.log(imageUrl)
+                                // console.log(imageUrl)
                                 var filename = preview_filename;
                                 openImagePreviewModal(imageUrl, filename);
                             })
                             .catch(error => console.error(error));
                     }
                     else if (extension === 'txt') {
-                        console.log("txt preview")
+                        // console.log("txt preview")
                         fetch('/files/' + encodeURIComponent(preview_filename))
                             .then(response => response.json())
                             .then(data => {
                                 var txtUrl = data['file_url']
-                                console.log(txtUrl)
+                                // console.log(txtUrl)
                                 var filename = preview_filename;
                                 openFilePreviewModal(txtUrl, filename);
                             })
@@ -2449,7 +2449,7 @@ function loadFiles() {
                             .then(response => response.json())
                             .then(data => {
                                 var videoUrl = data['file_url']
-                                console.log(videoUrl)
+                                // console.log(videoUrl)
                                 var filename = preview_filename;
                                 openVideoPreviewModal(videoUrl, filename);
                             })
