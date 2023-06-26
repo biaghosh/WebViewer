@@ -4,7 +4,7 @@ import io
 import datetime
 from flask import render_template, url_for, flash, redirect, request, abort, jsonify, make_response, send_file, session
 import requests
-from azure.storage.fileshare import ShareFileClient
+from azure.storage.fileshare import ShareClient,ShareDirectoryClient,ShareFileClient
 from azure.storage.blob import BlobServiceClient, ContentSettings,generate_blob_sas, BlobSasPermissions
 from bivwebs import app, bcrypt
 from bivwebs.forms import LoginForm
@@ -1169,6 +1169,8 @@ def upload_file():
     PI = request.form['PI']
     voxels = request.form['voxels']
     thickness = request.form['thickness']
+    files = request.files.getlist('files')
+
 
 
     # 将数据保存到MongoDB
@@ -1178,40 +1180,49 @@ def upload_file():
         'info':{'spcimenName': spcimenName,'PI': PI,'voxels': voxels,'thickness':thickness},
         'types':{'Brightfield':{exposure:[wavelength]}}
     }
-
-    datasets.insert_one(doc)
+    if not datasets.find_one({'name': dataset_name}):   
+        datasets.insert_one(doc)
 
 
 
     # Azure存储账户名和账户密钥，这些信息应该从Azure门户中获得
     azure_storage_account_name = "bivlargefiles"
     azure_storage_account_key = "PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw=="
-
-    # 创建 Azure ShareFileClient
     share = "data"
-    share_file_client = ShareFileClient.from_connection_string(
-    conn_str=f"DefaultEndpointsProtocol=https;AccountName={azure_storage_account_name};AccountKey={azure_storage_account_key};EndpointSuffix=core.windows.net",
-    share_name=share,
-    file_path="")
+    # 创建 Azure ShareFileClient
 
-    # 尝试列出分享下的文件或目录
-    try:
-        my_files = share_file_client.list_directories_and_files()
-        for file in my_files:
-            print(file.name)
-        print('Connection to Azure Share Files successful.')
-    except Exception as e:
-        print(f'Failed to connect to Azure Share Files: {e}')
+    # share_file_client = ShareFileClient.from_connection_string(
+    # conn_str=f"DefaultEndpointsProtocol=https;AccountName={azure_storage_account_name};AccountKey={azure_storage_account_key};EndpointSuffix=core.windows.net",
+    # share_name=share,
+    # file_path="")
+    
+    share_client = ShareClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name="data", credential=azure_storage_account_key)
+    # 需要创建的目录路径
+    # 需要创建的目录路径
+    dirs = [dataset_name,"basis", modality, exposure, wavelength, direction]
 
-    file = request.files['file']
+ # 创建 ShareDirectoryClient 对象，并逐级创建目录
+    dir_path = ""
+    for dir_name in dirs:
+        print(dir_name)
+        dir_path = os.path.join(dir_path, dir_name)
+        dir_client = ShareDirectoryClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name=share,directory_path=dir_path,credential=azure_storage_account_key)
+        if not dir_client.exists():
+            dir_client.create_directory()
+    else:
+        # 父级文件夹已存在，跳过创建
+        pass
+    # 创建 ShareFileClient 对象，并上传文件到指定目录
+    for file in files:
+        # 假设文件名存储在变量 file_name 中
+        file_name = file.filename
 
-    # 这里我们直接使用文件名作为Azure存储中的名字，注意在实际项目中可能需要处理文件名冲突或者使用其他方式生成存储中的文件名
-    azure_file_name = file.filename
+        # 构造文件路径
+        file_path = os.path.join(dir_path, file_name)
 
-    # 创建一个新的FileClient用于上传文件
-    file_client = share_file_client.get_file_client(azure_file_name)
-
-    # 上传文件到Azure
-    file_client.upload_file(file)
+        # 创建 ShareFileClient 对象并上传文件
+        file_client = ShareFileClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name=share, file_path=file_path, credential=azure_storage_account_key)
+        file_client.upload_file(file)
+    
 
     return 'File Uploaded Successfully'

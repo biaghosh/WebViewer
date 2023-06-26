@@ -130,17 +130,17 @@
         const formData = new FormData();
         formData.append('dataset-name', datasetNameInput.value);
         formData.append('modality', modality.value);
-        formData.append('exposure',exposure.value);
-        formData.append('wavelength',wavelength.value)
+        formData.append('exposure', exposure.value);
+        formData.append('wavelength', wavelength.value)
         formData.append('direction', directionInput.value);
-        formData.append('spcimenName',specimenName.value);
-        formData.append('PI',PI.value);
-        formData.append('voxels',voxels.value);
-        formData.append('thickness',thickness.value);
+        formData.append('spcimenName', specimenName.value);
+        formData.append('PI', PI.value);
+        formData.append('voxels', voxels.value);
+        formData.append('thickness', thickness.value);
 
         // 遍历所有文件并添加到formData
         for (const file of fileInput.files) {
-            formData.append('file', file);
+            formData.append('files', file);
         }
 
         const response = await fetch('/dataset_upload', {
