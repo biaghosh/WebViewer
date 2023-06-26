@@ -199,8 +199,6 @@ let forwardBtn = document.getElementById("forwardBtn"),
     annModalDelete = document.getElementById("annModalDelete"),
     // fileDownloadBtn = document.getElementById("fileDownloadBtn"),
     fileManageBtn = document.getElementById("fileManageBtn"),
-    fileTlistbody = document.getElementById("fileTlistbody"),
-    fileTableBody = document.getElementById("fileTbody"),
     fileMTableBody = document.getElementById("fileMTbody"),
     downloadFileBtnUser = document.getElementById("downloadFileBtnUser"),
     zoomBox = document.getElementById('zoomCheckbox'),
@@ -256,7 +254,7 @@ function loadDynamic2D(fullLoad) {
     if (!canvasXY) {
         // xyDiv.style.height = 'auto'
         rendererXY = new THREE.WebGLRenderer({ preserveDrawingBuffer: true })
-        rendererXY.setSize(xyDiv.offsetWidth, 280)
+        rendererXY.setSize(xyDiv.offsetWidth, 300)
         rendererXY.outputEncoding = THREE.sRGBEncoding
         xyDiv.appendChild(rendererXY.domElement);
         canvasXY = rendererXY.domElement
@@ -280,11 +278,11 @@ function loadDynamic2D(fullLoad) {
         let color = pickr2.getColor().toRGBA()
         sceneXY.background = new THREE.Color(`rgb(${Math.round(color[0])},${Math.round(color[1])},${Math.round(color[2])})`)
 
-        cameraXY = new THREE.PerspectiveCamera(35, xyDiv.offsetWidth / 280, .1, 8000)
+        cameraXY = new THREE.PerspectiveCamera(45, xyDiv.offsetWidth / 280, .1, 8000)
         cameraXY.position.set(0, 0, parseInt(dsInfo["imageDims"]["x"])) // 
         controlsXY = new OrbitControls(cameraXY, rendererXY.domElement)
 
-        controlsXY.target.set(0, 10, 0) // view direction perpendicular to XY-plane
+        controlsXY.target.set(0, 0, 0) // view direction perpendicular to XY-plane
         controlsXY.enableRotate = false
         controlsXY.enableZoom = true
         controlsXY.zoomToCursor = true
