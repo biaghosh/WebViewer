@@ -32,6 +32,17 @@ import secrets
 import time
 from email.mime.image import MIMEImage
 import mimetypes
+from typing import Dict
+from PIL import Image
+import subprocess, timeit, argparse, os, json
+import math, zipfile
+import threading
+import concurrent.futures
+import pandas as pd, numpy as np 
+import glob
+from datetime import datetime
+from time import sleep
+import threading
 
 @app.route("/")
 @app.route("/home")
@@ -1262,3 +1273,191 @@ def get_dataset(name):
     if dataset is not None and '_id' in dataset:
         dataset['_id'] = str(dataset['_id'])
     return jsonify(dataset)
+
+def po2Dims(mongoRecord,jobNum):
+    mongoRecord[jobNum]['dims2'] = {}
+    for key in mongoRecord[jobNum]['imageDims']:
+        po2 = 128
+        while mongoRecord[jobNum]['imageDims'][key] > po2:
+                po2 = po2 * 2
+        mongoRecord[jobNum]['dims2'][key] = po2
+
+def startProcess(mongoRecord, jobNum, zdown):
+    global progress
+
+    total_tasks = mongoRecord[jobNum]['imageDims']['z'] + (mongoRecord[jobNum]['imageDims']['y'] - 1) // 4 + (mongoRecord[jobNum]['imageDims']['x'] - 1) // 4
+    completed_tasks = 0
+    # print("startprocess")
+    po2Dims(mongoRecord,jobNum)
+
+    maxWorkers = 4
+    if mongoRecord[jobNum]['dims2']['x'] > 8192 or mongoRecord[jobNum]['dims2']['y'] > 8192 :
+        maxWorkers = 2
+    # if option selected?
+    os.makedirs(mongoRecord[jobNum]['name'], exist_ok=True)
+    
+    create3dPngZip(mongoRecord, jobNum, zdown)
+    #need to remove pngs || or will they be useful for unity?
+    os.makedirs(mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/xy', exist_ok=True)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
+        for index in range(0, mongoRecord[jobNum]['imageDims']['z']):
+            executor.submit(createXyViewTIFF, index, mongoRecord, jobNum)
+            completed_tasks += 1
+            progress = (completed_tasks / total_tasks) * 100
+    #f = 0
+    
+    #os.remove(f) for f in os.listdir(mongoRecord['name'] + '/basis/'+ args.mod + '/xy/') if f.endswith('.png')
+    os.makedirs(mongoRecord[jobNum]['name'] + '/basis/' + mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/xz', exist_ok=True)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
+        for index in range(0, mongoRecord[jobNum]['imageDims']['y']-1, 4):
+            executor.submit(createXzViewTIFF, index, mongoRecord, jobNum)
+            completed_tasks += 1
+            progress = (completed_tasks / total_tasks) * 100
+    #for index in range(0, mongoRecord[jobNum]['imageDims']['y']-1, 4):
+    #    createXzViewTIFFASync(index, mongoRecord, jobNum)
+    #os.remove(file) for file in os.listdir('path/to/directory') if file.endswith('.png')
+    os.makedirs(mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/yz', exist_ok=True)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
+        for index in range(0, mongoRecord[jobNum]['imageDims']['x']-1, 4):
+            executor.submit(createYzViewTIFF, index,mongoRecord, jobNum)
+            completed_tasks += 1
+            progress = (completed_tasks / total_tasks) * 100
+            
+    #os.remove(file) for file in os.listdir('path/to/directory') if file.endswith('.png')
+
+def create3dPngZip(mongoRecord, jobNum, zdown):
+    fn = mongoRecord[jobNum]['name'] + '/' + mongoRecord[jobNum]['type'] + '-' + mongoRecord[jobNum]['exp'] + '-' + mongoRecord[jobNum]['wv'] + '.zip'
+    zipf = zipfile.ZipFile(fn, 'w', zipfile.ZIP_DEFLATED)
+    #3D xy  RESIZE HAS TO HIT TARGET OF 100MB pixel size (100mb * 4|RGBA) = 400mb which is < 500mb (max texture limit)
+    pixels = mongoRecord[jobNum]['imageDims']['x'] * mongoRecord[jobNum]['imageDims']['y'] * mongoRecord[jobNum]['imageDims']['z'] #/ zdown
+    scale = 1
+    if (pixels > 100000000):
+        scale = pixels / 100000000
+        scale = int(math.sqrt(scale))
+    #HARDCODE
+    mongoRecord[jobNum]['voxel'] = {}
+    mongoRecord[jobNum]['voxel']['x'] = 1
+    mongoRecord[jobNum]['voxel']['y'] = 1
+    mongoRecord[jobNum]['voxel']['z'] = 1 #* zdown
+    
+    mongoRecord[jobNum]['dims3'] = {}
+    mongoRecord[jobNum]['dims3']['x'] = mongoRecord[jobNum]['imageDims']['x']//scale
+    mongoRecord[jobNum]['dims3']['y'] = mongoRecord[jobNum]['imageDims']['y']//scale
+    znum = 0
+    for z in range( 1, mongoRecord[jobNum]['imageDims']['z'], 1 ):
+        filename = mongoRecord[jobNum]['fp'] #% z
+        tiff = Image.open(filename)
+        tiff.seek(z)
+        im = tiff.resize((mongoRecord[jobNum]['imageDims']['x']//scale, mongoRecord[jobNum]['imageDims']['y']//scale))
+        fn = "%d.png" % (znum)
+        znum = znum + 1
+        im.save(mongoRecord[jobNum]['name'] + '/' + fn)
+        zipf.write(mongoRecord[jobNum]['name'] + '/' + fn,fn)
+        os.remove(mongoRecord[jobNum]['name'] + '/' + fn)
+    zipf.close()
+
+def createXyViewTIFF(index, mongoRecord, jobNum):
+    print("XY")
+    filename = mongoRecord[jobNum]['fp'] #% index
+    tiff = Image.open(filename)
+    tiff.seek(index)
+    fn = "%d.png" % (index)
+    background = Image.new('RGBA', (mongoRecord[jobNum]['dims2']['x'], mongoRecord[jobNum]['dims2']['y']), (0, 0, 0, 0))
+    background.paste(tiff)
+    outputPath = mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/xy/'
+    outputFile = outputPath + fn
+    background.save(outputFile)
+    cmd = r'C:\Users\Yiyang\WebViewer\Web-Azure\LATEST-Web-Azure\Web-Azure\bivwebs\basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
+    subprocess.call(cmd)
+
+def createXzViewTIFF(index, mongoRecord, jobNum):
+    print("XZ")
+    filename = mongoRecord[jobNum]['fp'] #% index #3.7 supports this but not 3.8
+    tiff = Image.open(filename)
+    #tiff.seek(index)
+    fn = "%d.png" % (index)
+    background = Image.new('RGBA', (mongoRecord[jobNum]['dims2']['x'], mongoRecord[jobNum]['dims2']['z']), (0, 0, 0, 0))
+    for z in range(mongoRecord[jobNum]['imageDims']['z']):
+        tiff.seek(z)
+        cropped = tiff.crop((0,index,mongoRecord[jobNum]['imageDims']['x'],index+1))
+        background.paste(cropped,(0,z,mongoRecord[jobNum]['imageDims']['x'],z+1))	
+    outputPath = mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/xz/'
+    outputFile = outputPath + fn
+    background.save(outputFile)
+    cmd = r'C:\Users\Yiyang\WebViewer\Web-Azure\LATEST-Web-Azure\Web-Azure\bivwebs\basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
+    subprocess.call(cmd)
+
+def createYzViewTIFF(index, mongoRecord, jobNum):
+    print("YZ")
+    filename = mongoRecord[jobNum]['fp'] #% index #3.7 supports this but not 3.8
+    tiff = Image.open(filename)
+    #tiff.seek(index)
+    fn = "%d.png" % (index)
+    background = Image.new('RGBA', (mongoRecord[jobNum]['dims2']['y'], mongoRecord[jobNum]['dims2']['z']), (0, 0, 0, 0))
+    for z in range(mongoRecord[jobNum]['imageDims']['z']):
+        tiff.seek(z)
+        cropped = tiff.crop((0,index,mongoRecord[jobNum]['imageDims']['y'],index+1))
+        background.paste(cropped,(0,z,mongoRecord[jobNum]['imageDims']['y'],z+1))	
+    outputPath = mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/yz/'
+    outputFile = outputPath + fn
+    background.save(outputFile)
+    cmd = r'C:\Users\Yiyang\WebViewer\Web-Azure\LATEST-Web-Azure\Web-Azure\bivwebs\basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
+    subprocess.call(cmd)   
+
+# Set a global variable to track progress
+progress = 0
+@app.route('/driver', methods=['POST'])
+def driver():
+    global progress
+    # Reset progress at the start of a new job
+    progress = 0
+    data = request.form
+    OutputPath = data.get('OutputPath')
+    Modality = data.get('Modality')
+    exposure = data.get('exposure')
+    wavelength = data.get('wavelength')
+    path = data.get('path')
+    FileName = data.get('FileName')
+
+    input_data = {
+        'OutputPath': OutputPath,
+        'Modality': Modality,
+        'exposure': exposure,
+        'wavelength': wavelength,
+        'path': path,
+        'FileName': FileName
+    }
+    print(input_data)
+    jobs = {}
+    jobs[1] = [OutputPath, Modality, exposure, wavelength, path, FileName]
+    mongoRecord = {}
+    for job in jobs.items():
+        print("job: ", job)
+        print('Starting to process: ' + str(job[0])) #[0] job number, [1] array
+        print("job0: ",job[0])
+        mongoRecord[str(job[0])] = {}
+        if(job[0] > 1):
+            print('Considering just sorting mongorecord at the end')
+        else:
+            mongoRecord[str(job[0])]['name'] = job[1][0]
+            firstFile = job[1][4] + job[1][5] #% 1  
+            
+            print(firstFile)
+            tiff = Image.open(firstFile)
+            tifCounter = tiff.n_frames
+            mongoRecord[str(job[0])]['imageDims'] = {}
+            mongoRecord[str(job[0])]['imageDims']['x'], mongoRecord[str(job[0])]['imageDims']['y'] = tiff.size
+            mongoRecord[str(job[0])]['imageDims']['z'] = tifCounter
+            mongoRecord[str(job[0])]['type'] = job[1][1] #bf or fl
+            mongoRecord[str(job[0])]['exp'] = job[1][2] #exp
+            mongoRecord[str(job[0])]['wv'] = job[1][3] #wv
+            mongoRecord[str(job[0])]['fp'] = job[1][4] + job[1][5]
+            #mongoRecord[str(job[0])]['zdown'] = 1 #not used yet
+            startProcess(mongoRecord, str(job[0]), 1 )
+
+        mongoRecord[str(job[0])]["processedTime"] = datetime.now().time()
+    return jsonify({'status': 'success'})
+
+@app.route('/driver_progress')
+def progress_report():
+    return jsonify({'progress': progress})

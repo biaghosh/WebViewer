@@ -18,7 +18,7 @@
 <div class="container-fluid">
     <!-- 省略你已经有的HTML代码... -->
     <div class="row" style="margin-top: 70px;">
-        <div class="col-6">
+        <!-- <div class="col-6">
             <div class="card shadow">
                 <div class="card-header">Dataset Management</div>
                 <div class="card-body">
@@ -38,7 +38,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
         <div class="col-6">
             <div class="card shadow">
                 <div class="card-header">Upload Dataset</div>
@@ -168,10 +168,61 @@
                 </div>
             </div>
         </div>
+        <div class="col-6">
+            <div class="card shadow">
+                <div class="card-header">3D Convert</div>
+                <div class="card-body">
+                    <div class="card border-0">
+                        <div class="card-body">
+                            <form id="job-form">
+                                <div class="form-group">
+                                    <label for="OutputPath">OutputPath</label>
+                                    <input type="text" class="form-control" id="OutputPath_3D" placeholder="Enter OutputPath">
+                                </div>
+                                <div class="form-group">
+                                    <label for="type">Modality:<span class="required">*</span></label>
+                                    <select id="modality_3D" name="type" class="form-control" required>
+                                        <option value="Brightfield">Brightfield</option>
+                                        <option value="fluorescent">Fluorescent</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="type">Exposure:<span class="required">*</span></label>
+                                    <select id="exposure_3D" name="type" class="form-control" required>
+                                        <option value="1">1</option>
+                                        <option value="0">0</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="type">Wavelength:<span class="required">*</span></label>
+                                    <select id="wavelength_3D" name="type" class="form-control" required>
+                                        <option value="430">430nm</option>
+                                        <option value="650">650nm</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="path">Path</label>
+                                    <input type="text" class="form-control" id="path_3D" placeholder="Enter path">
+                                </div>
+                                <div class="form-group">
+                                    <label for="filename">FileName</label>
+                                    <input type="file" class="form-control-file" id="filename_3D">
+                                </div>
+                                <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
+                            </form>
+                            <div id="progress" style="width:100%;border:1px solid #ccc;">
+                                <div id="progress-bar" style="height:24px;background:#007bff;width:0;"></div>
+                            </div>
+                            <div id="progress-info"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        window.addEventListener("DOMContentLoaded", renderDatasetList())
+        // window.addEventListener("DOMContentLoaded", renderDatasetList())
 
         function jsonToTable(json) {
             let table = document.createElement('table');
@@ -222,15 +273,15 @@
         }
 
 
-        // 获取数据集列表并添加点击事件
-        const datasetList = document.getElementById('datasetList');
-        datasetList.addEventListener('click', event => {
-            if (event.target && event.target.nodeName === 'LI') {
-                const name = event.target.textContent;
-                console.log(name)
-                showDatasetDetails(name);
-            }
-        });
+        // // 获取数据集列表并添加点击事件
+        // const datasetList = document.getElementById('datasetList');
+        // datasetList.addEventListener('click', event => {
+        //     if (event.target && event.target.nodeName === 'LI') {
+        //         const name = event.target.textContent;
+        //         console.log(name)
+        //         showDatasetDetails(name);
+        //     }
+        // });
         async function uploadDataset() {
             const datasetNameInput = document.getElementById('dataset-name');
             const modality = document.getElementById('modality');
@@ -275,7 +326,7 @@
             formData.append('dataset-name', datasetNameInput.value);
             formData.append('modality', modality.value);
             formData.append('exposure', exposure.value);
-            formData.append('wavelength', wavelength.value)
+            formData.append('wavelength', wavelength.value);
             formData.append('axis', axisInput.value);
             formData.append('voxels_x', voxels_x.value);
             formData.append('voxels_y', voxels_y.value);
@@ -295,9 +346,8 @@
             formData.append('PI', PI.value);
             formData.append('voxel_size', voxel_size.value);
             formData.append('thickness', thickness.value);
-            for (let pair of formData.entries()) {
-                console.log(pair[0] + ', ' + pair[1]);
-            }
+
+
             // 遍历所有文件并添加到formData
             for (const file of fileInput.files) {
                 formData.append('files', file);
@@ -331,39 +381,93 @@
                 });
         }
 
-        function renderDatasetList() {
-            getDatasets().then(datasets => {
-                const datasetList = document.getElementById('datasetList');
-                datasetList.innerHTML = ''; // clear existing content
-                const ul = document.createElement('ul');
-                ul.classList.add('list-group');
+        // function renderDatasetList() {
+        //     getDatasets().then(datasets => {
+        //         const datasetList = document.getElementById('datasetList');
+        //         datasetList.innerHTML = ''; // clear existing content
+        //         const ul = document.createElement('ul');
+        //         ul.classList.add('list-group');
 
-                datasets.forEach(dataset => {
-                    const li = document.createElement('li');
-                    li.classList.add('list-group-item');
-                    li.dataset.name = dataset.name;
-                    li.textContent = dataset.name;
-                    ul.appendChild(li)
-                });
-                datasetList.appendChild(ul);
+        //         datasets.forEach(dataset => {
+        //             const li = document.createElement('li');
+        //             li.classList.add('list-group-item');
+        //             li.dataset.name = dataset.name;
+        //             li.textContent = dataset.name;
+        //             ul.appendChild(li)
+        //         });
+        //         datasetList.appendChild(ul);
 
-                ul.addEventListener('click', (event) => {
-                    const selectedLi = event.target.closest('li');
-                    if (selectedLi) {
-                        selectedDatasetName = selectedLi.dataset.name;
-                        // Remove the selected-dataset class from all other li elements
-                        const allLiElements = document.querySelectorAll('#datasetList li');
-                        allLiElements.forEach((li) => {
-                            if (li !== selectedLi) {
-                                li.classList.remove('selected-dataset');
-                            }
-                        });
-                        // Add the selected-dataset class to the selected li element
-                        selectedLi.classList.add('selected-dataset');
-                    }
-                });
+        //         ul.addEventListener('click', (event) => {
+        //             const selectedLi = event.target.closest('li');
+        //             if (selectedLi) {
+        //                 selectedDatasetName = selectedLi.dataset.name;
+        //                 // Remove the selected-dataset class from all other li elements
+        //                 const allLiElements = document.querySelectorAll('#datasetList li');
+        //                 allLiElements.forEach((li) => {
+        //                     if (li !== selectedLi) {
+        //                         li.classList.remove('selected-dataset');
+        //                     }
+        //                 });
+        //                 // Add the selected-dataset class to the selected li element
+        //                 selectedLi.classList.add('selected-dataset');
+        //             }
+        //         });
 
+        //     });
+        // }
+
+        document.getElementById('submitBtn').addEventListener('click', function () {
+            const OutputPath = document.getElementById('OutputPath_3D');
+            const Modality = document.getElementById('modality_3D');
+            const exposure = document.getElementById('exposure_3D');
+            const wavelength_3D = document.getElementById('wavelength_3D');
+            const path = document.getElementById('path_3D');
+            const File = document.getElementById('filename_3D');
+
+            var formData = new FormData(document.querySelector('form'));
+            formData.append('OutputPath', OutputPath.value);
+            formData.append('Modality', Modality.value);
+            formData.append('exposure', exposure.value);
+            formData.append('wavelength', wavelength_3D.value);
+            formData.append('path', path.value);
+            formData.append('FileName', File.files[0].name);
+
+            fetch('/driver', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Error: ' + response.statusText);
+                }
+            }).then(data => {
+                console.log('Success:', data);
+            }).catch(error => {
+                console.error('Error:', error);
             });
-        }
+            var progressInterval = setInterval(function () {
+                fetch('/driver_progress', { method: 'GET' }) // 这是一个假设的服务器端点，用于获取进度信息
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error('Error: ' + response.statusText);
+                        }
+                    })
+                    .then(data => {
+                        console.log('Progress:', data);
+                        document.getElementById('progress-bar').style.width = data.progress + '%';
+                        document.getElementById('progress-info').innerText = data.progress + '% Completed';
+                        if (data.progress === 100) {
+                            clearInterval(progressInterval);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }, 1000); // 每秒检查一次进度
+        });
+
     </script>
     {% endblock %}

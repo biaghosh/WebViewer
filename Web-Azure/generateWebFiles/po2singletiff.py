@@ -10,7 +10,7 @@ import glob
 from datetime import datetime
 
 def startProcess(mongoRecord, jobNum, zdown):
-    print("startprocess")
+    # print("startprocess")
     po2Dims(mongoRecord,jobNum)
 
     maxWorkers = 4
@@ -74,7 +74,7 @@ def create3dPngZip(mongoRecord, jobNum, zdown):
     zipf.close()
 
 def createXyViewTIFF(index, mongoRecord, jobNum):
-    print("xy合成")
+    # print("xy合成")
     filename = mongoRecord[jobNum]['fp'] #% index
     tiff = Image.open(filename)
     tiff.seek(index)
