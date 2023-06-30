@@ -16,29 +16,7 @@
     </style>
 </head>
 <div class="container-fluid">
-    <!-- 省略你已经有的HTML代码... -->
     <div class="row" style="margin-top: 70px;">
-        <!-- <div class="col-6">
-            <div class="card shadow">
-                <div class="card-header">Dataset Management</div>
-                <div class="card-body">
-                    <div class="card border-0">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-3">
-                                    <h5 class="card-title">Dataset List</h5>
-                                    <div id="datasetList" class="table table-striped table-hover"></div>
-                                </div>
-                                <div class="col-9">
-                                    <h5 class="card-title">Dataset Details</h5>
-                                    <pre id="dataset-details"></pre>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> -->
         <div class="col-6">
             <div class="card shadow">
                 <div class="card-header">Upload Dataset</div>
@@ -176,8 +154,9 @@
                         <div class="card-body">
                             <form id="job-form">
                                 <div class="form-group">
-                                    <label for="OutputPath">OutputPath</label>
-                                    <input type="text" class="form-control" id="OutputPath_3D" placeholder="Enter OutputPath">
+                                    <label for="OutputPath">OutputPath:<span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="OutputPath_3D"
+                                        placeholder="Enter OutputPath" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="type">Modality:<span class="required">*</span></label>
@@ -201,87 +180,29 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="path">Path</label>
+                                    <label for="path">Inputpath:<span class="required">*</span></label>
                                     <input type="text" class="form-control" id="path_3D" placeholder="Enter path">
                                 </div>
                                 <div class="form-group">
-                                    <label for="filename">FileName</label>
+                                    <label for="filename">TifFile:<span class="required">*</span></label>
                                     <input type="file" class="form-control-file" id="filename_3D">
                                 </div>
                                 <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
                             </form>
-                            <div id="progress" style="width:100%;border:1px solid #ccc;">
-                                <div id="progress-bar" style="height:24px;background:#007bff;width:0;"></div>
-                            </div>
-                            <div id="progress-info"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
+    <div id="popup"
+        style="display: none; position: fixed; width: 100%; height: 100%; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: 2; cursor: pointer;">
+        <div
+            style="position: absolute; top: 50%; left: 50%; font-size: 50px; color: white; transform: translate(-50%,-50%);-ms-transform: translate(-50%,-50%);">
+            Processing, please wait...
+        </div>
+    </div>
     <script>
-        // window.addEventListener("DOMContentLoaded", renderDatasetList())
-
-        function jsonToTable(json) {
-            let table = document.createElement('table');
-            table.style.width = '100%';  // 可以修改为你需要的宽度
-            table.setAttribute('border', '1');
-            for (let key in json) {
-                let row = document.createElement('tr');
-
-                let keyCell = document.createElement('td');
-                keyCell.textContent = key;
-                row.appendChild(keyCell);
-
-                let valueCell = document.createElement('td');
-
-                // 检查值的类型
-                if (typeof json[key] === 'object' && json[key] !== null) {
-                    // 如果值是一个对象或数组，递归调用 jsonToTable 函数
-                    valueCell.appendChild(jsonToTable(json[key]));
-                } else {
-                    // 否则，直接将值转换为文本
-                    valueCell.textContent = json[key];
-                }
-
-                row.appendChild(valueCell);
-
-                table.appendChild(row);
-            }
-
-            return table;
-        }
-
-        function showDatasetDetails(name) {
-            // 使用 fetch API 获取数据集细节
-            fetch(`/getdatasetsdetail/${name}`)
-                .then(response => response.json())
-                .then(data => {
-                    // 获取展示数据的容器
-                    const detailsContainer = document.getElementById('dataset-details');
-
-                    // 调用 jsonToTable 函数将 JSON 数据转换为 HTML 表格
-                    const table = jsonToTable(data);
-
-                    // 清空容器并添加新的内容
-                    detailsContainer.innerHTML = '';
-                    detailsContainer.appendChild(table);
-                })
-                .catch(err => console.error(err));
-        }
-
-
-        // // 获取数据集列表并添加点击事件
-        // const datasetList = document.getElementById('datasetList');
-        // datasetList.addEventListener('click', event => {
-        //     if (event.target && event.target.nodeName === 'LI') {
-        //         const name = event.target.textContent;
-        //         console.log(name)
-        //         showDatasetDetails(name);
-        //     }
-        // });
         async function uploadDataset() {
             const datasetNameInput = document.getElementById('dataset-name');
             const modality = document.getElementById('modality');
@@ -311,10 +232,10 @@
 
 
 
-            // 创建一个数组，包含所有需要检查的输入框
+            // Create an array containing all input boxes that need to be checked
             const requiredInputs = [datasetNameInput, axisInput, voxels_x, voxels_y, voxels_z, ImageDims_x, ImageDims_y, ImageDims_z, Dims3_x, Dims3_y, Dims3_z, pixelLengthUM, zskip];
 
-            // 遍历每个输入框，如果它们中的任何一个是空的，则停止上传并显示一个警告
+            // Iterate over each input box, if any of them are empty, stop the upload and show a warning
             for (let input of requiredInputs) {
                 if (input.value.trim() === '') {
                     alert('Please fill out all required fields.');
@@ -381,41 +302,6 @@
                 });
         }
 
-        // function renderDatasetList() {
-        //     getDatasets().then(datasets => {
-        //         const datasetList = document.getElementById('datasetList');
-        //         datasetList.innerHTML = ''; // clear existing content
-        //         const ul = document.createElement('ul');
-        //         ul.classList.add('list-group');
-
-        //         datasets.forEach(dataset => {
-        //             const li = document.createElement('li');
-        //             li.classList.add('list-group-item');
-        //             li.dataset.name = dataset.name;
-        //             li.textContent = dataset.name;
-        //             ul.appendChild(li)
-        //         });
-        //         datasetList.appendChild(ul);
-
-        //         ul.addEventListener('click', (event) => {
-        //             const selectedLi = event.target.closest('li');
-        //             if (selectedLi) {
-        //                 selectedDatasetName = selectedLi.dataset.name;
-        //                 // Remove the selected-dataset class from all other li elements
-        //                 const allLiElements = document.querySelectorAll('#datasetList li');
-        //                 allLiElements.forEach((li) => {
-        //                     if (li !== selectedLi) {
-        //                         li.classList.remove('selected-dataset');
-        //                     }
-        //                 });
-        //                 // Add the selected-dataset class to the selected li element
-        //                 selectedLi.classList.add('selected-dataset');
-        //             }
-        //         });
-
-        //     });
-        // }
-
         document.getElementById('submitBtn').addEventListener('click', function () {
             const OutputPath = document.getElementById('OutputPath_3D');
             const Modality = document.getElementById('modality_3D');
@@ -423,6 +309,25 @@
             const wavelength_3D = document.getElementById('wavelength_3D');
             const path = document.getElementById('path_3D');
             const File = document.getElementById('filename_3D');
+
+
+            // Create an array containing all input boxes that need to be checked
+            const requiredInputs = [OutputPath, Modality, exposure, wavelength_3D, path, File];
+
+            // Iterate over each input box, if any of them are empty, stop the upload and show a warning
+            for (let input of requiredInputs) {
+                if (input.value.trim() === '') {
+                    alert('Please fill out all required fields.');
+                    return;
+                }
+            }
+
+            var fileExtension = File.files[0].name.split('.').pop().toLowerCase(); // 获取文件扩展名
+            if (fileExtension !== 'tif') {
+                alert('Wrong file format! Please upload the .tif file');
+                return;
+            }
+
 
             var formData = new FormData(document.querySelector('form'));
             formData.append('OutputPath', OutputPath.value);
@@ -432,11 +337,14 @@
             formData.append('path', path.value);
             formData.append('FileName', File.files[0].name);
 
+            // Display a popup after the submit button is clicked
+            document.getElementById('popup').style.display = 'block';
             fetch('/driver', {
                 method: 'POST',
                 body: formData
             }).then(response => {
                 if (response.ok) {
+                    document.getElementById('popup').style.display = 'none';
                     return response.json();
                 } else {
                     throw new Error('Error: ' + response.statusText);
@@ -446,27 +354,6 @@
             }).catch(error => {
                 console.error('Error:', error);
             });
-            var progressInterval = setInterval(function () {
-                fetch('/driver_progress', { method: 'GET' }) // 这是一个假设的服务器端点，用于获取进度信息
-                    .then(response => {
-                        if (response.ok) {
-                            return response.json();
-                        } else {
-                            throw new Error('Error: ' + response.statusText);
-                        }
-                    })
-                    .then(data => {
-                        console.log('Progress:', data);
-                        document.getElementById('progress-bar').style.width = data.progress + '%';
-                        document.getElementById('progress-info').innerText = data.progress + '% Completed';
-                        if (data.progress === 100) {
-                            clearInterval(progressInterval);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            }, 1000); // 每秒检查一次进度
         });
 
     </script>

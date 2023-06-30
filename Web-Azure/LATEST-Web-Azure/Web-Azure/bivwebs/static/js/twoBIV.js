@@ -11,7 +11,7 @@ var keyEvent = new Event('keyup')
 let xyInputTimeout
 var previousSlice
 let session
-var SAS = 'sp=r&st=2023-06-22T17:29:05Z&se=2023-12-21T21:29:00Z&sv=2022-11-02&sig=e4x7sd%2FQ%2FQyVH54RI6k3Y2btt9wTYfz%2FOIBE34UXyGY%3D&sr=s'
+var SAS = 'sp=r&st=2023-06-22T17:29:05Z&se=2099-12-21T21:29:00Z&sv=2022-11-02&sig=e4x7sd%2FQ%2FQyVH54RI6k3Y2btt9wTYfz%2FOIBE34UXyGY%3D&sr=s'
 
 dsSelect.addEventListener("change", () => {
     if (!dsSelect.value)
@@ -298,7 +298,7 @@ function loadDynamic2D(fullLoad) {
         loader.detectSupport(rendererXY)
     supportPass = true
 
-    // 将以下 URL 替换为你的 SAS URL
+    // Replace the URL below with your SAS URL
     var sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/xy/${slider.value}.basis?${SAS}`;
 
     loader.load(sasUrl, function (texture) {

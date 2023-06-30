@@ -7,9 +7,7 @@ import requests
 from azure.storage.fileshare import ShareClient,ShareDirectoryClient,ShareFileClient
 from azure.storage.blob import BlobServiceClient, ContentSettings,generate_blob_sas, BlobSasPermissions
 from bivwebs import app, bcrypt
-from bivwebs.forms import LoginForm
 from bivwebs.forms import EmailOTPForm
-from bivwebs.models import User
 from urllib.parse import urlparse, urljoin
 from werkzeug.utils import secure_filename
 from bson import ObjectId
@@ -21,28 +19,16 @@ from skimage import io as sio
 from scipy.ndimage.morphology import distance_transform_edt, binary_dilation
 from scipy.interpolate import interpn
 import gridfs
-import json
 import zipfile
-from bson import json_util
-import bson
-import base64
-import random
 from flask_mail import Mail, Message
 import secrets
 import time
 from email.mime.image import MIMEImage
-import mimetypes
-from typing import Dict
 from PIL import Image
-import subprocess, timeit, argparse, os, json
+import subprocess, os
 import math, zipfile
-import threading
 import concurrent.futures
-import pandas as pd, numpy as np 
-import glob
 from datetime import datetime
-from time import sleep
-import threading
 
 @app.route("/")
 @app.route("/home")
@@ -89,7 +75,7 @@ def login():
                 users = db.Users
                 user = users.find_one({"email": email})
                 if user:
-                    users.update_one({"email": form.email.data}, { "$set": {"lastLogin": datetime.datetime.now(), "logins": user['logins']+1}})
+                    users.update_one({"email": form.email.data}, { "$set": {"lastLogin": datetime.now(), "logins": user['logins']+1}})
                     session['email'] = email
                     session['level'] = user['level']
                     session['multiAvailable'] = user['multiAvailable']
@@ -416,24 +402,6 @@ def getDatasetInfo():
                 
             }
         },
-        # {
-        #    "$group":
-        #    {
-        #        "_id": {
-        #            "id": "$_id",
-        #            "name": "$name",
-        #            "types": "$types",
-        #            "voxels": "$voxels",
-        #            "dims2": "$dims2",
-        #            "dims3": "$dims3",
-        #            "imageDims": "$imageDims",
-        #            "info": "$info",
-        #            "zskip": "$zskip",
-        #        },
-        #        "annSlices": { "$addToSet": "$ann"}
-
-        #     }
-        # },
     ])
     response_data = {
         'session': dict(session),
@@ -1201,7 +1169,7 @@ def upload_file():
 
 
 
-    # 将数据保存到MongoDB
+    # Save data to MongoDB
     doc = {
         'name': dataset_name,
         'types':{modality:{exposure:[wavelength]}},
@@ -1219,23 +1187,16 @@ def upload_file():
 
 
 
-    # Azure存储账户名和账户密钥，这些信息应该从Azure门户中获得
+    # Azure storage account name and account key, these information should be obtained from the Azure portal
     azure_storage_account_name = "bivlargefiles"
     azure_storage_account_key = "PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw=="
     share = "data"
-    # 创建 Azure ShareFileClient
+    # Create Azure ShareFileClient
 
-    # share_file_client = ShareFileClient.from_connection_string(
-    # conn_str=f"DefaultEndpointsProtocol=https;AccountName={azure_storage_account_name};AccountKey={azure_storage_account_key};EndpointSuffix=core.windows.net",
-    # share_name=share,
-    # file_path="")
-    
-    share_client = ShareClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name="data", credential=azure_storage_account_key)
-    # 需要创建的目录路径
-    # 需要创建的目录路径
+    # The directory path that needs to be created
     dirs = [dataset_name,"basis", modality, exposure, wavelength, axis]
 
- # 创建 ShareDirectoryClient 对象，并逐级创建目录
+    # Create a ShareDirectoryClient object and create directories step by step
     dir_path = ""
     for dir_name in dirs:
         print(dir_name)
@@ -1244,17 +1205,17 @@ def upload_file():
         if not dir_client.exists():
             dir_client.create_directory()
     else:
-        # 父级文件夹已存在，跳过创建
+        # Parent folder already exists, skip creation
         pass
-    # 创建 ShareFileClient 对象，并上传文件到指定目录
+    # Create a ShareFileClient object and upload files to the specified directory
     for file in files:
-        # 假设文件名存储在变量 file_name 中
+        # Assuming the filename is stored in the variable file_name
         file_name = file.filename
 
-        # 构造文件路径
+        # build file path
         file_path = os.path.join(dir_path, file_name)
 
-        # 创建 ShareFileClient 对象并上传文件
+        # Create a ShareFileClient object and upload files
         file_client = ShareFileClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name=share, file_path=file_path, credential=azure_storage_account_key)
         file_client.upload_file(file)
     
@@ -1302,8 +1263,6 @@ def startProcess(mongoRecord, jobNum, zdown):
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
         for index in range(0, mongoRecord[jobNum]['imageDims']['z']):
             executor.submit(createXyViewTIFF, index, mongoRecord, jobNum)
-            completed_tasks += 1
-            progress = (completed_tasks / total_tasks) * 100
     #f = 0
     
     #os.remove(f) for f in os.listdir(mongoRecord['name'] + '/basis/'+ args.mod + '/xy/') if f.endswith('.png')
@@ -1311,8 +1270,7 @@ def startProcess(mongoRecord, jobNum, zdown):
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
         for index in range(0, mongoRecord[jobNum]['imageDims']['y']-1, 4):
             executor.submit(createXzViewTIFF, index, mongoRecord, jobNum)
-            completed_tasks += 1
-            progress = (completed_tasks / total_tasks) * 100
+
     #for index in range(0, mongoRecord[jobNum]['imageDims']['y']-1, 4):
     #    createXzViewTIFFASync(index, mongoRecord, jobNum)
     #os.remove(file) for file in os.listdir('path/to/directory') if file.endswith('.png')
@@ -1320,8 +1278,6 @@ def startProcess(mongoRecord, jobNum, zdown):
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
         for index in range(0, mongoRecord[jobNum]['imageDims']['x']-1, 4):
             executor.submit(createYzViewTIFF, index,mongoRecord, jobNum)
-            completed_tasks += 1
-            progress = (completed_tasks / total_tasks) * 100
             
     #os.remove(file) for file in os.listdir('path/to/directory') if file.endswith('.png')
 
