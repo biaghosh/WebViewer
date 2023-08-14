@@ -11,7 +11,7 @@ var keyEvent = new Event('keyup')
 let xyInputTimeout
 var previousSlice
 let session
-var SAS = 'sp=r&st=2023-06-22T17:29:05Z&se=2099-12-21T21:29:00Z&sv=2022-11-02&sig=e4x7sd%2FQ%2FQyVH54RI6k3Y2btt9wTYfz%2FOIBE34UXyGY%3D&sr=s'
+var SAS = 'sp=r&st=2023-08-14T15:15:15Z&se=2036-06-18T15:15:00Z&spr=https&sv=2022-11-02&sig=pisDbcAw2k0FGGNHg5i4FIqJklWf9%2BAW03VkeidVsWk%3D&sr=s'
 
 dsSelect.addEventListener("change", () => {
     if (!dsSelect.value)
