@@ -154,7 +154,7 @@
                         <div class="card-body">
                             <form id="job-form">
                                 <div class="form-group">
-                                    <label for="OutputPath">OutputPath:<span class="required">*</span></label>
+                                    <label for="OutputPath">OutputPath:(e.g.C:\Users\Desktop\ConvertResult)<span class="required">*</span></label>
                                     <input type="text" class="form-control" id="OutputPath_3D"
                                         placeholder="Enter OutputPath" required>
                                 </div>
@@ -180,7 +180,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="path">Inputpath:<span class="required">*</span></label>
+                                    <label for="path">InputPath:(e.g.C:\Users\Desktop\new test case 1\)<span class="required">*</span></label>
                                     <input type="text" class="form-control" id="path_3D" placeholder="Enter path">
                                 </div>
                                 <div class="form-group">
@@ -336,7 +336,7 @@
             formData.append('wavelength', wavelength_3D.value);
             formData.append('path', path.value);
             formData.append('FileName', File.files[0].name);
-
+            
             // Display a popup after the submit button is clicked
             document.getElementById('popup').style.display = 'block';
             fetch('/driver', {
