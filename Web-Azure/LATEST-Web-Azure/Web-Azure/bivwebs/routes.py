@@ -1429,6 +1429,6 @@ def driver():
 
         # 确定zip文件的完整路径
         zip_file_path = os.path.join(base_dir, 'all_images.zip')
-
+    
     # 返回ZIP文件
     return send_file(zip_file_path, as_attachment=True, attachment_filename="processed_images.zip")
