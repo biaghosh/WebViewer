@@ -25,8 +25,8 @@ import secrets
 import time
 from email.mime.image import MIMEImage
 from PIL import Image
-
-
+import tempfile
+import shutil
 import subprocess, os
 import math, zipfile
 import concurrent.futures
@@ -1246,8 +1246,7 @@ def po2Dims(mongoRecord,jobNum):
         mongoRecord[jobNum]['dims2'][key] = po2
 
 def startProcess(mongoRecord, jobNum, zdown):
-    global progress
-
+    print("startProcess")
     total_tasks = mongoRecord[jobNum]['imageDims']['z'] + (mongoRecord[jobNum]['imageDims']['y'] - 1) // 4 + (mongoRecord[jobNum]['imageDims']['x'] - 1) // 4
     completed_tasks = 0
     # print("startprocess")
@@ -1280,7 +1279,14 @@ def startProcess(mongoRecord, jobNum, zdown):
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
         for index in range(0, mongoRecord[jobNum]['imageDims']['x']-1, 4):
             executor.submit(createYzViewTIFF, index,mongoRecord, jobNum)
-            
+
+    # 确定包含所有图片的目录的路径
+    base_dir = os.path.join(temp_dir, mongoRecord[jobNum]['name'])
+
+    # 创建zip文件的名字和路径
+    zip_filename_without_extension = os.path.join(base_dir, 'all_images')
+    shutil.make_archive(zip_filename_without_extension, 'zip', base_dir)
+        
     #os.remove(file) for file in os.listdir('path/to/directory') if file.endswith('.png')
 
 def create3dPngZip(mongoRecord, jobNum, zdown):
@@ -1314,6 +1320,9 @@ def create3dPngZip(mongoRecord, jobNum, zdown):
         os.remove(mongoRecord[jobNum]['name'] + '/' + fn)
     zipf.close()
 
+# 创建一个临时目录，所有生成的图片都将保存在这里
+temp_dir = tempfile.mkdtemp()
+
 def createXyViewTIFF(index, mongoRecord, jobNum):
     print("XY")
     filename = mongoRecord[jobNum]['fp'] #% index
@@ -1322,8 +1331,10 @@ def createXyViewTIFF(index, mongoRecord, jobNum):
     fn = "%d.png" % (index)
     background = Image.new('RGBA', (mongoRecord[jobNum]['dims2']['x'], mongoRecord[jobNum]['dims2']['y']), (0, 0, 0, 0))
     background.paste(tiff)
-    outputPath = mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/xy/'
-    outputFile = outputPath + fn
+    outputPath = os.path.join(temp_dir, mongoRecord[jobNum]['name'], 'basis', mongoRecord[jobNum]['type'], mongoRecord[jobNum]['exp'], mongoRecord[jobNum]['wv'], 'xy/')
+    # 确保目录结构存在
+    os.makedirs(outputPath, exist_ok=True)
+    outputFile = os.path.join(outputPath, fn)
     background.save(outputFile)
     cmd = r'C:\Users\Yiyang\WebViewer\Web-Azure\LATEST-Web-Azure\Web-Azure\bivwebs\basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
     subprocess.call(cmd)
@@ -1339,8 +1350,9 @@ def createXzViewTIFF(index, mongoRecord, jobNum):
         tiff.seek(z)
         cropped = tiff.crop((0,index,mongoRecord[jobNum]['imageDims']['x'],index+1))
         background.paste(cropped,(0,z,mongoRecord[jobNum]['imageDims']['x'],z+1))	
-    outputPath = mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/xz/'
-    outputFile = outputPath + fn
+    outputPath = os.path.join(temp_dir, mongoRecord[jobNum]['name'], 'basis', mongoRecord[jobNum]['type'], mongoRecord[jobNum]['exp'], mongoRecord[jobNum]['wv'], 'xz/')
+    os.makedirs(outputPath, exist_ok=True)
+    outputFile = os.path.join(outputPath, fn)
     background.save(outputFile)
     cmd = r'C:\Users\Yiyang\WebViewer\Web-Azure\LATEST-Web-Azure\Web-Azure\bivwebs\basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
     subprocess.call(cmd)
@@ -1356,21 +1368,18 @@ def createYzViewTIFF(index, mongoRecord, jobNum):
         tiff.seek(z)
         cropped = tiff.crop((0,index,mongoRecord[jobNum]['imageDims']['y'],index+1))
         background.paste(cropped,(0,z,mongoRecord[jobNum]['imageDims']['y'],z+1))	
-    outputPath = mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/yz/'
-    outputFile = outputPath + fn
+    outputPath = os.path.join(temp_dir, mongoRecord[jobNum]['name'], 'basis', mongoRecord[jobNum]['type'], mongoRecord[jobNum]['exp'], mongoRecord[jobNum]['wv'], 'yz/')
+    os.makedirs(outputPath, exist_ok=True)
+    outputFile = os.path.join(outputPath, fn)
     background.save(outputFile)
     cmd = r'C:\Users\Yiyang\WebViewer\Web-Azure\LATEST-Web-Azure\Web-Azure\bivwebs\basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
     subprocess.call(cmd)   
 
 # Set a global variable to track progress
-progress = 0
 @app.route('/driver', methods=['POST'])
 def driver():
-    global progress
     # Reset progress at the start of a new job
-    progress = 0
     data = request.form
-    OutputPath = data.get('OutputPath')
     Modality = data.get('Modality')
     exposure = data.get('exposure')
     wavelength = data.get('wavelength')
@@ -1378,7 +1387,6 @@ def driver():
     FileName = data.get('FileName')
 
     input_data = {
-        'OutputPath': OutputPath,
         'Modality': Modality,
         'exposure': exposure,
         'wavelength': wavelength,
@@ -1387,7 +1395,7 @@ def driver():
     }
     print(input_data)
     jobs = {}
-    jobs[1] = [OutputPath, Modality, exposure, wavelength, path, FileName]
+    jobs[1] = [Modality, exposure, wavelength, path, FileName]
     mongoRecord = {}
     for job in jobs.items():
         print("job: ", job)
@@ -1398,24 +1406,29 @@ def driver():
             print('Considering just sorting mongorecord at the end')
         else:
             mongoRecord[str(job[0])]['name'] = job[1][0]
-            firstFile = job[1][4] + job[1][5] #% 1  
+            firstFile = job[1][3] + job[1][4] #% 1  
             
-            print(firstFile)
+            print("firstFile",firstFile)
             tiff = Image.open(firstFile)
             tifCounter = tiff.n_frames
             mongoRecord[str(job[0])]['imageDims'] = {}
             mongoRecord[str(job[0])]['imageDims']['x'], mongoRecord[str(job[0])]['imageDims']['y'] = tiff.size
             mongoRecord[str(job[0])]['imageDims']['z'] = tifCounter
-            mongoRecord[str(job[0])]['type'] = job[1][1] #bf or fl
-            mongoRecord[str(job[0])]['exp'] = job[1][2] #exp
-            mongoRecord[str(job[0])]['wv'] = job[1][3] #wv
-            mongoRecord[str(job[0])]['fp'] = job[1][4] + job[1][5]
+            mongoRecord[str(job[0])]['type'] = job[1][0] #bf or fl
+            mongoRecord[str(job[0])]['exp'] = job[1][1] #exp
+            mongoRecord[str(job[0])]['wv'] = job[1][2] #wv
+            mongoRecord[str(job[0])]['fp'] = job[1][3] + job[1][4]
             #mongoRecord[str(job[0])]['zdown'] = 1 #not used yet
+            print("mongoRecord",mongoRecord)
             startProcess(mongoRecord, str(job[0]), 1 )
 
         mongoRecord[str(job[0])]["processedTime"] = datetime.now().time()
-    return jsonify({'status': 'success'})
+        # print("mongoRecord",mongoRecord)
+        # 获取保存所有图像的基本目录路径
+        base_dir = os.path.join(temp_dir, mongoRecord[str(job[0])]['name'])
 
-@app.route('/driver_progress')
-def progress_report():
-    return jsonify({'progress': progress})
+        # 确定zip文件的完整路径
+        zip_file_path = os.path.join(base_dir, 'all_images.zip')
+
+    # 返回ZIP文件
+    return send_file(zip_file_path, as_attachment=True, attachment_filename="processed_images.zip")

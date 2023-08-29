@@ -154,11 +154,6 @@
                         <div class="card-body">
                             <form id="job-form">
                                 <div class="form-group">
-                                    <label for="OutputPath">OutputPath:(e.g.C:\Users\Desktop\ConvertResult)<span class="required">*</span></label>
-                                    <input type="text" class="form-control" id="OutputPath_3D"
-                                        placeholder="Enter OutputPath" required>
-                                </div>
-                                <div class="form-group">
                                     <label for="type">Modality:<span class="required">*</span></label>
                                     <select id="modality_3D" name="type" class="form-control" required>
                                         <option value="Brightfield">Brightfield</option>
@@ -180,7 +175,8 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="path">InputPath:(e.g.C:\Users\Desktop\new test case 1\)<span class="required">*</span></label>
+                                    <label for="path">InputPath:(e.g.C:\Users\Desktop\new test case 1\)<span
+                                            class="required">*</span></label>
                                     <input type="text" class="form-control" id="path_3D" placeholder="Enter path">
                                 </div>
                                 <div class="form-group">
@@ -303,7 +299,6 @@
         }
 
         document.getElementById('submitBtn').addEventListener('click', function () {
-            const OutputPath = document.getElementById('OutputPath_3D');
             const Modality = document.getElementById('modality_3D');
             const exposure = document.getElementById('exposure_3D');
             const wavelength_3D = document.getElementById('wavelength_3D');
@@ -312,7 +307,7 @@
             console.log(File.files[0])
 
             // Create an array containing all input boxes that need to be checked
-            const requiredInputs = [OutputPath, Modality, exposure, wavelength_3D, path, File];
+            const requiredInputs = [Modality, exposure, wavelength_3D, path, File];
 
             // Iterate over each input box, if any of them are empty, stop the upload and show a warning
             for (let input of requiredInputs) {
@@ -330,30 +325,37 @@
 
 
             var formData = new FormData(document.querySelector('form'));
-            formData.append('OutputPath', OutputPath.value);
             formData.append('Modality', Modality.value);
             formData.append('exposure', exposure.value);
             formData.append('wavelength', wavelength_3D.value);
             formData.append('path', path.value);
             formData.append('FileName', File.files[0].name);
-            
-            // Display a popup after the submit button is clicked
-            document.getElementById('popup').style.display = 'block';
+
             fetch('/driver', {
                 method: 'POST',
                 body: formData
             }).then(response => {
                 if (response.ok) {
-                    document.getElementById('popup').style.display = 'none';
-                    return response.json();
+                    return response.blob(); // 获取返回的文件blob
                 } else {
                     throw new Error('Error: ' + response.statusText);
                 }
-            }).then(data => {
-                console.log('Success:', data);
+            }).then(blob => {
+                document.getElementById('popup').style.display = 'none'; // 关闭popup
+
+                // 自动触发文件下载
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'processed_images.zip';  // 设定下载文件的名称
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
             }).catch(error => {
                 console.error('Error:', error);
             });
+
         });
 
     </script>
