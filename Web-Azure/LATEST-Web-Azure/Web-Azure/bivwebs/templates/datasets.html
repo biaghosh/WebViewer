@@ -174,14 +174,14 @@
                                         <option value="650">650nm</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
+                                <!-- <div class="form-group">
                                     <label for="path">InputPath:(e.g.C:\Users\Desktop\new test case 1\)<span
                                             class="required">*</span></label>
                                     <input type="text" class="form-control" id="path_3D" placeholder="Enter path">
-                                </div>
+                                </div> -->
                                 <div class="form-group">
                                     <label for="filename">TifFile:<span class="required">*</span></label>
-                                    <input type="file" class="form-control-file" id="filename_3D">
+                                    <input type="file" class="form-control-file" id="fileInputTiff">
                                 </div>
                                 <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
                             </form>
@@ -302,12 +302,12 @@
             const Modality = document.getElementById('modality_3D');
             const exposure = document.getElementById('exposure_3D');
             const wavelength_3D = document.getElementById('wavelength_3D');
-            const path = document.getElementById('path_3D');
-            const File = document.getElementById('filename_3D');
-            console.log(File.files[0])
+            // const path = document.getElementById('path_3D');
+            const fileInputTiff = document.getElementById('fileInputTiff');
+            const fileTiff = fileInputTiff.files[0];
 
             // Create an array containing all input boxes that need to be checked
-            const requiredInputs = [Modality, exposure, wavelength_3D, path, File];
+            const requiredInputs = [Modality, exposure, wavelength_3D, fileInputTiff];
 
             // Iterate over each input box, if any of them are empty, stop the upload and show a warning
             for (let input of requiredInputs) {
@@ -317,46 +317,49 @@
                 }
             }
 
-            var fileExtension = File.files[0].name.split('.').pop().toLowerCase(); // 获取文件扩展名
+            var fileExtension = fileInputTiff.files[0].name.split('.').pop().toLowerCase(); // 获取文件扩展名
             if (fileExtension !== 'tif') {
                 alert('Wrong file format! Please upload the .tif file');
                 return;
             }
 
-
-            var formData = new FormData(document.querySelector('form'));
+            // Send the file content to backend
+            var formData = new FormData();
             formData.append('Modality', Modality.value);
             formData.append('exposure', exposure.value);
             formData.append('wavelength', wavelength_3D.value);
-            formData.append('path', path.value);
-            formData.append('FileName', File.files[0].name);
-
+            formData.append('FileName', fileTiff.name);
+            formData.append('fileContent', fileTiff); // Add the file content here
+            // 遍历FormData对象并在控制台输出内容
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
             fetch('/driver', {
                 method: 'POST',
                 body: formData
             }).then(response => {
                 if (response.ok) {
-                    return response.blob(); // 获取返回的文件blob
+                    return response.blob();
                 } else {
                     throw new Error('Error: ' + response.statusText);
                 }
             }).then(blob => {
-                document.getElementById('popup').style.display = 'none'; // 关闭popup
+                document.getElementById('popup').style.display = 'none';
 
-                // 自动触发文件下载
+                // Auto-trigger file download
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = url;
-                a.download = 'processed_images.zip';  // 设定下载文件的名称
+                a.download = 'processed_images.zip';
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
             }).catch(error => {
                 console.error('Error:', error);
             });
-
         });
+
 
     </script>
     {% endblock %}

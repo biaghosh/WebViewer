@@ -31,6 +31,7 @@ import subprocess, os
 import math, zipfile
 import concurrent.futures
 from datetime import datetime
+from io import BytesIO
 
 @app.route("/")
 @app.route("/home")
@@ -1281,8 +1282,9 @@ def startProcess(mongoRecord, jobNum, zdown):
             executor.submit(createYzViewTIFF, index,mongoRecord, jobNum)
 
     # 确定包含所有图片的目录的路径
+    print("temp_dir",temp_dir)
     base_dir = os.path.join(temp_dir, mongoRecord[jobNum]['name'])
-
+    print("base_dir",base_dir)
     # 创建zip文件的名字和路径
     zip_filename_without_extension = os.path.join(base_dir, 'all_images')
     shutil.make_archive(zip_filename_without_extension, 'zip', base_dir)
@@ -1309,8 +1311,10 @@ def create3dPngZip(mongoRecord, jobNum, zdown):
     mongoRecord[jobNum]['dims3']['y'] = mongoRecord[jobNum]['imageDims']['y']//scale
     znum = 0
     for z in range( 1, mongoRecord[jobNum]['imageDims']['z'], 1 ):
-        filename = mongoRecord[jobNum]['fp'] #% z
-        tiff = Image.open(filename)
+        file = mongoRecord[jobNum]['fp'] #% z
+        # print(file)
+        tiff = Image.open(BytesIO(file))
+        print(tiff)
         tiff.seek(z)
         im = tiff.resize((mongoRecord[jobNum]['imageDims']['x']//scale, mongoRecord[jobNum]['imageDims']['y']//scale))
         fn = "%d.png" % (znum)
@@ -1326,7 +1330,7 @@ temp_dir = tempfile.mkdtemp()
 def createXyViewTIFF(index, mongoRecord, jobNum):
     print("XY")
     filename = mongoRecord[jobNum]['fp'] #% index
-    tiff = Image.open(filename)
+    tiff = Image.open(BytesIO(filename))
     tiff.seek(index)
     fn = "%d.png" % (index)
     background = Image.new('RGBA', (mongoRecord[jobNum]['dims2']['x'], mongoRecord[jobNum]['dims2']['y']), (0, 0, 0, 0))
@@ -1342,7 +1346,7 @@ def createXyViewTIFF(index, mongoRecord, jobNum):
 def createXzViewTIFF(index, mongoRecord, jobNum):
     print("XZ")
     filename = mongoRecord[jobNum]['fp'] #% index #3.7 supports this but not 3.8
-    tiff = Image.open(filename)
+    tiff = Image.open(BytesIO(filename))
     #tiff.seek(index)
     fn = "%d.png" % (index)
     background = Image.new('RGBA', (mongoRecord[jobNum]['dims2']['x'], mongoRecord[jobNum]['dims2']['z']), (0, 0, 0, 0))
@@ -1360,7 +1364,7 @@ def createXzViewTIFF(index, mongoRecord, jobNum):
 def createYzViewTIFF(index, mongoRecord, jobNum):
     print("YZ")
     filename = mongoRecord[jobNum]['fp'] #% index #3.7 supports this but not 3.8
-    tiff = Image.open(filename)
+    tiff = Image.open(BytesIO(filename))
     #tiff.seek(index)
     fn = "%d.png" % (index)
     background = Image.new('RGBA', (mongoRecord[jobNum]['dims2']['y'], mongoRecord[jobNum]['dims2']['z']), (0, 0, 0, 0))
@@ -1380,46 +1384,50 @@ def createYzViewTIFF(index, mongoRecord, jobNum):
 def driver():
     # Reset progress at the start of a new job
     data = request.form
+    # print(data)
     Modality = data.get('Modality')
     exposure = data.get('exposure')
     wavelength = data.get('wavelength')
-    path = data.get('path')
+    # path = data.get('path')
     FileName = data.get('FileName')
+    # 提取TIFF文件内容
+    file = request.files['fileContent']
+    file_content = file.read()
 
     input_data = {
         'Modality': Modality,
         'exposure': exposure,
         'wavelength': wavelength,
-        'path': path,
         'FileName': FileName
     }
-    print(input_data)
+    # print(input_data)
     jobs = {}
-    jobs[1] = [Modality, exposure, wavelength, path, FileName]
+    jobs[1] = [Modality, exposure, wavelength, file_content]
     mongoRecord = {}
     for job in jobs.items():
-        print("job: ", job)
-        print('Starting to process: ' + str(job[0])) #[0] job number, [1] array
-        print("job0: ",job[0])
+        # print("job: ", job)
+        # print('Starting to process: ' + str(job[0])) #[0] job number, [1] array
+        # print("job0: ",job[0])
         mongoRecord[str(job[0])] = {}
         if(job[0] > 1):
             print('Considering just sorting mongorecord at the end')
         else:
             mongoRecord[str(job[0])]['name'] = job[1][0]
-            firstFile = job[1][3] + job[1][4] #% 1  
+            firstFile = job[1][3] #% 1  
             
-            print("firstFile",firstFile)
-            tiff = Image.open(firstFile)
+            # print("firstFile",firstFile)
+            tiff = Image.open(BytesIO(firstFile))
             tifCounter = tiff.n_frames
+            print("tifCounter",tifCounter)
             mongoRecord[str(job[0])]['imageDims'] = {}
             mongoRecord[str(job[0])]['imageDims']['x'], mongoRecord[str(job[0])]['imageDims']['y'] = tiff.size
             mongoRecord[str(job[0])]['imageDims']['z'] = tifCounter
             mongoRecord[str(job[0])]['type'] = job[1][0] #bf or fl
             mongoRecord[str(job[0])]['exp'] = job[1][1] #exp
             mongoRecord[str(job[0])]['wv'] = job[1][2] #wv
-            mongoRecord[str(job[0])]['fp'] = job[1][3] + job[1][4]
+            mongoRecord[str(job[0])]['fp'] = job[1][3]
             #mongoRecord[str(job[0])]['zdown'] = 1 #not used yet
-            print("mongoRecord",mongoRecord)
+            # print("mongoRecord",mongoRecord)
             startProcess(mongoRecord, str(job[0]), 1 )
 
         mongoRecord[str(job[0])]["processedTime"] = datetime.now().time()
