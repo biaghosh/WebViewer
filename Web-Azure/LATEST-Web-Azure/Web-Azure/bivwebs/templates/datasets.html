@@ -152,39 +152,46 @@
                 <div class="card-body">
                     <div class="card border-0">
                         <div class="card-body">
-                            <form id="job-form">
-                                <div class="form-group">
-                                    <label for="type">Modality:<span class="required">*</span></label>
-                                    <select id="modality_3D" name="type" class="form-control" required>
-                                        <option value="Brightfield">Brightfield</option>
-                                        <option value="fluorescent">Fluorescent</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="type">Exposure:<span class="required">*</span></label>
-                                    <select id="exposure_3D" name="type" class="form-control" required>
-                                        <option value="1">1</option>
-                                        <option value="0">0</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="type">Wavelength:<span class="required">*</span></label>
-                                    <select id="wavelength_3D" name="type" class="form-control" required>
-                                        <option value="430">430nm</option>
-                                        <option value="650">650nm</option>
-                                    </select>
-                                </div>
-                                <!-- <div class="form-group">
+                            <div class="row">
+                                <div class="col-3">
+                                    <form id="job-form">
+                                        <div class="form-group">
+                                            <label for="type">Modality:<span class="required">*</span></label>
+                                            <select id="modality_3D" name="type" class="form-control" required>
+                                                <option value="Brightfield">Brightfield</option>
+                                                <option value="fluorescent">Fluorescent</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="type">Exposure:<span class="required">*</span></label>
+                                            <select id="exposure_3D" name="type" class="form-control" required>
+                                                <option value="1">1</option>
+                                                <option value="0">0</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="type">Wavelength:<span class="required">*</span></label>
+                                            <select id="wavelength_3D" name="type" class="form-control" required>
+                                                <option value="430">430nm</option>
+                                                <option value="650">650nm</option>
+                                            </select>
+                                        </div>
+                                        <!-- <div class="form-group">
                                     <label for="path">InputPath:(e.g.C:\Users\Desktop\new test case 1\)<span
                                             class="required">*</span></label>
                                     <input type="text" class="form-control" id="path_3D" placeholder="Enter path">
                                 </div> -->
-                                <div class="form-group">
-                                    <label for="filename">TifFile:<span class="required">*</span></label>
-                                    <input type="file" class="form-control-file" id="fileInputTiff">
+                                        <div class="form-group">
+                                            <label for="filename">TifFile:<span class="required">*</span></label>
+                                            <input type="file" class="form-control-file" id="fileInputTiff">
+                                        </div>
+                                        <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
+                                    </form>
                                 </div>
-                                <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
-                            </form>
+                                <div class="col-4">
+                                    dsa
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
