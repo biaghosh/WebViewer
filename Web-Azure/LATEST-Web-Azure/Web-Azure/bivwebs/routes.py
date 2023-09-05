@@ -1360,10 +1360,6 @@ def createXzViewTIFF(index, mongoRecord, jobNum):
     background.save(outputFile)
     cmd = r'C:\Users\Yiyang\WebViewer\Web-Azure\LATEST-Web-Azure\Web-Azure\bivwebs\basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
     subprocess.call(cmd)
-    response = {
-        'message': 'createXZViewTIFF has finished running.',
-    }
-    return response
 
 def createYzViewTIFF(index, mongoRecord, jobNum):
     # print("YZ")
