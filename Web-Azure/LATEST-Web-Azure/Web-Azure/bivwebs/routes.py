@@ -1328,7 +1328,7 @@ def create3dPngZip(mongoRecord, jobNum, zdown):
 temp_dir = tempfile.mkdtemp()
 
 def createXyViewTIFF(index, mongoRecord, jobNum):
-    print("XY")
+    # print("XY")
     filename = mongoRecord[jobNum]['fp'] #% index
     tiff = Image.open(BytesIO(filename))
     tiff.seek(index)
@@ -1344,7 +1344,7 @@ def createXyViewTIFF(index, mongoRecord, jobNum):
     subprocess.call(cmd)
 
 def createXzViewTIFF(index, mongoRecord, jobNum):
-    print("XZ")
+    # print("XZ")
     filename = mongoRecord[jobNum]['fp'] #% index #3.7 supports this but not 3.8
     tiff = Image.open(BytesIO(filename))
     #tiff.seek(index)
@@ -1360,9 +1360,13 @@ def createXzViewTIFF(index, mongoRecord, jobNum):
     background.save(outputFile)
     cmd = r'C:\Users\Yiyang\WebViewer\Web-Azure\LATEST-Web-Azure\Web-Azure\bivwebs\basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
     subprocess.call(cmd)
+    response = {
+        'message': 'createXZViewTIFF has finished running.',
+    }
+    return response
 
 def createYzViewTIFF(index, mongoRecord, jobNum):
-    print("YZ")
+    # print("YZ")
     filename = mongoRecord[jobNum]['fp'] #% index #3.7 supports this but not 3.8
     tiff = Image.open(BytesIO(filename))
     #tiff.seek(index)
