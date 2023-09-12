@@ -335,7 +335,7 @@ def get_user_datasets(email):
 
 @app.route('/getDatasets', methods=['GET'])
 def get_datasets():
-    print("get_datasets")
+    # print("get_datasets")
     datasets = []
     client = MongoClient(app.config['mongo'])
     db = client.BIV
@@ -423,7 +423,7 @@ def viewer():
     user = users.find_one({"email": session['email']})
     # bcrypt.generate_password_hash("zxcvb1",form.password.data)})
     ds = user["datasets"]
-    print(ds)
+    # print(ds)
     return render_template('three_new popup.html', title='Viewer', datasets=ds)
 
 
@@ -534,7 +534,7 @@ def volRender():
 
 @app.route("/getSlice", methods=['POST'])
 def getSlice():
-    print("getSlice")
+    # print("getSlice")
     if 'email' not in session:
         return redirect(url_for('login'))
     json = request.get_json()
@@ -1202,7 +1202,7 @@ def upload_file():
     # Create a ShareDirectoryClient object and create directories step by step
     dir_path = ""
     for dir_name in dirs:
-        print(dir_name)
+        # print(dir_name)
         dir_path = os.path.join(dir_path, dir_name)
         dir_client = ShareDirectoryClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name=share,directory_path=dir_path,credential=azure_storage_account_key)
         if not dir_client.exists():
@@ -1228,7 +1228,7 @@ def upload_file():
 
 @app.route('/getdatasetsdetail/<name>', methods=['GET'])
 def get_dataset(name):
-    print(name)
+    # print(name)
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     datasets = db.datasets
@@ -1247,7 +1247,7 @@ def po2Dims(mongoRecord,jobNum):
         mongoRecord[jobNum]['dims2'][key] = po2
 
 def startProcess(mongoRecord, jobNum, zdown):
-    print("startProcess")
+    # print("startProcess")
     total_tasks = mongoRecord[jobNum]['imageDims']['z'] + (mongoRecord[jobNum]['imageDims']['y'] - 1) // 4 + (mongoRecord[jobNum]['imageDims']['x'] - 1) // 4
     completed_tasks = 0
     # print("startprocess")
@@ -1282,9 +1282,9 @@ def startProcess(mongoRecord, jobNum, zdown):
             executor.submit(createYzViewTIFF, index,mongoRecord, jobNum)
 
     # 确定包含所有图片的目录的路径
-    print("temp_dir",temp_dir)
+    # print("temp_dir",temp_dir)
     base_dir = os.path.join(temp_dir, mongoRecord[jobNum]['name'])
-    print("base_dir",base_dir)
+    # print("base_dir",base_dir)
     # 创建zip文件的名字和路径
     zip_filename_without_extension = os.path.join(base_dir, 'all_images')
     shutil.make_archive(zip_filename_without_extension, 'zip', base_dir)
@@ -1314,7 +1314,7 @@ def create3dPngZip(mongoRecord, jobNum, zdown):
         file = mongoRecord[jobNum]['fp'] #% z
         # print(file)
         tiff = Image.open(BytesIO(file))
-        print(tiff)
+        # print(tiff)
         tiff.seek(z)
         im = tiff.resize((mongoRecord[jobNum]['imageDims']['x']//scale, mongoRecord[jobNum]['imageDims']['y']//scale))
         fn = "%d.png" % (znum)
@@ -1418,7 +1418,7 @@ def driver():
             # print("firstFile",firstFile)
             tiff = Image.open(BytesIO(firstFile))
             tifCounter = tiff.n_frames
-            print("tifCounter",tifCounter)
+            # print("tifCounter",tifCounter)
             mongoRecord[str(job[0])]['imageDims'] = {}
             mongoRecord[str(job[0])]['imageDims']['x'], mongoRecord[str(job[0])]['imageDims']['y'] = tiff.size
             mongoRecord[str(job[0])]['imageDims']['z'] = tifCounter
