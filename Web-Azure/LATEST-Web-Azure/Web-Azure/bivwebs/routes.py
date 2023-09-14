@@ -6,7 +6,7 @@ from flask import render_template, url_for, flash, redirect, request, abort, jso
 import requests
 from azure.storage.fileshare import ShareClient,ShareDirectoryClient,ShareFileClient
 from azure.storage.blob import BlobServiceClient, ContentSettings,generate_blob_sas, BlobSasPermissions
-from bivwebs import app, bcrypt
+from bivwebs import app, socketio
 from bivwebs.forms import EmailOTPForm
 from urllib.parse import urlparse, urljoin
 from werkzeug.utils import secure_filename
@@ -32,6 +32,9 @@ import math, zipfile
 import concurrent.futures
 from datetime import datetime
 from io import BytesIO
+
+# Set a global variable to track progress
+progress = {}
 
 @app.route("/")
 @app.route("/home")
@@ -108,6 +111,7 @@ def account():
     if 'email' not in session:
         return redirect(url_for('login'))
     return render_template('account.html', title='Account')
+
 
 
 @app.route("/marketing")
@@ -1266,13 +1270,13 @@ def startProcess(mongoRecord, jobNum, zdown):
         for index in range(0, mongoRecord[jobNum]['imageDims']['z']):
             executor.submit(createXyViewTIFF, index, mongoRecord, jobNum)
     #f = 0
-    
+    progress['progress'] = 0.1  # 10% done
     #os.remove(f) for f in os.listdir(mongoRecord['name'] + '/basis/'+ args.mod + '/xy/') if f.endswith('.png')
     os.makedirs(mongoRecord[jobNum]['name'] + '/basis/' + mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/xz', exist_ok=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
         for index in range(0, mongoRecord[jobNum]['imageDims']['y']-1, 4):
             executor.submit(createXzViewTIFF, index, mongoRecord, jobNum)
-
+    progress['progress'] = 0.5  # 50% done
     #for index in range(0, mongoRecord[jobNum]['imageDims']['y']-1, 4):
     #    createXzViewTIFFASync(index, mongoRecord, jobNum)
     #os.remove(file) for file in os.listdir('path/to/directory') if file.endswith('.png')
@@ -1280,7 +1284,8 @@ def startProcess(mongoRecord, jobNum, zdown):
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
         for index in range(0, mongoRecord[jobNum]['imageDims']['x']-1, 4):
             executor.submit(createYzViewTIFF, index,mongoRecord, jobNum)
-
+    progress['progress'] = 1.0  # 100% done
+    progress['status'] = 'completed'
     # 确定包含所有图片的目录的路径
     # print("temp_dir",temp_dir)
     base_dir = os.path.join(temp_dir, mongoRecord[jobNum]['name'])
@@ -1380,8 +1385,13 @@ def createYzViewTIFF(index, mongoRecord, jobNum):
     subprocess.call(cmd)   
 
 # Set a global variable to track progress
+progress = {}
+
+# Set a global variable to track progress
 @app.route('/driver', methods=['POST'])
 def driver():
+    global progress
+    progress = {'status': 'started', 'progress': 0.0}
     # Reset progress at the start of a new job
     data = request.form
     # print(data)
@@ -1404,6 +1414,7 @@ def driver():
     jobs = {}
     jobs[1] = [Modality, exposure, wavelength, file_content]
     mongoRecord = {}
+
     for job in jobs.items():
         # print("job: ", job)
         # print('Starting to process: ' + str(job[0])) #[0] job number, [1] array
@@ -1432,11 +1443,33 @@ def driver():
 
         mongoRecord[str(job[0])]["processedTime"] = datetime.now().time()
         # print("mongoRecord",mongoRecord)
+        
+        
+        blob_service_client = BlobServiceClient(account_url=f"https://bivlargefiles.blob.core.windows.net/zipfiles",credential="PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw==")
+        blob_client = blob_service_client.get_blob_client(container="zipfiles", blob='processed_images.zip')
         # 获取保存所有图像的基本目录路径
         base_dir = os.path.join(temp_dir, mongoRecord[str(job[0])]['name'])
 
         # 确定zip文件的完整路径
         zip_file_path = os.path.join(base_dir, 'all_images.zip')
-    
-    # 返回ZIP文件
-    return send_file(zip_file_path, as_attachment=True, attachment_filename="processed_images.zip")
+        # 上传ZIP文件
+        with open(zip_file_path, "rb") as data:
+            blob_client.upload_blob(data, overwrite=True)
+
+        # 获取文件的URL
+        public_url = blob_client.url
+        print(public_url)
+        # 返回创建的URL而不是ZIP文件本身
+    return jsonify({"url": public_url})
+
+@app.route('/progress', methods=['GET'])
+def get_progress():
+    # Return the current progress as JSON
+    global progress
+    print("progress",progress)
+    return jsonify(progress)
+
+@socketio.on('message')
+def handle_message(msg):
+    print('Received message: ' + msg)
+    socketio.emit('message', msg)

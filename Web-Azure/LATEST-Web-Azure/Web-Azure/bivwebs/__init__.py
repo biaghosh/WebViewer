@@ -1,12 +1,16 @@
-from flask import Flask
+import eventlet
+eventlet.monkey_patch()
+
+from flask import Flask, render_template
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '157a176c56f1cfb0dc493223f7bca700'
 app.config.update({'mongo': 'mongodb://bivwebviewer:wuyr3ILIUO30TwR5IlQLHUzAQxUjFuVSwWU0HlX20Lf9VuCqqMYz6P9lfdpW0a0MVJGee014XJyWACDbY9RCuw==@bivwebviewer.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@bivwebviewer@'})
-# app.config.update({'mongo': 'mongodb://localhost:27017/BIV'})
 app.config['TESTING'] = False
+
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -19,5 +23,8 @@ app.config.update(
     MAIL_USERNAME='ybian@bioinvision.com',
     MAIL_PASSWORD='Bian19981109'
 )
+
+# Initialize SocketIO with the app
+socketio = SocketIO(app)
 
 from bivwebs import routes

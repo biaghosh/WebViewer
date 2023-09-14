@@ -141,6 +141,7 @@
                                 <button id="upload-button" class="btn btn-primary"
                                     onclick="uploadDataset()">Upload</button>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -185,7 +186,13 @@
                                         <input type="file" class="form-control-file" id="fileInputTiff">
                                     </div>
                                     <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
+
                                 </form>
+                            </div>
+                            <div class="upload-form-group">
+                                <label for="download-link">Download Link:</label>
+                                <input type="text" id="download-link" name="download-link" class="form-control"
+                                    readonly>
                             </div>
                         </div>
                     </div>
@@ -200,6 +207,7 @@
             Processing, please wait...
         </div>
     </div>
+    <script src="https://cdn.socket.io/3.0.3/socket.io.min.js"></script>
     <script>
         async function uploadDataset() {
             const datasetNameInput = document.getElementById('dataset-name');
@@ -300,7 +308,31 @@
                 });
         }
 
+        var socket = io.connect('https://webviewerbiv.azurewebsites.net/');
+
+
+        socket.onopen = function (event) {
+            console.log('WebSocket is open now.');
+        };
+        socket.onclose = function (event) {
+            console.log('WebSocket is closed now.');
+        };
+        socket.onerror = function (event) {
+            console.log('WebSocket error: ', event);
+        };
+        socket.onmessage = function (event) {
+            console.log('WebSocket message received: ', event);
+
+            // 假设服务器发送了一个包含 URL 的 JSON 对象
+            let data = JSON.parse(event.data);
+            if (data.url) {
+                document.getElementById('download-link').value = data.url;
+                console.log('File URL:', data.url);
+            }
+        };
+        let shouldContinue = true;
         document.getElementById('submitBtn').addEventListener('click', function () {
+            // 设置一个定时器来定期获取进度更新
             const Modality = document.getElementById('modality_3D');
             const exposure = document.getElementById('exposure_3D');
             const wavelength_3D = document.getElementById('wavelength_3D');
@@ -324,7 +356,7 @@
                 alert('Wrong file format! Please upload the .tif file');
                 return;
             }
-            
+
             // Send the file content to backend
             var formData = new FormData();
             formData.append('Modality', Modality.value);
@@ -336,31 +368,60 @@
             for (let [key, value] of formData.entries()) {
                 console.log(key, value);
             }
+
+            // 启动getProgress函数
+            shouldContinue = true;
+            getProgress();
+
             fetch('/driver', {
                 method: 'POST',
                 body: formData
-            }).then(response => {
-                if (response.ok) {
-                    return response.blob();
-                } else {
-                    throw new Error('Error: ' + response.statusText);
-                }
-            }).then(blob => {
-                document.getElementById('popup').style.display = 'none';
-
-                // Auto-trigger file download
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'processed_images.zip';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-            }).catch(error => {
-                console.error('Error:', error);
-            });
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error('Network response was not ok: ' + text);
+                        });
+                    }
+                    return response.json();  // 解析返回的JSON
+                })
+                .then(data => {
+                    // 检查是否存在URL
+                    console.log(data)
+                    if (data.url) {
+                        shouldContinue = false;
+                        document.getElementById('download-link').value = data.url;
+                    } else {
+                        throw new Error('No URL provided');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         });
+        async function getProgress() {
+            try {
+                if (!shouldContinue) {
+                    return;
+                }
+
+                console.log("getProgress");
+                const response = await fetch('/progress');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                const progress = await response.json();
+                console.log(progress);
+                // document.getElementById('progress').textContent = 'Progress: ' + progress.value + '%';
+
+                // 如果shouldContinue仍然为true，则在一段时间后再次调用getProgress
+                if (shouldContinue) {
+                    setTimeout(getProgress, 1000); // 这里设置一个1秒的延时，你可以根据需要调整这个值
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
 
 
     </script>
