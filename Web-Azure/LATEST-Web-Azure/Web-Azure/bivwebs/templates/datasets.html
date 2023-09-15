@@ -13,6 +13,20 @@
         .required {
             color: red;
         }
+
+        .progress-bar {
+            width: 100%;
+            background-color: #f3f3f3;
+        }
+
+        .progress-bar-fill {
+            width: 0%;
+            height: 30px;
+            background-color: #76c7c0;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+        }
     </style>
 </head>
 <div class="container-fluid">
@@ -186,13 +200,12 @@
                                         <input type="file" class="form-control-file" id="fileInputTiff">
                                     </div>
                                     <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
-
+                                    <div class="form-group">
+                                        <div class="progress-bar">
+                                            <div class="progress-bar-fill" id="progress-bar-fill">0%</div>
+                                        </div>
+                                    </div>
                                 </form>
-                            </div>
-                            <div class="upload-form-group">
-                                <label for="download-link">Download Link:</label>
-                                <input type="text" id="download-link" name="download-link" class="form-control"
-                                    readonly>
                             </div>
                         </div>
                     </div>
@@ -308,28 +321,6 @@
                 });
         }
 
-        var socket = io.connect('https://webviewerbiv.azurewebsites.net/');
-
-
-        socket.onopen = function (event) {
-            console.log('WebSocket is open now.');
-        };
-        socket.onclose = function (event) {
-            console.log('WebSocket is closed now.');
-        };
-        socket.onerror = function (event) {
-            console.log('WebSocket error: ', event);
-        };
-        socket.onmessage = function (event) {
-            console.log('WebSocket message received: ', event);
-
-            // 假设服务器发送了一个包含 URL 的 JSON 对象
-            let data = JSON.parse(event.data);
-            if (data.url) {
-                document.getElementById('download-link').value = data.url;
-                console.log('File URL:', data.url);
-            }
-        };
         let shouldContinue = true;
         document.getElementById('submitBtn').addEventListener('click', function () {
             // 设置一个定时器来定期获取进度更新
@@ -377,28 +368,21 @@
                 method: 'POST',
                 body: formData
             })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => {
-                            throw new Error('Network response was not ok: ' + text);
-                        });
-                    }
-                    return response.json();  // 解析返回的JSON
+                .then(response => response.blob())
+                .then(blob => {
+                    shouldContinue = false
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'processed_images.zip';  // 设定下载文件的名称
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
                 })
-                .then(data => {
-                    // 检查是否存在URL
-                    console.log(data)
-                    if (data.url) {
-                        shouldContinue = false;
-                        document.getElementById('download-link').value = data.url;
-                    } else {
-                        throw new Error('No URL provided');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+                .catch((error) => console.error('Error:', error));
         });
+
         async function getProgress() {
             try {
                 if (!shouldContinue) {
@@ -410,9 +394,13 @@
                 if (!response.ok) {
                     throw new Error('Network response was not ok ' + response.statusText);
                 }
-                const progress = await response.json();
-                console.log(progress);
-                // document.getElementById('progress').textContent = 'Progress: ' + progress.value + '%';
+
+                const data = await response.json();
+                const progress = data.progress; // Now correctly obtaining progress from the resolved promise
+                const progress_per = progress * 100;
+                console.log(progress, progress_per);
+                document.getElementById('progress-bar-fill').style.width = progress_per + '%';
+                document.getElementById('progress-bar-fill').textContent = Math.round(progress_per) + '%';
 
                 // 如果shouldContinue仍然为true，则在一段时间后再次调用getProgress
                 if (shouldContinue) {
@@ -422,6 +410,7 @@
                 console.error('Error:', error);
             }
         }
+
 
 
     </script>

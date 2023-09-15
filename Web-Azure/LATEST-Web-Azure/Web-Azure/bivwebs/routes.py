@@ -6,7 +6,7 @@ from flask import render_template, url_for, flash, redirect, request, abort, jso
 import requests
 from azure.storage.fileshare import ShareClient,ShareDirectoryClient,ShareFileClient
 from azure.storage.blob import BlobServiceClient, ContentSettings,generate_blob_sas, BlobSasPermissions
-from bivwebs import app, socketio
+from bivwebs import app
 from bivwebs.forms import EmailOTPForm
 from urllib.parse import urlparse, urljoin
 from werkzeug.utils import secure_filename
@@ -1270,13 +1270,13 @@ def startProcess(mongoRecord, jobNum, zdown):
         for index in range(0, mongoRecord[jobNum]['imageDims']['z']):
             executor.submit(createXyViewTIFF, index, mongoRecord, jobNum)
     #f = 0
-    progress['progress'] = 0.1  # 10% done
+    progress['progress'] = 0.3  # 30% done
     #os.remove(f) for f in os.listdir(mongoRecord['name'] + '/basis/'+ args.mod + '/xy/') if f.endswith('.png')
     os.makedirs(mongoRecord[jobNum]['name'] + '/basis/' + mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/xz', exist_ok=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
         for index in range(0, mongoRecord[jobNum]['imageDims']['y']-1, 4):
             executor.submit(createXzViewTIFF, index, mongoRecord, jobNum)
-    progress['progress'] = 0.5  # 50% done
+    progress['progress'] = 0.6  # 50% done
     #for index in range(0, mongoRecord[jobNum]['imageDims']['y']-1, 4):
     #    createXzViewTIFFASync(index, mongoRecord, jobNum)
     #os.remove(file) for file in os.listdir('path/to/directory') if file.endswith('.png')
@@ -1333,7 +1333,7 @@ def create3dPngZip(mongoRecord, jobNum, zdown):
 temp_dir = tempfile.mkdtemp()
 
 def createXyViewTIFF(index, mongoRecord, jobNum):
-    # print("XY")
+    print("XY")
     filename = mongoRecord[jobNum]['fp'] #% index
     tiff = Image.open(BytesIO(filename))
     tiff.seek(index)
@@ -1345,11 +1345,11 @@ def createXyViewTIFF(index, mongoRecord, jobNum):
     os.makedirs(outputPath, exist_ok=True)
     outputFile = os.path.join(outputPath, fn)
     background.save(outputFile)
-    cmd = r'C:\Users\Yiyang\WebViewer\Web-Azure\LATEST-Web-Azure\Web-Azure\bivwebs\basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
+    cmd = r'Web-Azure\LATEST-Web-Azure\Web-Azure\bivwebs\basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
     subprocess.call(cmd)
 
 def createXzViewTIFF(index, mongoRecord, jobNum):
-    # print("XZ")
+    print("XZ")
     filename = mongoRecord[jobNum]['fp'] #% index #3.7 supports this but not 3.8
     tiff = Image.open(BytesIO(filename))
     #tiff.seek(index)
@@ -1363,11 +1363,11 @@ def createXzViewTIFF(index, mongoRecord, jobNum):
     os.makedirs(outputPath, exist_ok=True)
     outputFile = os.path.join(outputPath, fn)
     background.save(outputFile)
-    cmd = r'C:\Users\Yiyang\WebViewer\Web-Azure\LATEST-Web-Azure\Web-Azure\bivwebs\basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
+    cmd = r'Web-Azure\LATEST-Web-Azure\Web-Azure\bivwebs\basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
     subprocess.call(cmd)
 
 def createYzViewTIFF(index, mongoRecord, jobNum):
-    # print("YZ")
+    print("YZ")
     filename = mongoRecord[jobNum]['fp'] #% index #3.7 supports this but not 3.8
     tiff = Image.open(BytesIO(filename))
     #tiff.seek(index)
@@ -1381,7 +1381,7 @@ def createYzViewTIFF(index, mongoRecord, jobNum):
     os.makedirs(outputPath, exist_ok=True)
     outputFile = os.path.join(outputPath, fn)
     background.save(outputFile)
-    cmd = r'C:\Users\Yiyang\WebViewer\Web-Azure\LATEST-Web-Azure\Web-Azure\bivwebs\basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
+    cmd = r'Web-Azure\LATEST-Web-Azure\Web-Azure\bivwebs\basisu.exe -tex_type 2d  -output_path %s -file %s' % (outputPath, outputFile) #-y_flip not a cure
     subprocess.call(cmd)   
 
 # Set a global variable to track progress
@@ -1410,15 +1410,12 @@ def driver():
         'wavelength': wavelength,
         'FileName': FileName
     }
-    # print(input_data)
+    print(input_data)
     jobs = {}
     jobs[1] = [Modality, exposure, wavelength, file_content]
     mongoRecord = {}
 
     for job in jobs.items():
-        # print("job: ", job)
-        # print('Starting to process: ' + str(job[0])) #[0] job number, [1] array
-        # print("job0: ",job[0])
         mongoRecord[str(job[0])] = {}
         if(job[0] > 1):
             print('Considering just sorting mongorecord at the end')
@@ -1439,37 +1436,21 @@ def driver():
             mongoRecord[str(job[0])]['fp'] = job[1][3]
             #mongoRecord[str(job[0])]['zdown'] = 1 #not used yet
             # print("mongoRecord",mongoRecord)
+            # print(mongoRecord)
             startProcess(mongoRecord, str(job[0]), 1 )
 
         mongoRecord[str(job[0])]["processedTime"] = datetime.now().time()
         # print("mongoRecord",mongoRecord)
         
-        
-        blob_service_client = BlobServiceClient(account_url=f"https://bivlargefiles.blob.core.windows.net/zipfiles",credential="PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw==")
-        blob_client = blob_service_client.get_blob_client(container="zipfiles", blob='processed_images.zip')
-        # 获取保存所有图像的基本目录路径
         base_dir = os.path.join(temp_dir, mongoRecord[str(job[0])]['name'])
-
         # 确定zip文件的完整路径
         zip_file_path = os.path.join(base_dir, 'all_images.zip')
-        # 上传ZIP文件
-        with open(zip_file_path, "rb") as data:
-            blob_client.upload_blob(data, overwrite=True)
+        # 返回ZIP文件
+        return send_file(zip_file_path, as_attachment=True, attachment_filename="processed_images.zip")
 
-        # 获取文件的URL
-        public_url = blob_client.url
-        print(public_url)
-        # 返回创建的URL而不是ZIP文件本身
-    return jsonify({"url": public_url})
 
 @app.route('/progress', methods=['GET'])
 def get_progress():
     # Return the current progress as JSON
     global progress
-    print("progress",progress)
     return jsonify(progress)
-
-@socketio.on('message')
-def handle_message(msg):
-    print('Received message: ' + msg)
-    socketio.emit('message', msg)

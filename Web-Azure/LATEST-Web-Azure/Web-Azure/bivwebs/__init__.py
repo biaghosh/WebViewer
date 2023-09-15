@@ -1,10 +1,6 @@
-import eventlet
-eventlet.monkey_patch()
-
 from flask import Flask, render_template
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
-from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '157a176c56f1cfb0dc493223f7bca700'
@@ -24,7 +20,5 @@ app.config.update(
     MAIL_PASSWORD='Bian19981109'
 )
 
-# Initialize SocketIO with the app
-socketio = SocketIO(app)
 
 from bivwebs import routes
