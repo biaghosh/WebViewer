@@ -1251,6 +1251,7 @@ def po2Dims(mongoRecord,jobNum):
         mongoRecord[jobNum]['dims2'][key] = po2
 
 def startProcess(mongoRecord, jobNum, zdown):
+    global progress
     # print("startProcess")
     total_tasks = mongoRecord[jobNum]['imageDims']['z'] + (mongoRecord[jobNum]['imageDims']['y'] - 1) // 4 + (mongoRecord[jobNum]['imageDims']['x'] - 1) // 4
     completed_tasks = 0
@@ -1385,9 +1386,6 @@ def createYzViewTIFF(index, mongoRecord, jobNum):
     subprocess.call(cmd)   
 
 # Set a global variable to track progress
-progress = {}
-
-# Set a global variable to track progress
 @app.route('/driver', methods=['POST'])
 def driver():
     global progress
@@ -1451,6 +1449,9 @@ def driver():
 
 @app.route('/progress', methods=['GET'])
 def get_progress():
-    # Return the current progress as JSON
-    global progress
-    return jsonify(progress)
+    try:
+        global progress
+        return jsonify(progress)
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+

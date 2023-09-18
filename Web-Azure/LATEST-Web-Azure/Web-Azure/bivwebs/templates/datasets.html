@@ -362,8 +362,8 @@
 
             // 启动getProgress函数
             shouldContinue = true;
-            getProgress();
-
+            // getProgress();
+            console.log("daole1")
             fetch('/driver', {
                 method: 'POST',
                 body: formData
@@ -383,32 +383,39 @@
                 .catch((error) => console.error('Error:', error));
         });
 
-        async function getProgress() {
-            try {
-                if (!shouldContinue) {
-                    return;
-                }
-
-                console.log("getProgress");
-                const response = await fetch('/progress');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
-                }
-
-                const data = await response.json();
-                const progress = data.progress; // Now correctly obtaining progress from the resolved promise
-                const progress_per = progress * 100;
-                console.log(progress, progress_per);
-                document.getElementById('progress-bar-fill').style.width = progress_per + '%';
-                document.getElementById('progress-bar-fill').textContent = Math.round(progress_per) + '%';
-
-                // 如果shouldContinue仍然为true，则在一段时间后再次调用getProgress
-                if (shouldContinue) {
-                    setTimeout(getProgress, 1000); // 这里设置一个1秒的延时，你可以根据需要调整这个值
-                }
-            } catch (error) {
-                console.error('Error:', error);
+        function getProgress() {
+            if (!shouldContinue) {
+                console.log("Exiting getProgress because shouldContinue is false");
+                return;
             }
+
+            console.log("getProgress");
+
+            fetch('/progress')
+                .then(response => {
+                    if (!response.ok) {
+                        console.error('Response not OK:', response);
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+
+                    const progress = data.progress;
+                    const progress_per = progress * 100;
+                    console.log(progress, progress_per);
+                    document.getElementById('progress-bar-fill').style.width = progress_per + '%';
+                    document.getElementById('progress-bar-fill').textContent = Math.round(progress_per) + '%';
+
+                    // 如果 shouldContinue 仍然为 true，则在一段时间后再次调用 getProgress
+                    if (shouldContinue) {
+                        setTimeout(getProgress, 1000); // 这里设置一个1秒的延时，你可以根据需要调整这个值
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
         }
 
 
