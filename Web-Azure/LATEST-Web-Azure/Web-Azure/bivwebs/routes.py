@@ -105,14 +105,11 @@ def logout():
     session.pop('level', None)
     return redirect(url_for('home'))
 
-
 @app.route("/account")
 def account():
     if 'email' not in session:
         return redirect(url_for('login'))
     return render_template('account.html', title='Account')
-
-
 
 @app.route("/marketing")
 def marketing():
@@ -123,13 +120,11 @@ def marketing():
         return render_template('403.html'), 403
     return render_template('marketing.html', title='Marketing')
 
-
 @app.route("/webview")
 def webview():
     if 'email' not in session:
         return redirect(url_for('login'))
     return render_template('webview.html', title='Web3DView')
-
 
 @app.route("/getAnnotations", methods=['POST'])
 def getAnnotations():
@@ -201,7 +196,6 @@ def saveAnnotation():
     json["user"] = session['email']
     return make_response(jsonify(json), 200)
 
-
 @app.route("/updateAnnotation", methods=['POST'])
 def updateAnnotation():
     if 'email' not in session:
@@ -231,7 +225,6 @@ def updateAnnotation():
 
     data = '{}'
     return make_response(dumps(data), 200)
-
 
 @app.route("/updateAnnotationComments", methods=['POST'])
 def updateAnnotationComments():
@@ -1174,8 +1167,6 @@ def upload_file():
     thickness = request.form['thickness']
     files = request.files.getlist('files')
 
-
-
     # Save data to MongoDB
     doc = {
         'name': dataset_name,
@@ -1330,7 +1321,7 @@ def create3dPngZip(mongoRecord, jobNum, zdown):
         os.remove(mongoRecord[jobNum]['name'] + '/' + fn)
     zipf.close()
 
-# 创建一个临时目录，所有生成的图片都将保存在这里
+# Create temp_dir, save all .img 
 temp_dir = tempfile.mkdtemp()
 
 def createXyViewTIFF(index, mongoRecord, jobNum):
@@ -1342,7 +1333,6 @@ def createXyViewTIFF(index, mongoRecord, jobNum):
     background = Image.new('RGBA', (mongoRecord[jobNum]['dims2']['x'], mongoRecord[jobNum]['dims2']['y']), (0, 0, 0, 0))
     background.paste(tiff)
     outputPath = os.path.join(temp_dir, mongoRecord[jobNum]['name'], 'basis', mongoRecord[jobNum]['type'], mongoRecord[jobNum]['exp'], mongoRecord[jobNum]['wv'], 'xy/')
-    # 确保目录结构存在
     os.makedirs(outputPath, exist_ok=True)
     outputFile = os.path.join(outputPath, fn)
     background.save(outputFile)
@@ -1398,7 +1388,7 @@ def driver():
     wavelength = data.get('wavelength')
     # path = data.get('path')
     FileName = data.get('FileName')
-    # 提取TIFF文件内容
+    # Extract Tiff content
     file = request.files['fileContent']
     file_content = file.read()
 
@@ -1441,9 +1431,9 @@ def driver():
         # print("mongoRecord",mongoRecord)
         
         base_dir = os.path.join(temp_dir, mongoRecord[str(job[0])]['name'])
-        # 确定zip文件的完整路径
+        # Whole Path of zip file
         zip_file_path = os.path.join(base_dir, 'all_images.zip')
-        # 返回ZIP文件
+        # Return Zip file
         return send_file(zip_file_path, as_attachment=True, attachment_filename="processed_images.zip")
 
 

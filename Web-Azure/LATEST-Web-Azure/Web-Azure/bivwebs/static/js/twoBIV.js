@@ -2104,7 +2104,6 @@ function orthoClick(evt) {
 }
 
 function initMainOrthoLines() {
-
     var points = [];
     points.push(new THREE.Vector3(0, -dsInfo["imageDims"]["y"] / 2, 0.5));
     points.push(new THREE.Vector3(0, dsInfo["imageDims"]["y"] / 2, 0.5));

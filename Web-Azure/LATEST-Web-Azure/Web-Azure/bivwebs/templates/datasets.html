@@ -3,9 +3,6 @@
 
 <head>
     <style>
-        /* 省略你已经有的CSS代码... */
-
-        /* 添加一个新的样式用于控制上传表单的布局 */
         .upload-form-group {
             margin-bottom: 15px;
         }
@@ -257,7 +254,7 @@
             for (let input of requiredInputs) {
                 if (input.value.trim() === '') {
                     alert('Please fill out all required fields.');
-                    return;  // 退出函数，停止上传
+                    return;  
                 }
             }
 
@@ -286,8 +283,6 @@
             formData.append('voxel_size', voxel_size.value);
             formData.append('thickness', thickness.value);
 
-
-            // 遍历所有文件并添加到formData
             for (const file of fileInput.files) {
                 formData.append('files', file);
             }
@@ -298,11 +293,9 @@
             });
 
             if (!response.ok) {
-                // 如果响应失败，打印错误信息
                 console.error('Upload failed:', response.statusText);
             } else {
                 const data = await response.json();
-                // 打印成功信息和上传的数据集详情
                 console.log(data.message, data);
                 document.getElementById('file-names').innerText = data.files.join('\n');
             }
@@ -322,7 +315,6 @@
 
         let shouldContinue = true;
         document.getElementById('submitBtn').addEventListener('click', function () {
-            // 设置一个定时器来定期获取进度更新
             const Modality = document.getElementById('modality_3D');
             const exposure = document.getElementById('exposure_3D');
             const wavelength_3D = document.getElementById('wavelength_3D');
@@ -341,7 +333,7 @@
                 }
             }
 
-            var fileExtension = fileInputTiff.files[0].name.split('.').pop().toLowerCase(); // 获取文件扩展名
+            var fileExtension = fileInputTiff.files[0].name.split('.').pop().toLowerCase(); // Get file extension name
             if (fileExtension !== 'tif') {
                 alert('Wrong file format! Please upload the .tif file');
                 return;
@@ -354,12 +346,8 @@
             formData.append('wavelength', wavelength_3D.value);
             formData.append('FileName', fileTiff.name);
             formData.append('fileContent', fileTiff); // Add the file content here
-            // 遍历FormData对象并在控制台输出内容
-            for (let [key, value] of formData.entries()) {
-                console.log(key, value);
-            }
 
-            // 启动getProgress函数
+            // Start getProgress function
             shouldContinue = true;
             // getProgress();
             console.log("daole1")
@@ -374,7 +362,7 @@
                     const a = document.createElement('a');
                     a.style.display = 'none';
                     a.href = url;
-                    a.download = 'processed_images.zip';  // 设定下载文件的名称
+                    a.download = 'processed_images.zip';  // Set download zip file name
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
@@ -399,17 +387,15 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Response data:', data);
-
                     const progress = data.progress;
                     const progress_per = progress * 100;
                     console.log(progress, progress_per);
                     document.getElementById('progress-bar-fill').style.width = progress_per + '%';
                     document.getElementById('progress-bar-fill').textContent = Math.round(progress_per) + '%';
 
-                    // 如果 shouldContinue 仍然为 true，则在一段时间后再次调用 getProgress
+                    // If shouldContinue still true，invoke getProgress
                     if (shouldContinue) {
-                        setTimeout(getProgress, 1000); // 这里设置一个1秒的延时，你可以根据需要调整这个值
+                        setTimeout(getProgress, 1000); // set 1 second delay time 
                     }
                 })
                 .catch(error => {
