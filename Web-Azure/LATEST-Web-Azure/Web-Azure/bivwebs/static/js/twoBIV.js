@@ -1373,7 +1373,7 @@ annModalDelete.addEventListener('click', () => {
 })
 
 window.addEventListener('resize', () => {
-
+    
     if (!cameraXY)
         return
     cameraXY.aspect = (xyDiv.offsetWidth / 260)//@TODO HARDCODE
