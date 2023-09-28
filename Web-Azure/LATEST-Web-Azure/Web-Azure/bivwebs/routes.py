@@ -1183,8 +1183,6 @@ def upload_file():
     if not datasets.find_one({'name': dataset_name}):   
         datasets.insert_one(doc)
 
-
-
     # Azure storage account name and account key, these information should be obtained from the Azure portal
     azure_storage_account_name = "bivlargefiles"
     azure_storage_account_key = "PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw=="
@@ -1217,8 +1215,7 @@ def upload_file():
         file_client = ShareFileClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name=share, file_path=file_path, credential=azure_storage_account_key)
         file_client.upload_file(file)
     
-
-    return 'File Uploaded Successfully'
+    return jsonify({"message": "File Uploaded Successfully"}), 200
 
 
 @app.route('/getdatasetsdetail/<name>', methods=['GET'])

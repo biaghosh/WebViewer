@@ -152,7 +152,6 @@
                                 <button id="upload-button" class="btn btn-primary"
                                     onclick="uploadDataset()">Upload</button>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -187,11 +186,6 @@
                                             <option value="650">650nm</option>
                                         </select>
                                     </div>
-                                    <!-- <div class="form-group">
-                                    <label for="path">InputPath:(e.g.C:\Users\Desktop\new test case 1\)<span
-                                            class="required">*</span></label>
-                                    <input type="text" class="form-control" id="path_3D" placeholder="Enter path">
-                                </div> -->
                                     <div class="form-group">
                                         <label for="filename">TifFile:<span class="required">*</span></label>
                                         <input type="file" class="form-control-file" id="fileInputTiff">
@@ -210,15 +204,31 @@
             </div>
         </div>
     </div>
-    <div id="popup"
-        style="display: none; position: fixed; width: 100%; height: 100%; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: 2; cursor: pointer;">
-        <div
-            style="position: absolute; top: 50%; left: 50%; font-size: 50px; color: white; transform: translate(-50%,-50%);-ms-transform: translate(-50%,-50%);">
-            Processing, please wait...
-        </div>
-    </div>
     <script src="https://cdn.socket.io/3.0.3/socket.io.min.js"></script>
     <script>
+        function updateFileList() {
+            // 获取input file元素
+            const inputElement = document.getElementById('file');
+
+            // 获取或创建用于显示文件名的列表
+            let fileListDisplay = document.getElementById('fileListDisplay');
+            if (!fileListDisplay) {
+                fileListDisplay = document.createElement('ul');
+                fileListDisplay.id = 'fileListDisplay';
+                inputElement.after(fileListDisplay);
+            }
+
+            // 清空先前的文件列表
+            fileListDisplay.innerHTML = '';
+
+            // 为每个选中的文件添加一个列表项
+            for (let i = 0; i < inputElement.files.length; i++) {
+                const listItem = document.createElement('li');
+                listItem.textContent = inputElement.files[i].name;
+                fileListDisplay.appendChild(listItem);
+            }
+        }
+
         async function uploadDataset() {
             const datasetNameInput = document.getElementById('dataset-name');
             const modality = document.getElementById('modality');
@@ -254,7 +264,7 @@
             for (let input of requiredInputs) {
                 if (input.value.trim() === '') {
                     alert('Please fill out all required fields.');
-                    return;  
+                    return;
                 }
             }
 
@@ -296,7 +306,7 @@
                 console.error('Upload failed:', response.statusText);
             } else {
                 const data = await response.json();
-                console.log(data.message, data);
+                alert(data.message)
                 document.getElementById('file-names').innerText = data.files.join('\n');
             }
         }
@@ -349,7 +359,7 @@
 
             // Start getProgress function
             shouldContinue = true;
-            // getProgress();
+            getProgress();
             console.log("daole1")
             fetch('/driver', {
                 method: 'POST',
