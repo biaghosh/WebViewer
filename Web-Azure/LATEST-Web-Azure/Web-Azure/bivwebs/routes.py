@@ -1251,6 +1251,7 @@ def startProcess(mongoRecord, jobNum, zdown):
     os.makedirs(mongoRecord[jobNum]['name'], exist_ok=True)
     
     create3dPngZip(mongoRecord, jobNum, zdown)
+    progress['progress'] = 0.1  # 30% done
     #need to remove pngs || or will they be useful for unity?
     os.makedirs(mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/xy', exist_ok=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
@@ -1274,7 +1275,7 @@ def startProcess(mongoRecord, jobNum, zdown):
     progress['progress'] = 1.0  # 100% done
     progress['status'] = 'completed'
     base_dir = os.path.join(temp_dir, mongoRecord[jobNum]['name'])
-    
+
     zip_filename_without_extension = os.path.join(base_dir, 'all_images')
     shutil.make_archive(zip_filename_without_extension, 'zip', base_dir)
         
