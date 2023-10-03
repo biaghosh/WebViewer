@@ -196,6 +196,7 @@ def saveAnnotation():
     json["user"] = session['email']
     return make_response(jsonify(json), 200)
 
+
 @app.route("/updateAnnotation", methods=['POST'])
 def updateAnnotation():
     if 'email' not in session:
@@ -1132,9 +1133,6 @@ def send_otp():
     mail.send(msg)
     return jsonify({'status': 'success', 'message': f"OTP has been sent to '{email}, if you do not receive it, please check your spam'."})
 
-
-
-
 @app.route('/dataset_upload', methods=['POST'])
 def upload_file():
     
@@ -1275,11 +1273,8 @@ def startProcess(mongoRecord, jobNum, zdown):
             executor.submit(createYzViewTIFF, index,mongoRecord, jobNum)
     progress['progress'] = 1.0  # 100% done
     progress['status'] = 'completed'
-    # 确定包含所有图片的目录的路径
-    # print("temp_dir",temp_dir)
     base_dir = os.path.join(temp_dir, mongoRecord[jobNum]['name'])
-    # print("base_dir",base_dir)
-    # 创建zip文件的名字和路径
+    
     zip_filename_without_extension = os.path.join(base_dir, 'all_images')
     shutil.make_archive(zip_filename_without_extension, 'zip', base_dir)
         

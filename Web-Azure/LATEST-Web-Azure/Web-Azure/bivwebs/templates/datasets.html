@@ -325,6 +325,10 @@
 
         let shouldContinue = true;
         document.getElementById('submitBtn').addEventListener('click', function () {
+            var submitBtn = document.getElementById("submitBtn");
+
+            // disabel submitBtn
+            submitBtn.disabled = true;
             const Modality = document.getElementById('modality_3D');
             const exposure = document.getElementById('exposure_3D');
             const wavelength_3D = document.getElementById('wavelength_3D');
@@ -376,6 +380,7 @@
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
+                    submitBtn.disabled = false;
                 })
                 .catch((error) => console.error('Error:', error));
         });
