@@ -336,6 +336,8 @@
             const fileInputTiff = document.getElementById('fileInputTiff');
             const fileTiff = fileInputTiff.files[0];
 
+
+
             // Create an array containing all input boxes that need to be checked
             const requiredInputs = [Modality, exposure, wavelength_3D, fileInputTiff];
 
@@ -390,8 +392,6 @@
                 console.log("Exiting getProgress because shouldContinue is false");
                 return;
             }
-
-            console.log("getProgress");
 
             fetch('/progress')
                 .then(response => {
