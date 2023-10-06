@@ -452,7 +452,7 @@ def datasets():
         return redirect(url_for('login'))
     if session['level'] != 'admin':
         return render_template('403.html'), 403
-    return render_template('datasets.html', title='Datasets')
+    return render_template('datasetsV2.html', title='Datasets')
 
 
 @app.route("/getUsers", methods=['GET'])
@@ -1274,12 +1274,6 @@ def startProcess(mongoRecord, jobNum, zdown):
             executor.submit(createYzViewTIFF, index,mongoRecord, jobNum)
     progress['progress'] = 1.0  # 100% done
     progress['status'] = 'completed'
-    base_dir = os.path.join(temp_dir, mongoRecord[jobNum]['name'])
-
-    zip_filename_without_extension = os.path.join(base_dir, 'all_images')
-    shutil.make_archive(zip_filename_without_extension, 'zip', base_dir)
-        
-    #os.remove(file) for file in os.listdir('path/to/directory') if file.endswith('.png')
 
 def create3dPngZip(mongoRecord, jobNum, zdown):
     fn = mongoRecord[jobNum]['name'] + '/' + mongoRecord[jobNum]['type'] + '-' + mongoRecord[jobNum]['exp'] + '-' + mongoRecord[jobNum]['wv'] + '.zip'
@@ -1369,31 +1363,75 @@ def createYzViewTIFF(index, mongoRecord, jobNum):
     subprocess.call(cmd)   
 
 # Set a global variable to track progress
-@app.route('/driver', methods=['POST'])
+@app.route('/UploadDataset', methods=['POST'])
 def driver():
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV
+    datasets = db.datasets
     global progress
     progress = {'status': 'started', 'progress': 0.0}
     # Reset progress at the start of a new job
     data = request.form
+
+    dataset_name = data.get('dataset-name')
+    voxels_x = data.get('voxels_x')
+
+    voxels_y = data.get('voxels_y')
+    voxels_z = data.get('voxels_z')
+    ImageDim_x = data.get('ImageDims_x')
+    ImageDim_y =  data.get('ImageDims_y')
+    ImageDim_z = data.get('ImageDims_z')
+    Dims2_x = data.get('Dims2_x')
+    Dims2_y = data.get('Dims2_y')
+    Dims2_z = data.get('Dims2_z')
+    Dims3_x = data.get('Dims3_x')
+    Dims3_y = data.get('Dims3_y')
+    Dims3_z = data.get('Dims3_z')
+    pixelLengthUM = data.get('pixelLengthUM')
+    zskip = data.get('zskip')
+    spcimenName = data.get('spcimenName')
+    PI = data.get('PI')
+    voxel_size = data.get('voxel_size')
+    thickness = data.get('thickness')
+
     # print(data)
-    Modality = data.get('Modality')
+    Modality = data.get('modality')
     exposure = data.get('exposure')
     wavelength = data.get('wavelength')
-    # path = data.get('path')
     FileName = data.get('FileName')
     # Extract Tiff content
     file = request.files['fileContent']
     file_content = file.read()
 
     input_data = {
+        'dataset_name':dataset_name,
         'Modality': Modality,
+        'voxels_x':voxels_x,
+        'voxels_y':voxels_y,
+        'voxels_z':voxels_z,
+        'ImageDim_x':ImageDim_x,
+        'ImageDim_y':ImageDim_y,
+        'ImageDim_z':ImageDim_z,
+        'Dims2_x':Dims2_x,
+        'Dims2_y':Dims2_y,
+        'Dims2_z':Dims2_z,
+        'Dims3_x':Dims3_x,
+        'Dims3_y':Dims3_y,
+        'Dims3_z':Dims3_z,
+        'pixelLengthUM':pixelLengthUM,
+        'zskip':zskip,
+        'spcimenName':spcimenName,
+        'PI':PI,
+        'voxel_size':voxel_size,
+        'thickness':thickness,
         'exposure': exposure,
         'wavelength': wavelength,
         'FileName': FileName
     }
-    print(input_data)
+    print("input_data",input_data)
     jobs = {}
-    jobs[1] = [Modality, exposure, wavelength, file_content]
+    jobs[1] = [dataset_name, Modality, exposure, wavelength, file_content]
+    # print("jobs1",jobs[1])
     mongoRecord = {}
 
     for job in jobs.items():
@@ -1402,7 +1440,7 @@ def driver():
             print('Considering just sorting mongorecord at the end')
         else:
             mongoRecord[str(job[0])]['name'] = job[1][0]
-            firstFile = job[1][3] #% 1  
+            firstFile = job[1][4] #% 1  
             
             # print("firstFile",firstFile)
             tiff = Image.open(BytesIO(firstFile))
@@ -1411,10 +1449,13 @@ def driver():
             mongoRecord[str(job[0])]['imageDims'] = {}
             mongoRecord[str(job[0])]['imageDims']['x'], mongoRecord[str(job[0])]['imageDims']['y'] = tiff.size
             mongoRecord[str(job[0])]['imageDims']['z'] = tifCounter
-            mongoRecord[str(job[0])]['type'] = job[1][0] #bf or fl
-            mongoRecord[str(job[0])]['exp'] = job[1][1] #exp
-            mongoRecord[str(job[0])]['wv'] = job[1][2] #wv
-            mongoRecord[str(job[0])]['fp'] = job[1][3]
+            mongoRecord[str(job[0])]['type'] = job[1][1] #bf or fl
+            mongoRecord[str(job[0])]['exp'] = job[1][2] #exp
+            mongoRecord[str(job[0])]['wv'] = job[1][3] #wv
+            print("mongoRecord",mongoRecord)
+            mongoRecord[str(job[0])]['fp'] = job[1][4]
+            
+
             #mongoRecord[str(job[0])]['zdown'] = 1 #not used yet
             # print("mongoRecord",mongoRecord)
             # print(mongoRecord)
@@ -1423,11 +1464,77 @@ def driver():
         mongoRecord[str(job[0])]["processedTime"] = datetime.now().time()
         # print("mongoRecord",mongoRecord)
         
-        base_dir = os.path.join(temp_dir, mongoRecord[str(job[0])]['name'])
-        # Whole Path of zip file
-        zip_file_path = os.path.join(base_dir, 'all_images.zip')
-        # Return Zip file
-        return send_file(zip_file_path, as_attachment=True, attachment_filename="processed_images.zip")
+        base_dir = os.path.join(temp_dir, mongoRecord[str(job[0])]['name'],'basis', mongoRecord[str(job[0])]['type'], mongoRecord[str(job[0])]['exp'], mongoRecord[str(job[0])]['wv'])
+        print("base_dir",base_dir)
+
+
+        files_and_dirs = os.listdir(base_dir)
+
+
+        # Save data to MongoDB
+        doc = {
+            'name': dataset_name,
+            'types':{Modality:{
+                exposure:[wavelength]
+                            }
+                    },
+            'voxels':{'x':voxels_x,'y':voxels_y,'z':voxels_z},
+            'dims2':{'x':Dims2_x,'y': Dims2_y,'z': Dims2_z},
+            'dims3':{'x':Dims3_x,'y': Dims3_y,'z': Dims3_z},
+            'pixelLengthUM':pixelLengthUM,
+            'imageDims':{'x':ImageDim_x,'y':ImageDim_y,'z':ImageDim_z},
+            'zskip':zskip,
+            'info':{'spcimenName': spcimenName,'PI': PI,'voxels': voxel_size,'thickness':thickness},
+        
+        }
+    if not datasets.find_one({'name': dataset_name}):   
+        datasets.insert_one(doc)
+
+    # Azure storage account name and account key, these information should be obtained from the Azure portal
+    azure_storage_account_name = "bivlargefiles"
+    azure_storage_account_key = "PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw=="
+    share = "data"
+    # Create Azure ShareFileClient
+
+    # The directory path that needs to be created
+
+    for item in files_and_dirs:
+        filesNameList = os.listdir(os.path.join(base_dir, item))
+        dir_s = [dataset_name,"basis", Modality, exposure, wavelength, item]
+
+        # Create a ShareDirectoryClient object and create directories step by step
+        dir_path = ""
+        for dir_name in dir_s:
+            # print(dir_name)
+            dir_path = os.path.join(dir_path, dir_name)
+            dir_client = ShareDirectoryClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name=share,directory_path=dir_path,credential=azure_storage_account_key)
+            if not dir_client.exists():
+                dir_client.create_directory()
+            else:
+            # Parent folder already exists, skip creation
+                pass
+        # Create a ShareFileClient object and upload files to the specified directory
+
+        for file_name in filesNameList:
+            fileExtension = file_name.split(".")[-1]
+            print("fileextension",fileExtension)
+            if fileExtension != 'basis': 
+                continue
+
+            # build file path
+            file_path = os.path.join(dir_path, dir_name)
+            print("file_path",file_path)
+            # Create a ShareFileClient object and upload files
+            
+            file_client = ShareFileClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name=share, file_path=file_path, credential=azure_storage_account_key)
+            file_path_loacl = os.path.join(os.path.join(base_dir, item), file_name)
+
+            # 以读模式打开文件
+            with open(file_path_loacl, 'r') as file:
+                content = file.read()
+            file_client.upload_file(content)
+    
+    return jsonify({"message": "File Uploaded Successfully"}), 200
 
 
 @app.route('/progress', methods=['GET'])
