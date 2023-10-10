@@ -1272,8 +1272,8 @@ def startProcess(mongoRecord, jobNum, zdown):
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
         for index in range(0, mongoRecord[jobNum]['imageDims']['x']-1, 4):
             executor.submit(createYzViewTIFF, index,mongoRecord, jobNum)
-    progress['progress'] = 1.0  # 100% done
-    progress['status'] = 'completed'
+    progress['progress'] = 0.9  # 100% done
+
 
 def create3dPngZip(mongoRecord, jobNum, zdown):
     fn = mongoRecord[jobNum]['name'] + '/' + mongoRecord[jobNum]['type'] + '-' + mongoRecord[jobNum]['exp'] + '-' + mongoRecord[jobNum]['wv'] + '.zip'
@@ -1482,7 +1482,7 @@ def driver():
             'dims2':{'x':Dims2_x,'y': Dims2_y,'z': Dims2_z},
             'dims3':{'x':Dims3_x,'y': Dims3_y,'z': Dims3_z},
             'pixelLengthUM':pixelLengthUM,
-            'imageDims':{'x':ImageDim_x,'y':ImageDim_y,'z':ImageDim_z},
+            'imageDims':{'x':mongoRecord[str(job[0])]['imageDims']['x'],'y':mongoRecord[str(job[0])]['imageDims']['y'],'z':mongoRecord[str(job[0])]['imageDims']['z']},
             'zskip':zskip,
             'info':{'spcimenName': spcimenName,'PI': PI,'voxels': voxel_size,'thickness':thickness},
         
@@ -1522,20 +1522,21 @@ def driver():
                 continue
 
             # build file path
-            file_path = os.path.join(dir_path, dir_name)
+            file_path = os.path.join(dir_path, file_name)
             print("file_path",file_path)
             # Create a ShareFileClient object and upload files
             
             file_client = ShareFileClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name=share, file_path=file_path, credential=azure_storage_account_key)
-            file_path_loacl = os.path.join(os.path.join(base_dir, item), file_name)
-
+            file_path_local = os.path.join(os.path.join(base_dir, item), file_name)
+            print(file_path_local)
             # 以读模式打开文件
-            with open(file_path_loacl, 'r') as file:
+            with open(file_path_local, 'rb') as file:
                 content = file.read()
             file_client.upload_file(content)
-    
-    return jsonify({"message": "File Uploaded Successfully"}), 200
 
+    progress['progress'] = 1
+    progress['status'] = 'completed'
+    return jsonify({"message": "File Uploaded Successfully"}), 200
 
 @app.route('/progress', methods=['GET'])
 def get_progress():
