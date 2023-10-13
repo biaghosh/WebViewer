@@ -1517,13 +1517,11 @@ def driver():
 
         for file_name in filesNameList:
             fileExtension = file_name.split(".")[-1]
-            print("fileextension",fileExtension)
             if fileExtension != 'basis': 
                 continue
 
             # build file path
             file_path = os.path.join(dir_path, file_name)
-            print("file_path",file_path)
             # Create a ShareFileClient object and upload files
             
             file_client = ShareFileClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name=share, file_path=file_path, credential=azure_storage_account_key)
