@@ -235,15 +235,11 @@ def updateAnnotationComments():
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     ds = db.annotations
-    # print(json)
     ds.update_one({
         "dataset": json["dataset"],
         "slice": json["slice"],
         "text": json["oldText"],
         "instance": int(json["instance"]),
-        #                "moduality": json["moduality"],
-        #                "exposure": json["exposure"],
-        #                "wavelength": json["wavelength"],
         "instance": int(json["instance"]),
         "status": 'active'
     },
@@ -268,13 +264,9 @@ def deleteAnnotation():
     else:
         json["instance"] = int(json["instance"])
 
-    # print(json)
     ds.update_one({
         "dataset": json["dataset"],
         "slice": json["slice"],
-        #                "moduality": json["moduality"],
-        #                "exposure": json["exposure"],
-        #                "wavelength": json["wavelength"],
         "text": json["text"],
         "instance": json["instance"]
     },
@@ -287,7 +279,6 @@ def deleteAnnotation():
 
 @app.route('/addAssignedDataset/<email>/<datasetName>', methods=['POST'])
 def add_assigned_dataset(email, datasetName):
-#   print(email,datasetName)
   client = MongoClient(app.config['mongo'])
   db = client.BIV
   users = db.Users
@@ -333,7 +324,6 @@ def get_user_datasets(email):
 
 @app.route('/getDatasets', methods=['GET'])
 def get_datasets():
-    # print("get_datasets")
     datasets = []
     client = MongoClient(app.config['mongo'])
     db = client.BIV
@@ -419,9 +409,7 @@ def viewer():
     db = client.BIV
     users = db.Users
     user = users.find_one({"email": session['email']})
-    # bcrypt.generate_password_hash("zxcvb1",form.password.data)})
     ds = user["datasets"]
-    # print(ds)
     return render_template('three_new popup.html', title='Viewer', datasets=ds)
 
 
@@ -514,7 +502,6 @@ def deleteUser():
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     users = db.Users
-    # print(json['email'])
     usersResult = users.delete_one({"email": json['email']})
     send = '{ "success": "cookie"}'
     return jsonify({'status': 'success', 'message': 'Delete successfully'})
@@ -915,7 +902,6 @@ def getFiles():
     db = client.BIV
     ds = db.files.files
     data = '{}'
-    # print(json, file=sys.stdout)
     data = ds.find({
             "dataset": json["dataset"],
         })
@@ -943,7 +929,6 @@ def store_image():
         
         # Generate a unique blob name
         blob_name = file.filename
-        # print(blob_name)
         # Get a reference to the container
         container_client = blob_service_client.get_container_client(CONTAINER_NAME)
 
@@ -996,7 +981,7 @@ def store_image():
             expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         )
         blob_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{CONTAINER_NAME}/{blob_name}"
-        # print(blob_url)
+
         doc = {
             "name" : filename,
             'upload_date': datetime.datetime.now(),
@@ -1054,7 +1039,7 @@ def download_files():
     if len(file_name) == 0:
         return
     format = file_name.split(".")[-1] 
-    # print(format)
+
     fs = db['files.files']
 
     file_url = fs.find_one({'name':file_name})['URL']
@@ -1193,7 +1178,6 @@ def upload_file():
     # Create a ShareDirectoryClient object and create directories step by step
     dir_path = ""
     for dir_name in dirs:
-        # print(dir_name)
         dir_path = os.path.join(dir_path, dir_name)
         dir_client = ShareDirectoryClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name=share,directory_path=dir_path,credential=azure_storage_account_key)
         if not dir_client.exists():
@@ -1274,7 +1258,6 @@ def startProcess(mongoRecord, jobNum, zdown):
             executor.submit(createYzViewTIFF, index,mongoRecord, jobNum)
     progress['progress'] = 0.9  # 100% done
 
-
 def create3dPngZip(mongoRecord, jobNum, zdown):
     fn = mongoRecord[jobNum]['name'] + '/' + mongoRecord[jobNum]['type'] + '-' + mongoRecord[jobNum]['exp'] + '-' + mongoRecord[jobNum]['wv'] + '.zip'
     zipf = zipfile.ZipFile(fn, 'w', zipfile.ZIP_DEFLATED)
@@ -1296,9 +1279,9 @@ def create3dPngZip(mongoRecord, jobNum, zdown):
     znum = 0
     for z in range( 1, mongoRecord[jobNum]['imageDims']['z'], 1 ):
         file = mongoRecord[jobNum]['fp'] #% z
-        # print(file)
+
         tiff = Image.open(BytesIO(file))
-        # print(tiff)
+
         tiff.seek(z)
         im = tiff.resize((mongoRecord[jobNum]['imageDims']['x']//scale, mongoRecord[jobNum]['imageDims']['y']//scale))
         fn = "%d.png" % (znum)
@@ -1375,7 +1358,6 @@ def driver():
 
     dataset_name = data.get('dataset-name')
     voxels_x = data.get('voxels_x')
-
     voxels_y = data.get('voxels_y')
     voxels_z = data.get('voxels_z')
     ImageDim_x = data.get('ImageDims_x')
@@ -1393,8 +1375,6 @@ def driver():
     PI = data.get('PI')
     voxel_size = data.get('voxel_size')
     thickness = data.get('thickness')
-
-    # print(data)
     Modality = data.get('modality')
     exposure = data.get('exposure')
     wavelength = data.get('wavelength')
@@ -1455,17 +1435,12 @@ def driver():
             print("mongoRecord",mongoRecord)
             mongoRecord[str(job[0])]['fp'] = job[1][4]
             
-
-            #mongoRecord[str(job[0])]['zdown'] = 1 #not used yet
-            # print("mongoRecord",mongoRecord)
-            # print(mongoRecord)
             startProcess(mongoRecord, str(job[0]), 1 )
 
         mongoRecord[str(job[0])]["processedTime"] = datetime.now().time()
         # print("mongoRecord",mongoRecord)
         
         base_dir = os.path.join(temp_dir, mongoRecord[str(job[0])]['name'],'basis', mongoRecord[str(job[0])]['type'], mongoRecord[str(job[0])]['exp'], mongoRecord[str(job[0])]['wv'])
-        print("base_dir",base_dir)
 
 
         files_and_dirs = os.listdir(base_dir)
@@ -1505,7 +1480,6 @@ def driver():
         # Create a ShareDirectoryClient object and create directories step by step
         dir_path = ""
         for dir_name in dir_s:
-            # print(dir_name)
             dir_path = os.path.join(dir_path, dir_name)
             dir_client = ShareDirectoryClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name=share,directory_path=dir_path,credential=azure_storage_account_key)
             if not dir_client.exists():
@@ -1526,8 +1500,6 @@ def driver():
             
             file_client = ShareFileClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name=share, file_path=file_path, credential=azure_storage_account_key)
             file_path_local = os.path.join(os.path.join(base_dir, item), file_name)
-            print(file_path_local)
-            # 以读模式打开文件
             with open(file_path_local, 'rb') as file:
                 content = file.read()
             file_client.upload_file(content)
