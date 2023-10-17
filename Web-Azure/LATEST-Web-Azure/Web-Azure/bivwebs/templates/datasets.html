@@ -327,8 +327,7 @@
         document.getElementById('submitBtn').addEventListener('click', function () {
             var submitBtn = document.getElementById("submitBtn");
 
-            // disabel submitBtn
-            submitBtn.disabled = true;
+            
             const Modality = document.getElementById('modality_3D');
             const exposure = document.getElementById('exposure_3D');
             const wavelength_3D = document.getElementById('wavelength_3D');
@@ -348,7 +347,7 @@
                     return;
                 }
             }
-
+            
             var fileExtension = fileInputTiff.files[0].name.split('.').pop().toLowerCase(); // Get file extension name
             if (fileExtension !== 'tif') {
                 alert('Wrong file format! Please upload the .tif file');
@@ -366,6 +365,8 @@
             // Start getProgress function
             shouldContinue = true;
             getProgress();
+            // disabel submitBtn
+            submitBtn.disabled = true;
             fetch('/driver', {
                 method: 'POST',
                 body: formData

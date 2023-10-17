@@ -9,9 +9,16 @@
             -ms-user-select: none;
             user-select: none;
             background-color: #e6e6e6;
-            /* 将所选行的背景颜色设置为灰色 */
+            /* Set the background color of selected rows to gray */
             color: #000;
-            /* 将所选行的文本颜色设置为黑色，以确保可读性 */
+            /* Set the text color of selected lines to black to ensure readability */
+        }
+
+        #datasetList,
+        #assignedDatasets {
+            max-height: 300px;
+            /* You can adjust this value as needed */
+            overflow-y: auto;
         }
 
 
@@ -39,6 +46,37 @@
                 <div id="viewUsersCard" class="card-body">
                     <!-- table -->
                 </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <h5 class="card-title">Dataset List</h5>
+                                <div id="datasetList" class="table table-striped table-hover"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-center justify-content-center">
+                        <div class="btn-group-vertical">
+                            <button id="addDatasetBtn" type="button" class="btn btn-primary mb-2"
+                                onclick="addAssignedDataset(selectedUserEmail, selectedDatasetName)">
+                                <i class="bi bi-arrow-right-circle-fill"></i> Add
+                            </button>
+                            <button id="removeDatasetBtn" type="button" class="btn btn-primary"
+                                onclick="removeAssignedDataset(selectedUserEmail, selectedAssignedDatasetName)">
+                                <i class="bi bi-arrow-left-circle-fill"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <h5 id="assignedDatasetsTitle" class="card-title">Assigned Datasets for </h5>
+                                <ul id="assignedDatasets" class="list-group"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="deleteUserBtn" type="submit" class="btn btn-danger">Delete</button>
             </div>
         </div>
         <!-- Create User-->
@@ -67,51 +105,7 @@
             </div>
         </div>
     </div>
-    <div class="row" style="margin: 10px;">
-        <div class="col-6">
-            <div class="card shadow">
-                <div id="assignedDatasetsHead" class="card-header">
-                    Assign Datasets
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="card border-0">
-                                <div class="card-body">
-                                    <h5 class="card-title">Dataset List</h5>
-                                    <div id="datasetList" class="table table-striped table-hover"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-center justify-content-center">
-                            <div class="btn-group-vertical">
-                                <button id="addDatasetBtn" type="button" class="btn btn-primary mb-2"
-                                    onclick="addAssignedDataset(selectedUserEmail, selectedDatasetName)">
-                                    <i class="bi bi-arrow-right-circle-fill"></i> Add
-                                </button>
-                                <button id="removeDatasetBtn" type="button" class="btn btn-primary"
-                                    onclick="removeAssignedDataset(selectedUserEmail, selectedAssignedDatasetName)">
-                                    <i class="bi bi-arrow-left-circle-fill"></i> Remove
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card border-0">
-                                <div class="card-body">
-                                    <h5 id="assignedDatasetsTitle" class="card-title">Assigned Datasets for </h5>
-                                    <ul id="assignedDatasets" class="list-group"></ul>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                    <button id="deleteUserBtn" type="submit" class="btn btn-danger">Delete</button>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
-
 
 <script>
     window.addEventListener("DOMContentLoaded", usersTable())
@@ -120,7 +114,6 @@
     let selectedDatasetName;
     let selectedAssignedDatasetName;
     const assignedDatasetsTitle = document.getElementById('assignedDatasetsTitle');
-
 
     function addAssignedDataset(email, datasetName) {
         console.log(email, datasetName)
@@ -141,7 +134,7 @@
             });
     }
 
-    // 从 Assigned Datasets 列表中删除数据集
+    // Delete selected datasets from Assigned Datasets
     function removeAssignedDataset(email, datasetName) {
         fetch(`/removeUserDataset/${email}/${datasetName}`, { method: 'POST' })
             .then(response => {
@@ -186,10 +179,19 @@
             .catch((error) => {
                 console.error('Error:', error)
             })
-
     })
 
     document.getElementById("deleteUserBtn").addEventListener('click', () => {
+
+        if (!selectedUserEmail || selectedUserEmail.trim() === "") {
+            alert("Please select an user to delete");
+            return; // This will exit the function early if no email is selected
+        }
+        // Confirm deletion
+        let isConfirmed = confirm("You sure you want to delete it? Deletion cannot be undone.");
+        if (!isConfirmed) {
+            return; // If the user clicked "Cancel", exit the function early
+        }
         //validate
         let email = selectedUserEmail
         //fetch
@@ -208,10 +210,10 @@
                     //updateTable
                     usersTable()
                     selectedUserEmail = " "
-                    assignedDatasetsHead.textContent = `Assigned Datasets for ${selectedUserEmail}`;
+                    // assignedDatasetsHead.textContent = `Assigned Datasets for ${selectedUserEmail}`;
                     handleSelectedUser(selectedUserEmail)
                 } else {
-                    // 显示错误消息
+                    // Display alert message
                     alert(data.message);
                 }
 
@@ -237,12 +239,12 @@
     function handleSelectedUser(selectedUserEmail) {
         assignedDatasetsTitle.textContent = `Assigned Datasets for ${selectedUserEmail}`;
         const assignedDatasets = document.getElementById('assignedDatasets');
-        // 先清空已分配数据集列表
+        // Empty the current datasets list
         assignedDatasets.innerHTML = '';
-        // 显示当前选择的用户
+        // Show the selected user
         const selectedUserHeading = document.createElement('h5');
         assignedDatasets.appendChild(selectedUserHeading);
-        // 查询当前选择的用户所拥有的数据集
+        // Query the datasets of selceted user
         fetch(`/getUserDatasets/${selectedUserEmail}`, {
             method: 'GET',
         })
@@ -327,7 +329,7 @@
                 lastLogin: selectedRow.querySelector('td:nth-child(4)').textContent,
             };
             selectedUserEmail = rowData['email']
-            assignedDatasetsHead.textContent = `Assigned Datasets for ${selectedUserEmail}`;
+            // assignedDatasetsHead.textContent = `Assigned Datasets for ${selectedUserEmail}`;
             handleSelectedUser(selectedUserEmail);
             // Remove the selected-row class from all other tr elements
             const allRows = document.querySelectorAll('tr');

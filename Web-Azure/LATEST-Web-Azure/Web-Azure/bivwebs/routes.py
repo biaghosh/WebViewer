@@ -1,10 +1,10 @@
 import os
 import sys
 import io
-import datetime
+from datetime import datetime, timedelta
 from flask import render_template, url_for, flash, redirect, request, abort, jsonify, make_response, send_file, session
 import requests
-from azure.storage.fileshare import ShareClient,ShareDirectoryClient,ShareFileClient
+from azure.storage.fileshare import ShareClient,ShareDirectoryClient,ShareFileClient,generate_file_sas
 from azure.storage.blob import BlobServiceClient, ContentSettings,generate_blob_sas, BlobSasPermissions
 from bivwebs import app
 from bivwebs.forms import EmailOTPForm
@@ -30,7 +30,6 @@ import shutil
 import subprocess, os
 import math, zipfile
 import concurrent.futures
-from datetime import datetime
 from io import BytesIO
 
 # Set a global variable to track progress
@@ -1515,4 +1514,52 @@ def get_progress():
         return jsonify(progress)
     except Exception as e:
         return jsonify(error=str(e)), 500
+
+@app.route('/getDatasetsData', methods=['POST'])
+def get_datasetsData():
+    dataset_name = request.json['datasetName']
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV
+    ds = db.datasets
+    # 假设每个数据集都有一个"name"字段来存储其名称
+    dataset_data = ds.find({"name": dataset_name})
+    # 将数据转换为可序列化的格式
+    data = []
+    for doc in dataset_data:
+        # 在返回前，MongoDB的ObjectId字段需要被删除或转换为字符串，因为它不能直接被序列化为JSON。
+        doc['_id'] = str(doc['_id'])
+        data.append(doc)
+
+    return jsonify(data)
+
+@app.route('/downloadDataset', methods=['POST'])
+def download_file():
+    dataset_name = request.json['datasetName']
+    azure_storage_account_name = "bivlargefiles"
+    azure_storage_account_key = "PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw=="
+    share = "data"
+    # 初始化BlobServiceClient
+    blob_service_client = BlobServiceClient(account_url=f"https://{azure_storage_account_name}.blob.core.windows.net", credential=azure_storage_account_key)
+
+    # 创建ShareFileClient对象
+    file_client = ShareFileClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", 
+                                   share_name=share, 
+                                   file_path=dataset_name, 
+                                   credential=azure_storage_account_key)
+
+
+
+    sas_token = generate_file_sas(
+    account_name=azure_storage_account_name,
+    account_key=azure_storage_account_key,
+    share_name=share,  # This should be sufficient. No need for a positional argument.
+    permission="rl",
+    expiry=datetime.utcnow() + timedelta(hours=1),
+    file_path=f"https://{azure_storage_account_name}.file.core.windows.net.data.{dataset_name}"
+)
+    sas_token = "sp=r&st=2023-10-17T20:48:24Z&se=2023-10-18T20:48:24Z&sv=2022-11-02&sig=u6kVW1MN6ibxrVlLW3zwXThKHXOILb8qyefZC6YdUQM%3D&sr=s"
+    
+    download_url = f"https://{azure_storage_account_name}.file.core.windows.net/{share}/{dataset_name}?{sas_token}"
+
+    return jsonify({'download_url': download_url})
 
