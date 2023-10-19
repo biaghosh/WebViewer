@@ -1407,7 +1407,6 @@ def driver():
         'wavelength': wavelength,
         'FileName': FileName
     }
-    print("input_data",input_data)
     jobs = {}
     jobs[1] = [dataset_name, Modality, exposure, wavelength, file_content]
     # print("jobs1",jobs[1])
@@ -1443,7 +1442,6 @@ def driver():
 
 
         files_and_dirs = os.listdir(base_dir)
-
 
         # Save data to MongoDB
         doc = {
@@ -1532,6 +1530,7 @@ def get_datasetsData():
 
     return jsonify(data)
 
+# Under developing
 @app.route('/downloadDataset', methods=['POST'])
 def download_file():
     dataset_name = request.json['datasetName']
@@ -1546,9 +1545,7 @@ def download_file():
                                    share_name=share, 
                                    file_path=dataset_name, 
                                    credential=azure_storage_account_key)
-
-
-
+    
     sas_token = generate_file_sas(
     account_name=azure_storage_account_name,
     account_key=azure_storage_account_key,
@@ -1564,3 +1561,24 @@ def download_file():
 
     return jsonify({'download_url': download_url})
 
+@app.route('/deleteDataset', methods=['POST'])
+def delete_dataset():
+    dataset_name = request.json['datasetName']
+    azure_storage_account_name = "bivlargefiles"
+    azure_storage_account_key = "PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw=="
+    share = "data"
+
+    # 初始化ShareClient
+    share_client = ShareClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name=share, credential=azure_storage_account_key)
+
+    # 获取对应的数据集目录客户端
+    directory_client = share_client.get_directory_client(dataset_name)
+
+    try:
+        # 尝试删除数据集
+        directory_client.delete_directory()
+        return jsonify({'status': 'success', 'message': f'Dataset {dataset_name} deleted successfully.'})
+
+    except Exception as e:
+        print(e)
+        return jsonify({'status': 'error', 'message': f'Error while deleting dataset {dataset_name}: {str(e)}'})
