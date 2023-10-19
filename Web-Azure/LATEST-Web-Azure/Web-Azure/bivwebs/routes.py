@@ -1557,9 +1557,10 @@ def download_file():
     expiry=datetime.utcnow() + timedelta(hours=1),
     file_path=f"https://{azure_storage_account_name}.file.core.windows.net.data.{dataset_name}"
 )
-    sas_token = "sp=r&st=2023-10-17T20:48:24Z&se=2023-10-18T20:48:24Z&sv=2022-11-02&sig=u6kVW1MN6ibxrVlLW3zwXThKHXOILb8qyefZC6YdUQM%3D&sr=s"
+    sas_token = "sp=r&st=2023-10-19T15:10:02Z&se=2023-11-29T16:10:00Z&sv=2022-11-02&sig=vtNHv%2Bg5WKHNbkNVjdAWH3J2OnSJnH%2BZobQ6SKAaOEo%3D&sr=s"
     
     download_url = f"https://{azure_storage_account_name}.file.core.windows.net/{share}/{dataset_name}?{sas_token}"
+    print(download_url)
 
     return jsonify({'download_url': download_url})
 

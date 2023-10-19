@@ -185,7 +185,9 @@
     </div>
     <script src="https://cdn.socket.io/3.0.3/socket.io.min.js"></script>
     <script>
-        let selectedDatasetName = "";
+        let selectedDatasetName = ""
+        document.getElementById('downloadDatasetBtn').disabled = true
+        document.getElementById('deleteDatasetBtn').disabled = true
         window.addEventListener("DOMContentLoaded", renderDatasetList())
         function renderDatasetList() {
             getDatasets().then(datasets => {
