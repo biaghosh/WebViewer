@@ -1255,7 +1255,7 @@ def startProcess(mongoRecord, jobNum, zdown):
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
         for index in range(0, mongoRecord[jobNum]['imageDims']['x']-1, 4):
             executor.submit(createYzViewTIFF, index,mongoRecord, jobNum)
-    progress['progress'] = 0.9  # 100% done
+    progress['progress'] = 1  # 100% done
 
 def create3dPngZip(mongoRecord, jobNum, zdown):
     fn = mongoRecord[jobNum]['name'] + '/' + mongoRecord[jobNum]['type'] + '-' + mongoRecord[jobNum]['exp'] + '-' + mongoRecord[jobNum]['wv'] + '.zip'
@@ -1437,9 +1437,9 @@ def driver():
 
         mongoRecord[str(job[0])]["processedTime"] = datetime.now().time()
         # print("mongoRecord",mongoRecord)
-        
         base_dir = os.path.join(temp_dir, mongoRecord[str(job[0])]['name'],'basis', mongoRecord[str(job[0])]['type'], mongoRecord[str(job[0])]['exp'], mongoRecord[str(job[0])]['wv'])
 
+        print("temp_dir",temp_dir)
 
         files_and_dirs = os.listdir(base_dir)
 
@@ -1501,8 +1501,6 @@ def driver():
                 content = file.read()
             file_client.upload_file(content)
 
-    progress['progress'] = 1
-    progress['status'] = 'completed'
     return jsonify({"message": "File Uploaded Successfully"}), 200
 
 @app.route('/progress', methods=['GET'])
