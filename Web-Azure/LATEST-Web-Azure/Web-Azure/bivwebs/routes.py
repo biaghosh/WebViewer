@@ -1464,24 +1464,18 @@ def driver():
     else:
         query = {'name': dataset_name}
         types_key = f"types.{Modality}"
-        # 根据 exposure 的值来确定是更新哪个键
+        # 
         exposure_key = f"{types_key}.{exposure}" 
 
-        # 要添加或更新的数据
+        # 
         update = {
             "$set": {
                 exposure_key: [wavelength]
         }
     }
 
-        # 执行更新
+        # 
         datasets.update_one(query, update, upsert=True)
-
-    # 查询并输出datasets集合中的所有文档
-    all_datasets = datasets.find()
-
-    for dataset in all_datasets:
-        print(dataset)
 
     # Azure storage account name and account key, these information should be obtained from the Azure portal
     azure_storage_account_name = "bivlargefiles"
