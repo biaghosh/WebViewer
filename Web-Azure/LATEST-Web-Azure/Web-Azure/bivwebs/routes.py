@@ -1439,7 +1439,7 @@ def driver():
         # print("mongoRecord",mongoRecord)
         base_dir = os.path.join(temp_dir, mongoRecord[str(job[0])]['name'],'basis', mongoRecord[str(job[0])]['type'], mongoRecord[str(job[0])]['exp'], mongoRecord[str(job[0])]['wv'])
 
-        print("temp_dir",temp_dir)
+        
 
         files_and_dirs = os.listdir(base_dir)
 
@@ -1461,6 +1461,27 @@ def driver():
         }
     if not datasets.find_one({'name': dataset_name}):   
         datasets.insert_one(doc)
+    else:
+        query = {'name': dataset_name}
+        types_key = f"types.{Modality}"
+        # 根据 exposure 的值来确定是更新哪个键
+        exposure_key = f"{types_key}.{exposure}" 
+
+        # 要添加或更新的数据
+        update = {
+            "$set": {
+                exposure_key: [wavelength]
+        }
+    }
+
+        # 执行更新
+        datasets.update_one(query, update, upsert=True)
+
+    # 查询并输出datasets集合中的所有文档
+    all_datasets = datasets.find()
+
+    for dataset in all_datasets:
+        print(dataset)
 
     # Azure storage account name and account key, these information should be obtained from the Azure portal
     azure_storage_account_name = "bivlargefiles"
@@ -1501,6 +1522,18 @@ def driver():
                 content = file.read()
             file_client.upload_file(content)
 
+    compressed_file_path = dataset_name + "_" + Modality + ".zip"
+    shutil.make_archive(compressed_file_path[:-4], 'zip', temp_dir)
+    blob_name = os.path.basename(compressed_file_path)
+
+    AZURE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=bivlargefiles;AccountKey=PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw==;EndpointSuffix=core.windows.net"
+    CONTAINER_NAME = "zipfiles"
+    blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
+    container_client = blob_service_client.get_container_client(CONTAINER_NAME)
+    blob_client = container_client.get_blob_client(blob_name)
+    with open(compressed_file_path, "rb") as f:
+        blob_client.upload_blob(f)
+
     return jsonify({"message": "File Uploaded Successfully"}), 200
 
 @app.route('/progress', methods=['GET'])
@@ -1534,30 +1567,30 @@ def download_file():
     dataset_name = request.json['datasetName']
     azure_storage_account_name = "bivlargefiles"
     azure_storage_account_key = "PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw=="
-    share = "data"
+    container_name = "zipfiles"
     # 初始化BlobServiceClient
     blob_service_client = BlobServiceClient(account_url=f"https://{azure_storage_account_name}.blob.core.windows.net", credential=azure_storage_account_key)
-
-    # 创建ShareFileClient对象
-    file_client = ShareFileClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", 
-                                   share_name=share, 
-                                   file_path=dataset_name, 
-                                   credential=azure_storage_account_key)
     
-    sas_token = generate_file_sas(
-    account_name=azure_storage_account_name,
-    account_key=azure_storage_account_key,
-    share_name=share,  # This should be sufficient. No need for a positional argument.
-    permission="rl",
-    expiry=datetime.utcnow() + timedelta(hours=1),
-    file_path=f"https://{azure_storage_account_name}.file.core.windows.net.data.{dataset_name}"
-)
-    sas_token = "sp=r&st=2023-10-19T15:10:02Z&se=2023-11-29T16:10:00Z&sv=2022-11-02&sig=vtNHv%2Bg5WKHNbkNVjdAWH3J2OnSJnH%2BZobQ6SKAaOEo%3D&sr=s"
-    
-    download_url = f"https://{azure_storage_account_name}.file.core.windows.net/{share}/{dataset_name}?{sas_token}"
-    print(download_url)
+    # 列出所有的blobs
+    all_blobs = blob_service_client.get_container_client(container_name).list_blobs(name_starts_with=dataset_name)
 
-    return jsonify({'download_url': download_url})
+    # 筛选出包含dataset_name并且为.zip的blobs
+    zip_blobs = [blob for blob in all_blobs if blob.name.endswith('.zip')]
+
+    download_urls = []
+
+    for blob in zip_blobs:
+        sas_token = generate_blob_sas(account_name=azure_storage_account_name,
+                                      container_name=container_name,
+                                      blob_name=blob.name,
+                                      account_key=azure_storage_account_key,
+                                      permission="r",
+                                      expiry=datetime.utcnow() + timedelta(hours=1))
+
+        download_url = f"https://{azure_storage_account_name}.blob.core.windows.net/{container_name}/{blob.name}?{sas_token}"
+        download_urls.append(download_url)
+    print(download_urls)
+    return jsonify({'download_urls': download_urls})
 
 @app.route('/deleteDataset', methods=['POST'])
 def delete_dataset():

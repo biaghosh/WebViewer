@@ -186,7 +186,7 @@
     <script src="https://cdn.socket.io/3.0.3/socket.io.min.js"></script>
     <script>
         let selectedDatasetName = ""
-        document.getElementById('downloadDatasetBtn').disabled = true
+        // document.getElementById('downloadDatasetBtn').disabled = true
         document.getElementById('deleteDatasetBtn').disabled = true
         window.addEventListener("DOMContentLoaded", renderDatasetList())
         function renderDatasetList() {
@@ -258,8 +258,18 @@
                 })
                     .then(response => response.json())
                     .then(data => {
-                        // 使用获得的URL自动触发下载
-                        window.location.href = data.download_url;
+                        // 检查是否收到了URL列表
+                        if (data.download_urls && Array.isArray(data.download_urls)) {
+                            if (data.download_urls.length === 0) {
+                                alert("No files found for the selected dataset.");
+                                return;
+                            }
+                            data.download_urls.forEach(url => {
+                                window.open(url, '_blank');
+                            });
+                        } else {
+                            console.error("Received unexpected data format from server:", data);
+                        }
                     })
                     .catch(error => console.error('Error:', error));
             } else {
