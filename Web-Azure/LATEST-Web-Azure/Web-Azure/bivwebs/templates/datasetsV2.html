@@ -306,6 +306,7 @@
                 alert("Please select a dataset first!");
             }
         });
+        
 
         function updateDatasetList(data) {
             const datasetInfoDiv = document.getElementById('datasetInfo');
@@ -315,7 +316,6 @@
 
             data.forEach(dataset => {
                 const datasetDiv = document.createElement('div');
-
                 datasetDiv.innerHTML = `
             <h6>Name: ${dataset.name}</h6>
             <div><strong>Types:</strong> ${JSON.stringify(dataset.types)}</div>
