@@ -227,7 +227,7 @@
                         })
                             .then(response => response.json())
                             .then(data => {
-                                // 为了简化，这里我们只显示一个JSON字符串，但你可以根据需要更优雅地显示数据
+                                
                                 updateDatasetList(data);
                             })
                             .catch((error) => {
@@ -235,7 +235,7 @@
                             });
                     }
                 });
-                // 若数据集列表非空，则模拟点击第一个数据集
+                
                 if (datasets.length > 0) {
                     const firstLi = ul.querySelector('li');
                     firstLi.click();

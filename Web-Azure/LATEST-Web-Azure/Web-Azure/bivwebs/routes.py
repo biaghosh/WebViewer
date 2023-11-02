@@ -1434,6 +1434,7 @@ def driver():
             print("mongoRecord",mongoRecord)
             mongoRecord[str(job[0])]['fp'] = job[1][4]
             
+            
             startProcess(mongoRecord, str(job[0]), 1 )
 
         mongoRecord[str(job[0])]["processedTime"] = datetime.now().time()
@@ -1596,4 +1597,5 @@ def delete_dataset():
     db = client.BIV
     datasets = db.datasets
     datasets.delete_one({"name": dataset_name})
+    send = '{ "success": "cookie"}'
     return jsonify({'status': 'success', 'message': 'Delete successfully'})
