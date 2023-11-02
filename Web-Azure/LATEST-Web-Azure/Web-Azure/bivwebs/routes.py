@@ -1590,21 +1590,10 @@ def download_file():
 @app.route('/deleteDataset', methods=['POST'])
 def delete_dataset():
     dataset_name = request.json['datasetName']
-    azure_storage_account_name = "bivlargefiles"
-    azure_storage_account_key = "PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw=="
-    share = "data"
 
-    # 初始化ShareClient
-    share_client = ShareClient(account_url=f"https://{azure_storage_account_name}.file.core.windows.net", share_name=share, credential=azure_storage_account_key)
 
-    # 获取对应的数据集目录客户端
-    directory_client = share_client.get_directory_client(dataset_name)
-
-    try:
-        # 尝试删除数据集
-        directory_client.delete_directory()
-        return jsonify({'status': 'success', 'message': f'Dataset {dataset_name} deleted successfully.'})
-
-    except Exception as e:
-        print(e)
-        return jsonify({'status': 'error', 'message': f'Error while deleting dataset {dataset_name}: {str(e)}'})
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV
+    datasets = db.datasets
+    datasets.delete_one({"name": dataset_name})
+    return jsonify({'status': 'success', 'message': 'Delete successfully'})
