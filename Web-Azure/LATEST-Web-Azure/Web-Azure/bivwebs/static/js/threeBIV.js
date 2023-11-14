@@ -10,7 +10,6 @@ document.getElementById("dsBtnEvent").addEventListener("click", () => {
     //dswindow.dsInfo
     if (typeof mesh === 'object') {
         if (!window.isVrTabSelected){
-            console.log("init")
             mesh.visible = false
             scene.remove(...scene.children)
             boundingLine = null

@@ -313,7 +313,6 @@
                 console.error('Error:', error)
             })
     }
-
     function handleTableRowClick(event) {
         const selectedRow = event.target.closest('tr');
         if (selectedRow) {
@@ -340,7 +339,6 @@
         }
     }
 
-
     function getDatasets() {
         return fetch('getDatasets')
             .then(response => response.json())
@@ -359,7 +357,6 @@
             datasetList.innerHTML = ''; // clear existing content
             const ul = document.createElement('ul');
             ul.classList.add('list-group');
-
             datasets.forEach(dataset => {
                 const li = document.createElement('li');
                 li.classList.add('list-group-item');
@@ -368,7 +365,6 @@
                 ul.appendChild(li)
             });
             datasetList.appendChild(ul);
-
             ul.addEventListener('click', (event) => {
                 const selectedLi = event.target.closest('li');
                 if (selectedLi) {
@@ -379,6 +375,7 @@
                         if (li !== selectedLi) {
                             li.classList.remove('selected-dataset');
                         }
+
                     });
                     // Add the selected-dataset class to the selected li element
                     selectedLi.classList.add('selected-dataset');

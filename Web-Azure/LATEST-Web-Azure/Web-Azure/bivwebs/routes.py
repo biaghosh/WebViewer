@@ -519,7 +519,7 @@ def volRender():
 
 @app.route("/getSlice", methods=['POST'])
 def getSlice():
-    # print("getSlice")
+    print("getSlice")
     if 'email' not in session:
         return redirect(url_for('login'))
     json = request.get_json()
@@ -1239,7 +1239,7 @@ def startProcess(mongoRecord, jobNum, zdown):
     #need to remove pngs || or will they be useful for unity?
     os.makedirs(mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/xy', exist_ok=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
-        for index in range(0, mongoRecord[jobNum]['imageDims']['z']):
+        for index in range(0, mongoRecord[jobNum]['imageDims']['x']):
             executor.submit(createXyViewTIFF, index, mongoRecord, jobNum)
     #f = 0
     progress['progress'] = 0.3  # 30% done
@@ -1254,7 +1254,7 @@ def startProcess(mongoRecord, jobNum, zdown):
     #os.remove(file) for file in os.listdir('path/to/directory') if file.endswith('.png')
     os.makedirs(mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/yz', exist_ok=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
-        for index in range(0, mongoRecord[jobNum]['imageDims']['x']-1, 4):
+        for index in range(0, mongoRecord[jobNum]['imageDims']['z']-1, 4):
             executor.submit(createYzViewTIFF, index,mongoRecord, jobNum)
     progress['progress'] = 1  # 100% done
 
@@ -1433,16 +1433,11 @@ def driver():
             mongoRecord[str(job[0])]['wv'] = job[1][3] #wv
             print("mongoRecord",mongoRecord)
             mongoRecord[str(job[0])]['fp'] = job[1][4]
-            
-            
             startProcess(mongoRecord, str(job[0]), 1 )
 
         mongoRecord[str(job[0])]["processedTime"] = datetime.now().time()
         # print("mongoRecord",mongoRecord)
         base_dir = os.path.join(temp_dir, mongoRecord[str(job[0])]['name'],'basis', mongoRecord[str(job[0])]['type'], mongoRecord[str(job[0])]['exp'], mongoRecord[str(job[0])]['wv'])
-
-        
-
         files_and_dirs = os.listdir(base_dir)
 
         # Save data to MongoDB
@@ -1546,12 +1541,12 @@ def get_datasetsData():
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     ds = db.datasets
-    # 假设每个数据集都有一个"name"字段来存储其名称
+    # Assume that each dataset has a "name" field to store its name
     dataset_data = ds.find({"name": dataset_name})
-    # 将数据转换为可序列化的格式
+    # Convert data to serializable format
     data = []
     for doc in dataset_data:
-        # 在返回前，MongoDB的ObjectId字段需要被删除或转换为字符串，因为它不能直接被序列化为JSON。
+        # MongoDB's ObjectId field needs to be removed or converted to a string before being returned because it cannot be serialized directly to JSON
         doc['_id'] = str(doc['_id'])
         data.append(doc)
 
@@ -1564,13 +1559,13 @@ def download_file():
     azure_storage_account_name = "bivlargefiles"
     azure_storage_account_key = "PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw=="
     container_name = "zipfiles"
-    # 初始化BlobServiceClient
+    # InitializeBlobServiceClient
     blob_service_client = BlobServiceClient(account_url=f"https://{azure_storage_account_name}.blob.core.windows.net", credential=azure_storage_account_key)
     
-    # 列出所有的blobs
+    # List of blobs
     all_blobs = blob_service_client.get_container_client(container_name).list_blobs(name_starts_with=dataset_name)
 
-    # 筛选出包含dataset_name并且为.zip的blobs
+    # Filter out blobs that contain dataset_name and are .zips
     zip_blobs = [blob for blob in all_blobs if blob.name.endswith('.zip')]
 
     download_urls = []
@@ -1585,14 +1580,12 @@ def download_file():
 
         download_url = f"https://{azure_storage_account_name}.blob.core.windows.net/{container_name}/{blob.name}?{sas_token}"
         download_urls.append(download_url)
-    print(download_urls)
+    # print(download_urls)
     return jsonify({'download_urls': download_urls})
 
 @app.route('/deleteDataset', methods=['POST'])
 def delete_dataset():
     dataset_name = request.json['datasetName']
-
-
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     datasets = db.datasets

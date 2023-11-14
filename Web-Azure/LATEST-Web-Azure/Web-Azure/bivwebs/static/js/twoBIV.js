@@ -25,13 +25,12 @@ dsSelect.addEventListener("change", () => {
     })
         .then(response => response.json())
         .then(data => {
-            // console.log(data)
+            document.getElementById('loadDatasetBtn').disabled = false
             session = data['session']
             dsName = data['dataset_info'][0]['name']
             dsInfo = data['dataset_info'][0]
             annSlices = data['dataset_info'][0]['ann']
-            files = data['dataset_info'][0]['file']
-            document.getElementById('loadDatasetBtn').disabled = false
+            files = data['dataset_info'][0]['file']  
             dsChanged = true
             modSelect.disabled = false
             let modCounter = 0, expCounter = 0, waveCounter = 0
@@ -43,7 +42,6 @@ dsSelect.addEventListener("change", () => {
             }
 
             for (const mod in dsInfo.types) {
-
                 let opt = document.createElement('option')
                 opt.appendChild(document.createTextNode(mod))
                 opt.value = mod
@@ -60,7 +58,6 @@ dsSelect.addEventListener("change", () => {
             modSelect.selectedIndex = 0
             var event = new Event('change')
             modSelect.dispatchEvent(event)
-
         })
         .catch((error) => { console.error('Error:', error) })
 })
