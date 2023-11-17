@@ -1570,7 +1570,6 @@ def download_file():
     zip_blobs = [blob for blob in all_blobs if blob.name.endswith('.zip')]
 
     download_urls = []
-
     for blob in zip_blobs:
         sas_token = generate_blob_sas(account_name=azure_storage_account_name,
                                       container_name=container_name,
@@ -1590,6 +1589,11 @@ def delete_dataset():
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     datasets = db.datasets
+    user = db.Users
+    user.update_many(
+        {"datasets": {"$in": [dataset_name]}},
+        {"$pull": {"datasets": dataset_name}}
+    )
     datasets.delete_one({"name": dataset_name})
     send = '{ "success": "cookie"}'
     return jsonify({'status': 'success', 'message': 'Delete successfully'})
