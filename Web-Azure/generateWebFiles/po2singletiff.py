@@ -88,7 +88,6 @@ def createXyViewTIFF(index, mongoRecord, jobNum):
     subprocess.call(cmd)
 
 def createXzViewTIFF(index, mongoRecord, jobNum):
-    
     filename = mongoRecord[jobNum]['fp'] #% index #3.7 supports this but not 3.8
     tiff = Image.open(filename)
     #tiff.seek(index)

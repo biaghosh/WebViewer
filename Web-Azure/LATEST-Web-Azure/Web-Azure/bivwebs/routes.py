@@ -1336,8 +1336,9 @@ def createYzViewTIFF(index, mongoRecord, jobNum):
     background = Image.new('RGBA', (mongoRecord[jobNum]['dims2']['y'], mongoRecord[jobNum]['dims2']['z']), (0, 0, 0, 0))
     for z in range(mongoRecord[jobNum]['imageDims']['z']):
         tiff.seek(z)
-        cropped = tiff.crop((0,index,mongoRecord[jobNum]['imageDims']['y'],index+1))
-        background.paste(cropped,(0,z,mongoRecord[jobNum]['imageDims']['y'],z+1))	
+        cropped = tiff.crop((index,0,index+1,mongoRecord[jobNum]['imageDims']['y']))
+        rot = cropped.transpose(method=Image.ROTATE_90)
+        background.paste(rot,(0,z,mongoRecord[jobNum]['imageDims']['y'],z+1))	
     outputPath = os.path.join(temp_dir, mongoRecord[jobNum]['name'], 'basis', mongoRecord[jobNum]['type'], mongoRecord[jobNum]['exp'], mongoRecord[jobNum]['wv'], 'yz/')
     os.makedirs(outputPath, exist_ok=True)
     outputFile = os.path.join(outputPath, fn)
