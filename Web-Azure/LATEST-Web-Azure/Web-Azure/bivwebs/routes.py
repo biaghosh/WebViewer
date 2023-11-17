@@ -1239,7 +1239,7 @@ def startProcess(mongoRecord, jobNum, zdown):
     #need to remove pngs || or will they be useful for unity?
     os.makedirs(mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/xy', exist_ok=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
-        for index in range(0, mongoRecord[jobNum]['imageDims']['x']):
+        for index in range(0, mongoRecord[jobNum]['imageDims']['z']):
             executor.submit(createXyViewTIFF, index, mongoRecord, jobNum)
     #f = 0
     progress['progress'] = 0.3  # 30% done
@@ -1254,7 +1254,7 @@ def startProcess(mongoRecord, jobNum, zdown):
     #os.remove(file) for file in os.listdir('path/to/directory') if file.endswith('.png')
     os.makedirs(mongoRecord[jobNum]['name'] + '/basis/'+ mongoRecord[jobNum]['type'] + '/' + mongoRecord[jobNum]['exp'] + '/' + mongoRecord[jobNum]['wv'] + '/yz', exist_ok=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
-        for index in range(0, mongoRecord[jobNum]['imageDims']['z']-1, 4):
+        for index in range(0, mongoRecord[jobNum]['imageDims']['x']-1, 4):
             executor.submit(createYzViewTIFF, index,mongoRecord, jobNum)
     progress['progress'] = 1  # 100% done
 
