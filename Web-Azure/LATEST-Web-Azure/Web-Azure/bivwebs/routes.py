@@ -1356,7 +1356,6 @@ def driver():
     progress = {'status': 'started', 'progress': 0.0}
     # Reset progress at the start of a new job
     data = request.form
-
     dataset_name = data.get('dataset-name')
     voxels_x = data.get('voxels_x')
     voxels_y = data.get('voxels_y')
@@ -1384,31 +1383,31 @@ def driver():
     file = request.files['fileContent']
     file_content = file.read()
 
-    input_data = {
-        'dataset_name':dataset_name,
-        'Modality': Modality,
-        'voxels_x':voxels_x,
-        'voxels_y':voxels_y,
-        'voxels_z':voxels_z,
-        'ImageDim_x':ImageDim_x,
-        'ImageDim_y':ImageDim_y,
-        'ImageDim_z':ImageDim_z,
-        'Dims2_x':Dims2_x,
-        'Dims2_y':Dims2_y,
-        'Dims2_z':Dims2_z,
-        'Dims3_x':Dims3_x,
-        'Dims3_y':Dims3_y,
-        'Dims3_z':Dims3_z,
-        'pixelLengthUM':pixelLengthUM,
-        'zskip':zskip,
-        'spcimenName':spcimenName,
-        'PI':PI,
-        'voxel_size':voxel_size,
-        'thickness':thickness,
-        'exposure': exposure,
-        'wavelength': wavelength,
-        'FileName': FileName
-    }
+    # input_data = {
+    #     'dataset_name':dataset_name,
+    #     'Modality': Modality,
+    #     'voxels_x':voxels_x,
+    #     'voxels_y':voxels_y,
+    #     'voxels_z':voxels_z,
+    #     'ImageDim_x':ImageDim_x,
+    #     'ImageDim_y':ImageDim_y,
+    #     'ImageDim_z':ImageDim_z,
+    #     'Dims2_x':Dims2_x,
+    #     'Dims2_y':Dims2_y,
+    #     'Dims2_z':Dims2_z,
+    #     'Dims3_x':Dims3_x,
+    #     'Dims3_y':Dims3_y,
+    #     'Dims3_z':Dims3_z,
+    #     'pixelLengthUM':pixelLengthUM,
+    #     'zskip':zskip,
+    #     'spcimenName':spcimenName,
+    #     'PI':PI,
+    #     'voxel_size':voxel_size,
+    #     'thickness':thickness,
+    #     'exposure': exposure,
+    #     'wavelength': wavelength,
+    #     'FileName': FileName
+    # }
     jobs = {}
     jobs[1] = [dataset_name, Modality, exposure, wavelength, file_content]
     # print("jobs1",jobs[1])
