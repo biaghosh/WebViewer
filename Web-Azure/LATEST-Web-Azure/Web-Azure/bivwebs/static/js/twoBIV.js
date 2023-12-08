@@ -449,7 +449,6 @@ function pixelIntensity() {
         rendererXY.domElement.removeEventListener("mousemove", canvasPixelEvent)
     } else
         rendererXY.domElement.addEventListener("mousemove", canvasPixelEvent)
-
 }
 
 function canvasPixelEvent(e) {
@@ -466,6 +465,7 @@ function canvasPixelEvent(e) {
         document.documentElement.style.cursor = "default";
     })
 }
+
 
 let measureCoords = []
 let clickHandler = {
@@ -488,6 +488,7 @@ let clickHandler = {
         return true;
     }
 };
+
 
 const clicks = new Proxy({}, clickHandler)
 clicks.count = [0, null]
@@ -619,9 +620,7 @@ startMaskBtn.addEventListener('click', () => {
                 line.geometry.setDrawRange(0, drawCount++)
                 intersects = []
                 line.geometry.attributes.position.needsUpdate = true;
-
             }
-
         }
         //}
     })
@@ -668,7 +667,6 @@ startMaskBtn.addEventListener('click', () => {
 
     //each up will save lineloop to array
 })
-
 
 
 eraseMaskBtn.addEventListener('click', () => {
@@ -1226,15 +1224,10 @@ function processNewAnn(evt) {
 
                 xyDiv.removeChild(this)
                 txtBox = null
-
                 canvasXY.addEventListener("click", orthoClick)
                 createAnnBtn.disabled = false
             }
         })
-
-
-
-
     }
 }
 

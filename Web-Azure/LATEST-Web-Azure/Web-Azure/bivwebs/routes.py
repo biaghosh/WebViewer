@@ -400,7 +400,6 @@ def getDatasetInfo():
     }
     return make_response(jsonify(response_data), 200)
 
-
 @app.route("/viewer")
 def viewer():
     if 'email' not in session:
@@ -434,6 +433,7 @@ def accounts():
         return render_template('403.html'), 403
     return render_template('accounts.html', title='Accounts')
 
+
 @app.route("/datasets")
 def datasets():
     if 'email' not in session:
@@ -461,7 +461,6 @@ def createUser():
 
     # Get the form information submitted by the web page
     json = request.get_json()
-
 
     # Establish database connection
     client = MongoClient(app.config['mongo'])
