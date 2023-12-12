@@ -94,7 +94,7 @@ def login():
                 form.otp.errors.append('Invalid OTP')
                 # OTP is incorrect or missing
                 # flash('Invalid OTP. Please try again.', 'warning')
-
+                
     return render_template('login.html', form=form)
 
 @app.route("/logout")
@@ -1143,7 +1143,7 @@ def upload_file():
     Dims3_z = request.form['Dims3_z']
     pixelLengthUM = request.form['pixelLengthUM']
     zskip = request.form['zskip']
-    spcimenName = request.form['spcimenName']
+    specimen = request.form['spcimenName']
     PI = request.form['PI']
     voxel_size = request.form['voxel_size']
     thickness = request.form['thickness']
@@ -1159,7 +1159,7 @@ def upload_file():
         'pixelLengthUM':pixelLengthUM,
         'imageDims':{'x':ImageDim_x,'y':ImageDim_y,'z':ImageDim_z},
         'zskip':zskip,
-        'info':{'spcimenName': spcimenName,'PI': PI,'voxels': voxel_size,'thickness':thickness},
+        'info':{'specimen': specimen,'PI': PI,'voxels': voxel_size,'thickness':thickness},
         
     }
     if not datasets.find_one({'name': dataset_name}):   
@@ -1370,7 +1370,7 @@ def driver():
     Dims3_z = data.get('Dims3_z')
     pixelLengthUM = data.get('pixelLengthUM')
     zskip = data.get('zskip')
-    spcimenName = data.get('spcimenName')
+    specimen = data.get('spcimenName')
     PI = data.get('PI')
     voxel_size = data.get('voxel_size')
     thickness = data.get('thickness')
@@ -1452,7 +1452,7 @@ def driver():
             'pixelLengthUM':pixelLengthUM,
             'imageDims':{'x':mongoRecord[str(job[0])]['imageDims']['x'],'y':mongoRecord[str(job[0])]['imageDims']['y'],'z':mongoRecord[str(job[0])]['imageDims']['z']},
             'zskip':zskip,
-            'info':{'spcimenName': spcimenName,'PI': PI,'voxels': voxel_size,'thickness':thickness},
+            'info':{'specimen': specimen,'PI': PI,'voxels': voxel_size,'thickness':thickness},
         
         }
     if not datasets.find_one({'name': dataset_name}):   
