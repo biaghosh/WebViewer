@@ -1453,7 +1453,6 @@ def driver():
             'imageDims':{'x':mongoRecord[str(job[0])]['imageDims']['x'],'y':mongoRecord[str(job[0])]['imageDims']['y'],'z':mongoRecord[str(job[0])]['imageDims']['z']},
             'zskip':zskip,
             'info':{'specimen': specimen,'PI': PI,'voxels': voxel_size,'thickness':thickness},
-        
         }
     if not datasets.find_one({'name': dataset_name}):   
         datasets.insert_one(doc)

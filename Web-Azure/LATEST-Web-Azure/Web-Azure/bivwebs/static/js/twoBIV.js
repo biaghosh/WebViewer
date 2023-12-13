@@ -64,7 +64,6 @@ dsSelect.addEventListener("change", () => {
 
 modSelect.addEventListener("change", changeMod)
 function changeMod() {
-
     exposureSelect.innerHTML = ``
     wavelengthSelect.innerHTML = ``
     modChanged = true
@@ -83,7 +82,6 @@ function changeMod() {
             waveCounter++
         }
     }
-
     if (expCounter < 2 && waveCounter < 2) {
         exposureSelect.selectedIndex = "0"
         changeExposure()
@@ -244,6 +242,7 @@ const yzShader = new THREE.ShaderMaterial({
 })
 loader = new BasisTextureLoader()
 loader.setTranscoderPath('./static/js/libs/basis/')
+
 let supportPass = false, draggedAnn = false, previousHoverObj
 
 function loadDynamic2D(fullLoad) {
@@ -304,6 +303,7 @@ function loadDynamic2D(fullLoad) {
         xyShader.uniforms.u_mod.value = '1.0'
         if (modSelect.value == 'Brightfield')
             xyShader.uniforms.u_mod.value = '0.0'
+
         xyShader.transparent = true
         mesh = new THREE.Mesh(geometry, xyShader)
         mesh.name = 'mouseSlice'
@@ -364,6 +364,7 @@ function loadDynamic2D(fullLoad) {
             event.object.material.color.setHex(0x00ffff)
         });
 
+        
         dControls.addEventListener('dragstart', function (event) {
 
             draggedAnn = true
@@ -378,7 +379,6 @@ function loadDynamic2D(fullLoad) {
         loadFiles()
         if (fullLoad)
             loadViews()
-
 
         //unlock buttons
         forwardBtn.disabled = false, backBtn.disabled = false, forwardStepBtn.disabled = false, backStepBtn.disabled = false
@@ -404,18 +404,15 @@ function loadDynamic2D(fullLoad) {
 }
 
 function animate2() {
-    // console.log("animate2")
     requestAnimationFrame(animate2)
     lineTextGroup.traverse(function (child) {
         if (child.type == 'Mesh' && cameraXY.position.z < 250) {
             var scaleFactor = 150
-
             var scale = scaleVector.subVectors(child.position, cameraXY.position).length() / scaleFactor
             child.scale.set(scale, scale, 1)
         }
     })
     annTextGroup.traverse(function (child) {
-        // console.log("annTextGroupTraverse")
         if (child.type == 'Mesh') {
             if (cameraXY.position.z <= 250) {
                 var scaleFactor = 500 * (1 / dsInfo['voxels']['z'] / (annFontNumber.value))
@@ -488,7 +485,6 @@ let clickHandler = {
     }
 };
 
-
 const clicks = new Proxy({}, clickHandler)
 clicks.count = [0, null]
 measureBtn.addEventListener('click', () => {
@@ -521,7 +517,6 @@ function enableDrawing() {
     else
         startMaskBtn.disabled = true
 }
-
 
 let vertsHolder = []
 
