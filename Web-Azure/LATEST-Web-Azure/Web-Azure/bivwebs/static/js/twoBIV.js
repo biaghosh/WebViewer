@@ -38,6 +38,7 @@ dsSelect.addEventListener("change", () => {
             exposureSelect.innerHTML = ``
             wavelengthSelect.innerHTML = ``
             if (lineTextGroup) {
+                
                 lineTextGroup.remove(...lineTextGroup.children)
             }
 
@@ -51,7 +52,6 @@ dsSelect.addEventListener("change", () => {
                     expCounter++
                     for (const wave in dsInfo.types[mod][exp]) {
                         waveCounter++
-
                     }
                 }
             }
@@ -61,6 +61,7 @@ dsSelect.addEventListener("change", () => {
         })
         .catch((error) => { console.error('Error:', error) })
 })
+
 
 modSelect.addEventListener("change", changeMod)
 function changeMod() {
@@ -116,7 +117,6 @@ wavelengthSelect.addEventListener("change", changeWavelength)
 function changeWavelength() {
     if (!wavelengthSelect.value)
         return
-
 }
 
 document.getElementById('loadDatasetBtn').addEventListener('click', () => {
@@ -145,11 +145,12 @@ document.getElementById('loadDatasetBtn').addEventListener('click', () => {
     // exportHeightInput.value = Math.round((dsInfo["imageDims"]["y"] / dsInfo["imageDims"]["x"]) * exportWidthSelect.options[exportWidthSelect.selectedIndex].text)
     addAnnotationEvents()
     populateInfoTable()
+    
     //this needs to be ds
     if (dsChanged && !orthosActive) {
         document.getElementById('orthoTab').click()
     }
-
+    
     if (dsChanged || modChanged)
         // console.log("changed")
     document.getElementById("dsBtnEvent").click()

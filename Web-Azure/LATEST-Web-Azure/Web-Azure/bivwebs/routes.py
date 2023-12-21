@@ -69,7 +69,6 @@ def login():
         if form.validate_on_submit():
             email = form.email.data
             otp_input = form.otp.data
-
             # Retrieve the OTP from the session or database
             # In this example, we'll get it from the session
             if session.get('otp') and int(session['otp']['value']) == otp_input and session['otp']['expire'] > time.time():
@@ -94,7 +93,6 @@ def login():
                 form.otp.errors.append('Invalid OTP')
                 # OTP is incorrect or missing
                 # flash('Invalid OTP. Please try again.', 'warning')
-                
     return render_template('login.html', form=form)
 
 @app.route("/logout")
@@ -223,7 +221,7 @@ def updateAnnotation():
             "y": json["y"],
             "datetime": json["datetime"]
         }})
-
+    
     data = '{}'
     return make_response(dumps(data), 200)
 
