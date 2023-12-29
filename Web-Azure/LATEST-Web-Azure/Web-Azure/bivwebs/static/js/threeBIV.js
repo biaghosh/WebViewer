@@ -9,7 +9,7 @@ document.getElementById("dsBtnEvent").addEventListener("click", () => {
     //console.log(window.dsInfo) idk if we have to go this far for safari
     //dswindow.dsInfo
     if (typeof mesh === 'object') {
-        if (!window.isVrTabSelected){
+        if (!window.isVrTabSelected) {
             mesh.visible = false
             scene.remove(...scene.children)
             boundingLine = null
@@ -17,7 +17,7 @@ document.getElementById("dsBtnEvent").addEventListener("click", () => {
             xclip.value = null
             yclip.value = null
         }
-        
+
         //init2(false)
     }
 })
@@ -173,8 +173,6 @@ function saveDataURI(name, dataURI) {
 window.isVrTabSelected = false; // 初始化为未选中状态
 window.isOrthoTabSelected = true;
 document.getElementById('vrTab').addEventListener('click', () => {
-    console.log("load3D")
-    console.log("alreadyOn",alreadyOn)
     window.isVrTabSelected = true // 取反以更新状态
     window.isOrthoTabSelected = false
     init2(true)
@@ -222,14 +220,14 @@ function init2(fullLoad) {
     document.getElementById(`vrOverlayDiv`).classList.add('d-flex')
 
     // if (!zclip.value)
-        zclip.value = Math.round(dsInfo["imageDims"]["z"] / 2)
-        console.log("zclip, ",zclip.value)
+    zclip.value = Math.round(dsInfo["imageDims"]["z"] / 2)
+    console.log("zclip, ", zclip.value)
     // if (!yclip.value)
-        yclip.value = Math.round(parseInt(dsInfo["imageDims"]["y"]) / 2 / 4) * 4
-        console.log("yclip, ",yclip.value)
+    yclip.value = Math.round(parseInt(dsInfo["imageDims"]["y"]) / 2 / 4) * 4
+    console.log("yclip, ", yclip.value)
     // if (!xclip.value)
-        xclip.value = Math.round(parseInt(dsInfo["imageDims"]["x"]) / 2 / 4) * 4
-        console.log("xclip111, ",xclip.value)
+    xclip.value = Math.round(parseInt(dsInfo["imageDims"]["x"]) / 2 / 4) * 4
+    console.log("xclip111, ", xclip.value)
     if (fullLoad) {
         //These should be set to what the 2D scene values are
         //zclip.value = Math.round(dsInfo["imageDims"]["z"] / 2) 
@@ -246,7 +244,7 @@ function init2(fullLoad) {
         //xclip.value = Math.round(parseInt(dsInfo["imageDims"]["x"]) / 2 / 4 ) * 4 
         xclip.min = 0
         xclip.max = dsInfo["imageDims"]["x"] - 1 //0 index
-        xclip.disabled = false 
+        xclip.disabled = false
         //might do this cleaner, like simulate a click
         edgesBox.checked = false
 
@@ -287,7 +285,7 @@ function init2(fullLoad) {
         ) //to center the mesh in the geometry
 
     }
-
+    console.log('dims3_x' + dsInfo['dims3']['x'] + 'dims3_y' + dsInfo['dims3']['y'] + 'dims3_z' + dsInfo['dims3']['z'])
     var dataSize = dsInfo['dims3']['x'] * dsInfo['dims3']['y'] * (dsInfo['dims3']['z'] + 1) * 4 //1 == 0offset,4 == RGBA
     var dataSliceSize = dsInfo['dims3']['x'] * dsInfo['dims3']['y'] * 4
 
@@ -341,6 +339,7 @@ function init2(fullLoad) {
         fragmentShader: shader.fragmentShader,
         side: THREE.BackSide // The volume shader uses the backface as its "reference point"
     })
+
     material.alphaTest = 0.5
     mesh = new THREE.Mesh(geometry, material)
     let zCounter = 0
@@ -348,7 +347,7 @@ function init2(fullLoad) {
     let progBar = document.getElementById("3dProgress")
     //progDiv.classList.remove("d-none")
     //progBar.setAttribute('aria-valuemax', dsInfo["dims3"]["z"])
-    console.log("modSelect.value",modSelect.value,"exposureSelect.value",exposureSelect.value)
+    console.log("modSelect.value", modSelect.value, "exposureSelect.value", exposureSelect.value)
     new JSZip.external.Promise(function (resolve, reject) {
 
         JSZipUtils.getBinaryContent(
@@ -374,9 +373,11 @@ function init2(fullLoad) {
                         c.height = dsInfo['dims3']['y']
                         let ctx = c.getContext('2d')
                         ctx.drawImage(this, 0, 0, dsInfo['dims3']['x'], dsInfo['dims3']['y'])
+                        // console.log(filename,dataSliceSize)
                         let index = Number(filename.split('.')[0])
                         text3d.needsUpdate = true
                         binaryData.set(ctx.getImageData(0, 0, dsInfo['dims3']['x'], dsInfo['dims3']['y']).data, (index * dataSliceSize))
+                        console.log(filename, index, dataSliceSize)
                         zCounter++
                         //progBar.setAttribute('aria-valuenow', zCounter);
                         //progBar.style.width = `${zCounter}%`
@@ -390,9 +391,9 @@ function init2(fullLoad) {
                             //progBar.style.width = `${zCounter}%`
                             document.getElementById("visBtn").disabled = false
                             //necessary for when modaulity hot reloads
-                            zPlaneIn3d()
-                            yPlaneIn3d()
-                            xPlaneIn3d()
+                            // zPlaneIn3d()
+                            // yPlaneIn3d()
+                            // xPlaneIn3d()
                         }
 
                     }

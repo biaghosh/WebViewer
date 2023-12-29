@@ -1509,7 +1509,7 @@ def driver():
                 content = file.read()
             file_client.upload_file(content)
 
-    compressed_file_path = dataset_name + "_" + Modality + ".zip"
+    compressed_file_path = Modality + "-" + exposure + "-" + wavelength + ".zip"
     shutil.make_archive(compressed_file_path[:-4], 'zip', temp_dir)
     blob_name = os.path.basename(compressed_file_path)
 
