@@ -30,7 +30,7 @@ dsSelect.addEventListener("change", () => {
             dsName = data['dataset_info'][0]['name']
             dsInfo = data['dataset_info'][0]
             annSlices = data['dataset_info'][0]['ann']
-            files = data['dataset_info'][0]['file']  
+            files = data['dataset_info'][0]['file']
             dsChanged = true
             modSelect.disabled = false
             let modCounter = 0, expCounter = 0, waveCounter = 0
@@ -38,7 +38,7 @@ dsSelect.addEventListener("change", () => {
             exposureSelect.innerHTML = ``
             wavelengthSelect.innerHTML = ``
             if (lineTextGroup) {
-                
+
                 lineTextGroup.remove(...lineTextGroup.children)
             }
 
@@ -145,15 +145,15 @@ document.getElementById('loadDatasetBtn').addEventListener('click', () => {
     // exportHeightInput.value = Math.round((dsInfo["imageDims"]["y"] / dsInfo["imageDims"]["x"]) * exportWidthSelect.options[exportWidthSelect.selectedIndex].text)
     addAnnotationEvents()
     populateInfoTable()
-    
+
     //this needs to be ds
     if (dsChanged && !orthosActive) {
         document.getElementById('orthoTab').click()
     }
-    
+
     if (dsChanged || modChanged)
         // console.log("changed")
-    document.getElementById("dsBtnEvent").click()
+        document.getElementById("dsBtnEvent").click()
     dsChanged = false
 })
 
@@ -273,7 +273,7 @@ function loadDynamic2D(fullLoad) {
         let color = pickr2.getColor().toRGBA()
         sceneXY.background = new THREE.Color(`rgb(${Math.round(color[0])},${Math.round(color[1])},${Math.round(color[2])})`)
 
-        cameraXY = new THREE.PerspectiveCamera(45, xyDiv.offsetWidth / 280, .1, 8000)
+        cameraXY = new THREE.PerspectiveCamera(45, xyDiv.offsetWidth / 360, .1, 8000)
         cameraXY.position.set(0, 0, parseInt(dsInfo["imageDims"]["x"])) // 
         controlsXY = new OrbitControls(cameraXY, rendererXY.domElement)
 
@@ -364,7 +364,7 @@ function loadDynamic2D(fullLoad) {
             event.object.material.color.setHex(0x00ffff)
         });
 
-        
+
         dControls.addEventListener('dragstart', function (event) {
 
             draggedAnn = true
@@ -1357,10 +1357,10 @@ annModalDelete.addEventListener('click', () => {
 })
 
 window.addEventListener('resize', () => {
-    
+
     if (!cameraXY)
         return
-    cameraXY.aspect = (xyDiv.offsetWidth / 260)//@TODO HARDCODE
+    cameraXY.aspect = (xyDiv.offsetWidth / 360)//@TODO HARDCODE
     cameraXY.updateProjectionMatrix()
     rendererXY.setSize(xyDiv.offsetWidth, 260)
 
@@ -1823,7 +1823,7 @@ function loadOrthos(fullLoad = true) {
             oDivs[ortho].appendChild(oRenderers[ortho].domElement)
             oScenes[ortho].remove(oMeshes[ortho])
 
-            oCameras[ortho] = new THREE.PerspectiveCamera(30, $(oDivs[ortho]).width() / 260, 1, 5000)
+            oCameras[ortho] = new THREE.PerspectiveCamera(30, $(oDivs[ortho]).width() / 400, 1, 5000)
 
             oControls[ortho] = new OrbitControls(oCameras[ortho], oRenderers[ortho].domElement)
 
@@ -1889,9 +1889,6 @@ function loadOrthos(fullLoad = true) {
                 oCameras[ortho].position.setZ(cameraXY.position.z)
             })
     })
-
-
-
 }
 
 function animateOrtho(rend, scene, camera, mat, animationId) {
@@ -1907,6 +1904,7 @@ function animateOrtho(rend, scene, camera, mat, animationId) {
 }
 
 function xzClick(evt) {
+    console.log("xzClick")
     let rect = oRenderers['xz'].domElement.getBoundingClientRect()
     let x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
     let y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
@@ -1920,8 +1918,6 @@ function xzClick(evt) {
         let xLimit = dsInfo['imageDims']['x'] / 2
         if (intersects[0].point.x > xLimit || intersects[0].point.x < -xLimit)
             return
-
-
 
         clipCoords.x = Math.round(intersects[0].point.x + (parseInt(dsInfo["imageDims"]["x"]) / 2))
         clipCoords.z = Math.round(intersects[0].point.y / dsInfo['voxels']['z'] + (parseInt(dsInfo["imageDims"]["z"]) / 2))
@@ -1970,6 +1966,7 @@ function xzClick(evt) {
 }
 
 function yzClick(evt) {
+    console.log("yzClick")
     let rect = oRenderers['yz'].domElement.getBoundingClientRect()
     let x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
     let y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
@@ -2028,6 +2025,7 @@ function updateMeshes() {
 }
 //update
 function orthoClick(evt) {
+    console.log("xyclick")
     if (draggedAnn) {
         draggedAnn = false
         return
@@ -2035,6 +2033,7 @@ function orthoClick(evt) {
     let rect = canvasXY.getBoundingClientRect()
     let x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
     let y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
+    console.log(x,y)
     rayCaster.setFromCamera({ 'x': x, 'y': y }, cameraXY)
     var intersects = []
     mesh.raycast(rayCaster, intersects)
@@ -2107,6 +2106,7 @@ function updateOrthoMeshes() {
     showLoading('ortho')
     xclip.value = clipCoords[oClip['yz']]
     yclip.value = clipCoords[oClip['xz']]
+    // console.log("xclip,yclip",xclip.value,yclip.value)
     orthos.forEach(ortho => {
         loader.load(`https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis?${SAS}`, function (texture) {
             texture.encoding = THREE.sRGBEncoding
