@@ -285,6 +285,7 @@ function loadDynamic2D(fullLoad) {
         controlsXY.minDistance = 150 //@hardcode
 
         geometry = new THREE.PlaneBufferGeometry(dsInfo['dims2']['x'], dsInfo['dims2']['y'])
+        console.log("geometry",geometry)
         material2 = new THREE.MeshBasicMaterial()
         material2.side = THREE.DoubleSide
     }
@@ -310,6 +311,7 @@ function loadDynamic2D(fullLoad) {
         mesh.translateX(parseInt((dsInfo["dims2"]["x"]) - parseInt(dsInfo["imageDims"]["x"])) / 2)
         mesh.translateY(parseInt((dsInfo["dims2"]["y"]) - parseInt(dsInfo["imageDims"]["y"])) / 2)
         mesh.translateZ(-1)
+        console.log("mesh",mesh)
         sceneXY.add(mesh)
         sceneXY.add(lineTextGroup, annTextGroup, brushGroup)
 
@@ -1362,13 +1364,13 @@ window.addEventListener('resize', () => {
         return
     cameraXY.aspect = (xyDiv.offsetWidth / 360)//@TODO HARDCODE
     cameraXY.updateProjectionMatrix()
-    rendererXY.setSize(xyDiv.offsetWidth, 260)
+    rendererXY.setSize(xyDiv.offsetWidth, 300)
 
     orthos.forEach(ortho => {
         // console.log("resize222222", $(oDivs[ortho]).width())
-        oCameras[ortho].aspect = ($(oDivs[ortho]).width() / 260)
+        oCameras[ortho].aspect = ($(oDivs[ortho]).width() / 300)
         oCameras[ortho].updateProjectionMatrix()
-        oRenderers[ortho].setSize($(oDivs[ortho]).width(), 260)
+        oRenderers[ortho].setSize($(oDivs[ortho]).width(), 300)
 
     });
 })
@@ -1751,6 +1753,7 @@ yzVertLineGeom = new THREE.BufferGeometry()
 yzHorzLineGeom = new THREE.BufferGeometry()
 
 function loadOrthos(fullLoad = true) {
+    console.log("loadOrthos")
     orthosActive = true
     sceneXY.add(xLine)
     sceneXY.add(yLine)
