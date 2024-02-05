@@ -249,6 +249,7 @@ function loadDynamic2D(fullLoad) {
     if (!canvasXY) {
         // xyDiv.style.height = 'auto'
         rendererXY = new THREE.WebGLRenderer({ preserveDrawingBuffer: true })
+        // console.log("load宽度",xyDiv.offsetWidth)
         rendererXY.setSize(xyDiv.offsetWidth, 300)
         rendererXY.outputEncoding = THREE.sRGBEncoding
         xyDiv.appendChild(rendererXY.domElement);
@@ -285,7 +286,7 @@ function loadDynamic2D(fullLoad) {
         controlsXY.minDistance = 150 //@hardcode
 
         geometry = new THREE.PlaneBufferGeometry(dsInfo['dims2']['x'], dsInfo['dims2']['y'])
-        console.log("geometry",geometry)
+        // console.log("geometry",geometry)
         material2 = new THREE.MeshBasicMaterial()
         material2.side = THREE.DoubleSide
     }
@@ -311,7 +312,6 @@ function loadDynamic2D(fullLoad) {
         mesh.translateX(parseInt((dsInfo["dims2"]["x"]) - parseInt(dsInfo["imageDims"]["x"])) / 2)
         mesh.translateY(parseInt((dsInfo["dims2"]["y"]) - parseInt(dsInfo["imageDims"]["y"])) / 2)
         mesh.translateZ(-1)
-        console.log("mesh",mesh)
         sceneXY.add(mesh)
         sceneXY.add(lineTextGroup, annTextGroup, brushGroup)
 
@@ -1363,6 +1363,7 @@ window.addEventListener('resize', () => {
     if (!cameraXY)
         return
     cameraXY.aspect = (xyDiv.offsetWidth / 360)//@TODO HARDCODE
+    console.log("宽度",xyDiv.offsetWidth)
     cameraXY.updateProjectionMatrix()
     rendererXY.setSize(xyDiv.offsetWidth, 300)
 
