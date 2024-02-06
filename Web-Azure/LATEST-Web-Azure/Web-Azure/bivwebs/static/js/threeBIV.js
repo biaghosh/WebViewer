@@ -365,6 +365,7 @@ function init2(fullLoad) {
         JSZip.loadAsync(data).then(function (zip) {
             Object.keys(zip.files).forEach(function (filename) {
                 if (/\/xy\//.test(filename) && filename.endsWith('.png')){
+                    
                     zip.files[filename].async('base64').then(function (fileData) {
                         let can = new Image()
                         can.src = 'data:image/png;base64,' + fileData
