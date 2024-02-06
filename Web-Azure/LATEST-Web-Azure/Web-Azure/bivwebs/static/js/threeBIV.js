@@ -348,10 +348,12 @@ function init2(fullLoad) {
     //progDiv.classList.remove("d-none")
     //progBar.setAttribute('aria-valuemax', dsInfo["dims3"]["z"])
     console.log("modSelect.value", modSelect.value, "exposureSelect.value", exposureSelect.value)
+    // URL = "https://bivlargefiles.blob.core.windows.net/zipfiles/WM_Brightfield-1-430.zip"
+
     new JSZip.external.Promise(function (resolve, reject) {
 
         JSZipUtils.getBinaryContent(
-            `./static/cryoData/${dsInfo['name']}/${modSelect.value}-${exposureSelect.value}-${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}.zip`
+            `https://bivlargefiles.blob.core.windows.net/zipfiles/${dsInfo['name']}-${modSelect.value}-${exposureSelect.value}-${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}.zip`
             , function (err, data) {
                 if (err) {
                     reject(err);
@@ -360,44 +362,46 @@ function init2(fullLoad) {
                 }
             });
     }).then(function (data) {
-
         JSZip.loadAsync(data).then(function (zip) {
             Object.keys(zip.files).forEach(function (filename) {
-                zip.files[filename].async('base64').then(function (fileData) {
-                    let can = new Image()
-                    can.src = 'data:image/png;base64,' + fileData
-                    can.onload = function () {
-
-                        let c = document.createElement('canvas')
-                        c.width = dsInfo['dims3']['x']
-                        c.height = dsInfo['dims3']['y']
-                        let ctx = c.getContext('2d')
-                        ctx.drawImage(this, 0, 0, dsInfo['dims3']['x'], dsInfo['dims3']['y'])
-                        // console.log(filename,dataSliceSize)
-                        let index = Number(filename.split('.')[0])
-                        text3d.needsUpdate = true
-                        binaryData.set(ctx.getImageData(0, 0, dsInfo['dims3']['x'], dsInfo['dims3']['y']).data, (index * dataSliceSize))
-                        console.log(filename, index, dataSliceSize)
-                        zCounter++
-                        //progBar.setAttribute('aria-valuenow', zCounter);
-                        //progBar.style.width = `${zCounter}%`
-                        if (zCounter == dsInfo["dims3"]["z"] - 1) {
-                            document.getElementById(`vrOverlayDiv`).classList.remove('d-flex')
-                            document.getElementById(`vrOverlayDiv`).classList.add('d-none')
-                            //progDiv.classList.add("d-none")
-                            mesh.visible = true
-                            zCounter = 0
+                if (/\/xy\//.test(filename) && filename.endsWith('.png')){
+                    zip.files[filename].async('base64').then(function (fileData) {
+                        let can = new Image()
+                        can.src = 'data:image/png;base64,' + fileData
+                        can.onload = function () {
+                            console.log(filename)
+                            let fn = filename.split('/').pop()
+                            console.log(fn)
+                            let c = document.createElement('canvas')
+                            c.width = dsInfo['dims3']['x']
+                            c.height = dsInfo['dims3']['y']
+                            let ctx = c.getContext('2d')
+                            ctx.drawImage(this, 0, 0, dsInfo['dims3']['x'], dsInfo['dims3']['y'])
+                            let index = Number(fn.split('.')[0])
+                            text3d.needsUpdate = true
+                            binaryData.set(ctx.getImageData(0, 0, dsInfo['dims3']['x'], dsInfo['dims3']['y']).data, (index * dataSliceSize))
+                            console.log(fn, index, dataSliceSize)
+                            zCounter++
                             //progBar.setAttribute('aria-valuenow', zCounter);
                             //progBar.style.width = `${zCounter}%`
-                            document.getElementById("visBtn").disabled = false
-                            //necessary for when modaulity hot reloads
-                            // zPlaneIn3d()
-                            // yPlaneIn3d()
-                            // xPlaneIn3d()
+                            if (zCounter == dsInfo["dims3"]["z"] - 1) {
+                                document.getElementById(`vrOverlayDiv`).classList.remove('d-flex')
+                                document.getElementById(`vrOverlayDiv`).classList.add('d-none')
+                                //progDiv.classList.add("d-none")
+                                mesh.visible = true
+                                zCounter = 0
+                                //progBar.setAttribute('aria-valuenow', zCounter);
+                                //progBar.style.width = `${zCounter}%`
+                                document.getElementById("visBtn").disabled = false
+                                //necessary for when modaulity hot reloads
+                                // zPlaneIn3d()
+                                // yPlaneIn3d()
+                                // xPlaneIn3d()
+                            }
+    
                         }
-
-                    }
-                })
+                    })
+                }
             })
         })
 
