@@ -440,6 +440,14 @@ def datasets():
         return render_template('403.html'), 403
     return render_template('datasetsV2.html', title='Datasets')
 
+@app.route("/datasetsNew")
+def datasetsNew():
+    if 'email' not in session:
+        return redirect(url_for('login'))
+    if session['level'] != 'admin':
+        return render_template('403.html'), 403
+    return render_template('datasetsV3.html', title='Datasets')
+
 
 @app.route("/getUsers", methods=['GET'])
 def getUsers():
