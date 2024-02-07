@@ -1445,8 +1445,8 @@ def driver():
                             }
                     },
             'voxels':{'x':voxels_x,'y':voxels_y,'z':voxels_z},
-            'dims2':{'x':Dims2_x,'y': Dims2_y,'z': Dims2_z},
-            'dims3':{'x':Dims3_x,'y': Dims3_y,'z': Dims3_z},
+            'dims2':{'x':int(Dims2_x),'y': int(Dims2_y),'z': int(Dims2_z)},
+            'dims3':{'x':int(Dims3_x),'y': int(Dims3_y),'z': int(Dims3_z)},
             'pixelLengthUM':pixelLengthUM,
             'imageDims':{'x':mongoRecord[str(job[0])]['imageDims']['x'],'y':mongoRecord[str(job[0])]['imageDims']['y'],'z':mongoRecord[str(job[0])]['imageDims']['z']},
             'zskip':zskip,
@@ -1466,7 +1466,6 @@ def driver():
                 exposure_key: [wavelength]
         }
     }
-
         # 
         datasets.update_one(query, update, upsert=True)
 
@@ -1509,7 +1508,7 @@ def driver():
                 content = file.read()
             file_client.upload_file(content)
 
-    compressed_file_path = Modality + "-" + exposure + "-" + wavelength + ".zip"
+    compressed_file_path = dataset_name +"-" + Modality + "-" + exposure + "-" + wavelength + ".zip"
     shutil.make_archive(compressed_file_path[:-4], 'zip', temp_dir)
     blob_name = os.path.basename(compressed_file_path)
 

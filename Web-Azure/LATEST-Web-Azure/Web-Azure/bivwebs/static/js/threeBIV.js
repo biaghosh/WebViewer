@@ -365,14 +365,13 @@ function init2(fullLoad) {
         JSZip.loadAsync(data).then(function (zip) {
             Object.keys(zip.files).forEach(function (filename) {
                 if (/\/xy\//.test(filename) && filename.endsWith('.png')){
-                    
                     zip.files[filename].async('base64').then(function (fileData) {
                         let can = new Image()
                         can.src = 'data:image/png;base64,' + fileData
                         can.onload = function () {
                             console.log(filename)
                             let fn = filename.split('/').pop()
-                            console.log(fn)
+                            // console.log(fn)
                             let c = document.createElement('canvas')
                             c.width = dsInfo['dims3']['x']
                             c.height = dsInfo['dims3']['y']
@@ -381,7 +380,7 @@ function init2(fullLoad) {
                             let index = Number(fn.split('.')[0])
                             text3d.needsUpdate = true
                             binaryData.set(ctx.getImageData(0, 0, dsInfo['dims3']['x'], dsInfo['dims3']['y']).data, (index * dataSliceSize))
-                            console.log(fn, index, dataSliceSize)
+                            // console.log(fn, index, dataSliceSize)
                             zCounter++
                             //progBar.setAttribute('aria-valuenow', zCounter);
                             //progBar.style.width = `${zCounter}%`
