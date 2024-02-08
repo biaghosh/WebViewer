@@ -1,52 +1,78 @@
 {% extends 'layout.html' %}
 {% block content %}
+
+<head>
+    <style>
+        .selected-dataset {
+            background-color: #e6e6e6;
+        }
+
+        .selectable-user:hover,
+        li:hover {
+            cursor: pointer;
+            background-color: #f5f5f5;
+        }
+
+        .upload-form-group {
+            margin-bottom: 15px;
+        }
+
+        .required {
+            color: red;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: #f3f3f3;
+        }
+
+        .progress-bar-fill {
+            width: 0%;
+            height: 30px;
+            background-color: #76c7c0;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+        }
+    </style>
+</head>
+
 <div class="container-fluid">
     <div class="row" style="margin-top: 70px;">
-        <div class="card shadow">
-            <div class="card-header">Dataset Info</div>
+        <div class="card shadow w-50">
+            <div class="card-header">Dataset</div>
             <div class="card-body">
                 <div class="row">
-                    <div class="card border-0">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-7">
-                                    <div class="upload-form-group">
-                                        <h5 class="card-title">Dataset List</h5>
-                                        <div id="datasetList" class="table table-striped table-hover"></div>
-                                    </div>
-                                </div>
-                                <div class="col-5">
-                                    <div class="upload-form-group">
-                                        <h5 class="card-title">Dataset Info</h5>
-                                        <div id="datasetInfo">
-                                            <!---->
-                                            <!-- The data will be dynamically populated by JavaScript -->
-                                        </div>
-                                        <div class="mt-3">
-                                            <button id="downloadDatasetBtn"
-                                                class="btn btn-sm btn-primary btn-icon-only">
-                                                <i class="fas fa-download"></i>
-                                            </button>
-                                            <button id="deleteDatasetBtn"
-                                                class="btn btn-sm btn-danger ml-2 btn-icon-only">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                    <!-- 左侧内容，固定宽度 -->
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <!-- <h5 class="card-title">Dataset List</h5> -->
+                            <div id="datasetList" class="table table-striped table-hover"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="filename">TifFile:<span class="required">*</span></label>
+                            <input type="file" class="form-control-file" id="fileInputTiff">
+                            <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
+                        </div>
+                        <div class="form-group">
+                            <div class="progress-bar">
+                                <div class="progress-bar-fill" id="progress-bar-fill">0%</div>
                             </div>
                         </div>
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label for="filename">TifFile:<span class="required">*</span></label>
-                                <input type="file" class="form-control-file" id="fileInputTiff">
-                            </div>
-                            <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
-                            <div class="form-group">
-                                <div class="progress-bar">
-                                    <div class="progress-bar-fill" id="progress-bar-fill">0%</div>
-                                </div>
-                            </div>
+                    </div>
+                    <!-- 右侧内容，固定宽度 -->
+                    <div class="col-md-7">
+                        <!-- <h5 class="card-title">Dataset Info</h5> -->
+                        <div id="datasetInfo">
+                            <!-- The data will be dynamically populated by JavaScript -->
+                        </div>
+                        <div class="mt-3">
+                            <button id="downloadDatasetBtn" class="btn btn-sm btn-primary btn-icon-only">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button id="deleteDatasetBtn" class="btn btn-sm btn-danger ml-2 btn-icon-only">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -175,29 +201,103 @@
         }
     });
 
-    function updateDatasetList(data) {
+    function updateDatasetList(datasets) {
+        const dataset = datasets[0]
+        console.log(dataset)
         const datasetInfoDiv = document.getElementById('datasetInfo');
+        datasetInfoDiv.innerHTML = ''; // 清空现有内容
 
-        // Clear all content 
-        datasetInfoDiv.innerHTML = '';
+        const form = document.createElement('form');
+        form.className = 'dataset-info-form';
+        let formHTML = `
+        <h6>Name: <input type="text" class="form-control mb-2" name="name" value="${dataset.name}" /></h6>
+        <div><strong>Types:</strong></div>`;
 
-        data.forEach(dataset => {
-            const datasetDiv = document.createElement('div');
-            datasetDiv.innerHTML = `
-        <h6>Name: ${dataset.name}</h6>
-        <div><strong>Types:</strong> ${JSON.stringify(dataset.types)}</div>
-        <div><strong>Voxels:</strong> ${JSON.stringify(dataset.voxels)}</div>
-        <div><strong>Dims2:</strong> ${JSON.stringify(dataset.dims2)}</div>
-        <div><strong>Dims3:</strong> ${JSON.stringify(dataset.dims3)}</div>
-        <div><strong>Pixel Length:</strong> ${dataset.pixelLengthUM}</div>
-        <div><strong>Image Dims:</strong> ${JSON.stringify(dataset.imageDims)}</div>
-        <div><strong>Zskip:</strong> ${dataset.zskip}</div>
-        <div><strong>Info:</strong> ${JSON.stringify(dataset.info)}</div>
+        if (dataset.types) {
+            let typesContent = '<h6>Types:</h6><ul>';
+            Object.keys(dataset.types).forEach((type) => {
+                typesContent += `<li>${type}:`;
+                Object.keys(dataset.types[type]).forEach((exposure) => {
+                    const wavelengths = dataset.types[type][exposure];
+                    typesContent += ` Exposure ${exposure} - Wavelengths: ${wavelengths.join(', ')}`;
+                });
+                typesContent += '</li>';
+            });
+            typesContent += '</ul>';
+            datasetInfoDiv.innerHTML = typesContent;
+        } else {
+            datasetInfoDiv.innerHTML = '<p>No types information available.</p>';
+        }
+
+        formHTML += `
+        <h6>Voxels:</h6>
+        <div class="mb-2">X: <input type="number" class="form-control" name="voxels[x]" value="${dataset.voxels.x}" /></div>
+        <div class="mb-2">Y: <input type="number" class="form-control" name="voxels[y]" value="${dataset.voxels.y}" /></div>
+        <div class="mb-2">Z: <input type="number" class="form-control" name="voxels[z]" value="${dataset.voxels.z}" /></div>
+
+        <h6>Dims3:</h6>
+        <div class="mb-2">X: <input type="number" class="form-control" name="dims3[x]" value="${dataset.dims3.x}" /></div>
+        <div class="mb-2">Y: <input type="number" class="form-control" name="dims3[y]" value="${dataset.dims3.y}" /></div>
+        <div class="mb-2">Z: <input type="number" class="form-control" name="dims3[z]" value="${dataset.dims3.z}" /></div>
+
+        <h6>Pixel Length UM: <input type="text" class="form-control mb-2" name="pixelLengthUM" value="${dataset.pixelLengthUM}" /></h6>
+
+        <h6>Dims2:</h6>
+        <div class="mb-2">X: <input type="text" class="form-control" name="dims2[x]" value="${dataset.dims2.x}" /></div>
+        <div class="mb-2">Y: <input type="text" class="form-control" name="dims2[y]" value="${dataset.dims2.y}" /></div>
+        <div class="mb-2">Z: <input type="text" class="form-control" name="dims2[z]" value="${dataset.dims2.z}" /></div>
+
+        <h6>Image Dims:</h6>
+        <div class="mb-2">X: <input type="text" class="form-control" name="imageDims[x]" value="${dataset.imageDims.x}" /></div>
+        <div class="mb-2">Y: <input type="text" class="form-control" name="imageDims[y]" value="${dataset.imageDims.y}" /></div>
+        <div class="mb-2">Z: <input type="text" class="form-control" name="imageDims[z]" value="${dataset.imageDims.z}" /></div>
+
+        <h6>Z Skip: <input type="number" class="form-control mb-2" name="zskip" value="${dataset.zskip}" /></h6>
+
+        <h6>Info:</h6>
+        <div class="mb-2">Specimen: <input type="text" class="form-control" name="info[specimen]" value="${dataset.info.specimen}" /></div>
+        <div class="mb-2">PI: <input type="text" class="form-control" name="info[PI]" value="${dataset.info.PI}" /></div>
+        <div class="mb-2">Voxels: <input type="text" class="form-control" name="info[voxels]" value="${dataset.info.voxels}" /></div>
+        <div class="mb-2">Thickness: <input type="text" class="form-control" name="info[thickness]" value="${dataset.info.thickness}" /></div>
+
+    
+        <button type="submit" class="btn btn-primary mt-2">Update</button>
     `;
 
-            datasetInfoDiv.appendChild(datasetDiv);
+        form.innerHTML = formHTML;
+        datasetInfoDiv.appendChild(form);
+
+        // 添加表单提交事件监听
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const updateData = Object.fromEntries(formData.entries());
+            // 注意：这里可能需要进一步处理updateData以符合后端接口的期望格式
+
+            // 替换为实际的更新数据API
+            fetch('/updateDataset', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    'datasetId': dataset._id, // 如果需要
+                    'updateData': updateData,
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Dataset updated successfully!');
+                    } else {
+                        alert('Failed to update dataset.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
         });
     }
+
+
 
     function getDatasets() {
         return fetch('getDatasets')
