@@ -328,7 +328,9 @@ def get_datasets():
     ds = db.datasets
     for dataset in ds.find():
         datasets.append({
-            'name': dataset['name']
+            'name': dataset['name'],
+            'institution': dataset['institution'],
+            'po_num': dataset['PO_#']
         })
     return jsonify(datasets)
 

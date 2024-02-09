@@ -3,23 +3,46 @@
 
 <head>
     <style>
-        .selected-dataset {
-            background-color: #e6e6e6;
+        /* 基础样式重置 */
+        * {
+            box-sizing: border-box;
         }
 
-        .selectable-user:hover,
-        li:hover {
-            cursor: pointer;
-            background-color: #f5f5f5;
+        .list-group {
+            width: 100%;
+            /* 设置表格宽度 */
+            table-layout: fixed;
+            /* 启用固定表格布局 */
+            border-collapse: collapse;
+            /* 折叠边框 */
         }
 
-        .upload-form-group {
-            margin-bottom: 15px;
+        .list-group th,
+        .list-group td {
+            width: 55%;
+            /* 假设你有两列，每列占一半宽度 */
+            text-align: center;
+            /* 文本左对齐 */
+            padding: 12px;
+            /* 单元格内边距 */
+            border: 1px solid #ddd;
+            /* 单元格边框 */
+            box-sizing: border-box;
+            /* 边框和内边距包含在宽度内 */
         }
 
-        .required {
-            color: red;
+        .list-group th {
+            background-color: #343a40;
+            /* 深灰色背景 */
+            color: #ffffff;
+            /* 白色文字 */
+            position: sticky;
+            /* 表头固定 */
+            top: 0;
+            z-index: 1;
         }
+
+
 
         .progress-bar {
             width: 100%;
@@ -34,6 +57,24 @@
             line-height: 30px;
             color: white;
         }
+
+        .xyz-container {
+            display: flex;
+            align-items: center;
+            /* 确保所有项在交叉轴上居中对齐 */
+            margin-bottom: 10px;
+            /* 或根据需要调整间距 */
+        }
+
+        .flex-item {
+            margin-right: 10px;
+            /* 在项目之间添加一些间隔 */
+        }
+
+        .flex-item.title {
+            font-weight: bold;
+            /* 如果需要，增加标题的粗细 */
+        }
     </style>
 </head>
 
@@ -46,6 +87,13 @@
                     <!-- 左侧内容，固定宽度 -->
                     <div class="col-md-5">
                         <div class="mb-3">
+                            <div id="filterContainer">
+                                <label for="institutionFilter">Filter by Institution:</label>
+                                <select id="institutionFilter">
+                                    <option value="all">All</option>
+                                    <!-- 动态添加其他institution选项 -->
+                                </select>
+                            </div>
                             <!-- <h5 class="card-title">Dataset List</h5> -->
                             <div id="datasetList" class="table table-striped table-hover"></div>
                         </div>
@@ -67,6 +115,8 @@
                             <!-- The data will be dynamically populated by JavaScript -->
                         </div>
                         <div class="mt-3">
+                            <button id="updateDatasetBtn" type="submit"
+                                class="btn btn-sm btn-primary btn-icon-only">Update</button>
                             <button id="downloadDatasetBtn" class="btn btn-sm btn-primary btn-icon-only">
                                 <i class="fas fa-download"></i>
                             </button>
@@ -83,36 +133,85 @@
 
 <script>
     let selectedDatasetName = ""
-    window.addEventListener("DOMContentLoaded", renderDatasetList())
+    window.addEventListener("DOMContentLoaded", function () {
+        getDatasets().then(datasets => {
+            // 填充筛选器选项
+            populateFilter(datasets);
+            // 初始渲染表格
+            renderDatasetList(datasets);
+        });
+    });
+
+
     function renderDatasetList() {
         getDatasets().then(datasets => {
             const datasetList = document.getElementById('datasetList');
             datasetList.innerHTML = ''; // clear existing content
-            const ul = document.createElement('ul');
-            ul.classList.add('list-group');
+
+            // 创建表格结构
+            const table = document.createElement('table');
+            table.classList.add('list-group');
+
+            // 创建并添加表头
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+
+            const institutionHeader = document.createElement('th');
+            institutionHeader.textContent = 'Institution';
+
+            const poNumHeader = document.createElement('th');
+            poNumHeader.textContent = 'PO_#';
+
+            const nameHeader = document.createElement('th');
+            nameHeader.textContent = 'Name';
+
+            headerRow.appendChild(institutionHeader);
+            headerRow.appendChild(nameHeader);
+            headerRow.appendChild(poNumHeader);
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // 创建并填充表格体
+            const tbody = document.createElement('tbody');
             datasets.forEach(dataset => {
-                const li = document.createElement('li');
-                li.classList.add('list-group-item');
-                li.dataset.name = dataset.name;
-                li.textContent = dataset.name;
-                ul.appendChild(li)
+                const row = document.createElement('tr');
+                row.dataset.name = dataset.name; // 便于之后获取选中的数据集名称
+                row.style.cursor = "pointer"; // 使行看起来是可点击的
+
+                const institutionCell = document.createElement('td');
+                institutionCell.textContent = dataset.institution;
+
+                const nameCell = document.createElement('td');
+                nameCell.textContent = dataset.name;
+
+                const poNumCell = document.createElement('td');
+                poNumCell.textContent = dataset.po_num;
+
+                row.appendChild(institutionCell);
+                row.appendChild(nameCell);
+                row.appendChild(poNumCell)
+
+                tbody.appendChild(row);
             });
-            datasetList.appendChild(ul);
-            ul.addEventListener('click', (event) => {
-                const selectedLi = event.target.closest('li');
-                if (selectedLi) {
-                    selectedDatasetName = selectedLi.dataset.name;
-                    console.log('Selected dataset:', selectedDatasetName);
-                    // Remove the selected-dataset class from all other li elements
-                    const allLiElements = document.querySelectorAll('#datasetList li');
-                    allLiElements.forEach((li) => {
-                        if (li !== selectedLi) {
-                            li.classList.remove('selected-dataset');
-                        }
+            table.appendChild(tbody);
+
+            datasetList.appendChild(table);
+
+            tbody.addEventListener('click', (event) => {
+                const selectedRow = event.target.closest('tr');
+                if (selectedRow) {
+                    selectedDatasetName = selectedRow.dataset.name;
+
+                    // 移除之前选中行的selected-dataset类
+                    const allRows = document.querySelectorAll('#datasetList tr');
+                    allRows.forEach((row) => {
+                        row.classList.remove('selected-dataset');
                     });
-                    // Add the selected-dataset class to the selected li element
-                    selectedLi.classList.add('selected-dataset');
-                    // Fetch data for the selected dataset
+
+                    // 为当前选中的行添加selected-dataset类
+                    selectedRow.classList.add('selected-dataset');
+
+                    // 获取选中的数据集信息
                     fetch('/getDatasetsData', {
                         method: 'POST',
                         headers: {
@@ -124,7 +223,7 @@
                     })
                         .then(response => response.json())
                         .then(data => {
-
+                            // 在这里处理数据集详细信息的更新
                             updateDatasetList(data);
                         })
                         .catch((error) => {
@@ -133,9 +232,10 @@
                 }
             });
 
+
             if (datasets.length > 0) {
-                const firstLi = ul.querySelector('li');
-                firstLi.click();
+                const firstRow = tbody.querySelector('tr');
+                firstRow.click();
             }
         });
     }
@@ -210,11 +310,13 @@
         const form = document.createElement('form');
         form.className = 'dataset-info-form';
         let formHTML = `
-        <h6>Name: <input type="text" class="form-control mb-2" name="name" value="${dataset.name}" /></h6>
-        <div><strong>Types:</strong></div>`;
+        <div class="xyz-container">
+            <div class="flex-item title">Name:</div>
+            <div class="flex-item"><input type="text" class="form-control" name="name" value="${dataset.name}" /></div>
+        </div>`;
 
         if (dataset.types) {
-            let typesContent = '<h6>Types:</h6><ul>';
+            let typesContent = '<div class="flex-item title">Types:</div>';
             Object.keys(dataset.types).forEach((type) => {
                 typesContent += `<li>${type}:`;
                 Object.keys(dataset.types[type]).forEach((exposure) => {
@@ -230,38 +332,50 @@
         }
 
         formHTML += `
-        <h6>Voxels:</h6>
-        <div class="mb-2">X: <input type="number" class="form-control" name="voxels[x]" value="${dataset.voxels.x}" /></div>
-        <div class="mb-2">Y: <input type="number" class="form-control" name="voxels[y]" value="${dataset.voxels.y}" /></div>
-        <div class="mb-2">Z: <input type="number" class="form-control" name="voxels[z]" value="${dataset.voxels.z}" /></div>
+        <div class="xyz-container">
+            <div class="flex-item title">Voxels:</div>
+            <div class="flex-item">X: <input type="number" class="form-control" name="voxels[x]" value="${dataset.voxels.x}" /></div>
+            <div class="flex-item">Y: <input type="number" class="form-control" name="voxels[y]" value="${dataset.voxels.y}" /></div>
+            <div class="flex-item">Z: <input type="number" class="form-control" name="voxels[z]" value="${dataset.voxels.z}" /></div>
+        </div>
 
-        <h6>Dims3:</h6>
-        <div class="mb-2">X: <input type="number" class="form-control" name="dims3[x]" value="${dataset.dims3.x}" /></div>
-        <div class="mb-2">Y: <input type="number" class="form-control" name="dims3[y]" value="${dataset.dims3.y}" /></div>
-        <div class="mb-2">Z: <input type="number" class="form-control" name="dims3[z]" value="${dataset.dims3.z}" /></div>
+        <div class="xyz-container">
+            <div class="flex-item title">Dims3:</div>
+            <div class="flex-item">X: <input type="number" class="form-control" name="dims3[x]" value="${dataset.dims3.x}" /></div>
+            <div class="flex-item">Y: <input type="number" class="form-control" name="dims3[y]" value="${dataset.dims3.y}" /></div>
+            <div class="flex-item">Z: <input type="number" class="form-control" name="dims3[z]" value="${dataset.dims3.z}" /></div>
+        </div>
 
-        <h6>Pixel Length UM: <input type="text" class="form-control mb-2" name="pixelLengthUM" value="${dataset.pixelLengthUM}" /></h6>
+        <div class="xyz-container">
+            <div class="flex-item title">Dims2:</div>
+            <div class="flex-item">X: <input type="text" class="form-control" name="dims2[x]" value="${dataset.dims2.x}" /></div>
+            <div class="flex-item">Y: <input type="text" class="form-control" name="dims2[y]" value="${dataset.dims2.y}" /></div>
+            <div class="flex-item">Z: <input type="text" class="form-control" name="dims2[z]" value="${dataset.dims2.z}" /></div>
+        </div>
+        
+        <div class="xyz-container">
+            <div class="flex-item title">Image Dims:</div>
+            <div class="flex-item">X: <input type="text" class="form-control" name="imageDims[x]" value="${dataset.imageDims.x}" /></div>
+            <div class="flex-item">Y: <input type="text" class="form-control" name="imageDims[y]" value="${dataset.imageDims.y}" /></div>
+            <div class="flex-item">Z: <input type="text" class="form-control" name="imageDims[z]" value="${dataset.imageDims.z}" /></div>
+        </div>  
 
-        <h6>Dims2:</h6>
-        <div class="mb-2">X: <input type="text" class="form-control" name="dims2[x]" value="${dataset.dims2.x}" /></div>
-        <div class="mb-2">Y: <input type="text" class="form-control" name="dims2[y]" value="${dataset.dims2.y}" /></div>
-        <div class="mb-2">Z: <input type="text" class="form-control" name="dims2[z]" value="${dataset.dims2.z}" /></div>
+        <div class="xyz-container">
+            <div class="flex-item">Pixel Length UM: <input type="text" class="form-control" name="pixelLengthUM" value="${dataset.pixelLengthUM}" /></div>
+            <div class="flex-item">Z Skip: <input type="number" class="form-control" name="zskip" value="${dataset.zskip}" /></div>
+        </div>
 
-        <h6>Image Dims:</h6>
-        <div class="mb-2">X: <input type="text" class="form-control" name="imageDims[x]" value="${dataset.imageDims.x}" /></div>
-        <div class="mb-2">Y: <input type="text" class="form-control" name="imageDims[y]" value="${dataset.imageDims.y}" /></div>
-        <div class="mb-2">Z: <input type="text" class="form-control" name="imageDims[z]" value="${dataset.imageDims.z}" /></div>
+        <div class="xyz-container">
+            <div class="flex-item title">Info:</div>
+            <div class="flex-item">Voxels: <input type="text" class="form-control" name="info[voxels]" value="${dataset.info.voxels}" /></div>
+            <div class="flex-item">Thickness: <input type="text" class="form-control" name="info[thickness]" value="${dataset.info.thickness}" /></div>
+        </div> 
 
-        <h6>Z Skip: <input type="number" class="form-control mb-2" name="zskip" value="${dataset.zskip}" /></h6>
-
-        <h6>Info:</h6>
-        <div class="mb-2">Specimen: <input type="text" class="form-control" name="info[specimen]" value="${dataset.info.specimen}" /></div>
-        <div class="mb-2">PI: <input type="text" class="form-control" name="info[PI]" value="${dataset.info.PI}" /></div>
-        <div class="mb-2">Voxels: <input type="text" class="form-control" name="info[voxels]" value="${dataset.info.voxels}" /></div>
-        <div class="mb-2">Thickness: <input type="text" class="form-control" name="info[thickness]" value="${dataset.info.thickness}" /></div>
-
+        <div class="xyz-container">
+            <div class="mb-2">Specimen: <input type="text" class="form-control" name="info[specimen]" value="${dataset.info.specimen}" /></div>
+            <div class="mb-2">PI: <input type="text" class="form-control" name="info[PI]" value="${dataset.info.PI}" /></div>
+        </div> 
     
-        <button type="submit" class="btn btn-primary mt-2">Update</button>
     `;
 
         form.innerHTML = formHTML;
@@ -296,6 +410,36 @@
                 .catch(error => console.error('Error:', error));
         });
     }
+
+    function populateFilter(datasets) {
+        const institutionSet = new Set(datasets.map(dataset => dataset.institution));
+        const filter = document.getElementById('institutionFilter');
+        institutionSet.forEach(institution => {
+            const option = document.createElement('option');
+            option.value = institution;
+            option.textContent = institution;
+            filter.appendChild(option);
+        });
+    }
+
+    function filterDatasets(institution) {
+        getDatasets().then(datasets => {
+            const filteredDatasets = institution === 'all' ? datasets : datasets.filter(dataset => dataset.institution === institution);
+            console.log("选择的", filteredDatasets)
+            renderDatasetList(filteredDatasets); // 重新渲染表格
+        });
+    }
+
+    document.getElementById('institutionFilter').addEventListener('change', (e) => {
+        filterDatasets(e.target.value);
+    });
+
+    // getDatasets().then(datasets => {
+    //     // 填充筛选器选项
+    //     populateFilter(datasets);
+    //     // 初始渲染表格
+    //     // renderDatasetList(datasets);
+    // });
 
 
 
