@@ -149,7 +149,6 @@ def saveAnnotation():
     if 'email' not in session:
         return redirect(url_for('login'))
     json = request.get_json()
-
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     ds = db.annotations
@@ -450,7 +449,6 @@ def datasetsNew():
         return render_template('403.html'), 403
     return render_template('datasetsV3.html', title='Datasets')
 
-
 @app.route("/getUsers", methods=['GET'])
 def getUsers():
     if 'email' not in session:
@@ -460,7 +458,6 @@ def getUsers():
     users = db.Users
     usersResult = users.find()
     return make_response(dumps(usersResult), 200)
-
 
 @app.route("/createUser", methods=['POST'])
 def createUser():
@@ -498,7 +495,6 @@ def createUser():
     send = '{ "success": "cookie"}'
     return make_response(send, 200)
 
-
 @app.route("/deleteUser", methods=['POST'])
 def deleteUser():
     if 'email' not in session:
@@ -523,7 +519,6 @@ def volRender():
 # pull a slice out of the stacked tiff and send it as webp
 # This function appears to send the data for 1/10th the cost
 
-
 @app.route("/getSlice", methods=['POST'])
 def getSlice():
     print("getSlice")
@@ -546,7 +541,6 @@ def getSlice():
         attachment_filename='slice.webp'
     )
 
-
 @app.route("/getViews", methods=['POST'])
 def getViews():
     if 'email' not in session:
@@ -567,7 +561,6 @@ def getViews():
         tempFile,
         attachment_filename='slice.webp'
     )
-
 
 @app.route("/saveView", methods=['POST'])
 def saveView():
@@ -1601,3 +1594,54 @@ def delete_dataset():
     datasets.delete_one({"name": dataset_name})
     send = '{ "success": "cookie"}'
     return jsonify({'status': 'success', 'message': 'Delete successfully'})
+
+@app.route('/getInstitutions', methods=['GET'])
+def get_institutions():
+    institutions = []
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV
+    collection = db.Institution  # 假设机构数据存储在'institutions'集合中
+    # print(collection)
+    for institution in collection.find():
+        print(institution)
+        institutions.append({
+            # 'id': str(institution['_id']),  # MongoDB的_id字段是ObjectId类型，需要转换为字符串
+            'name': institution.get('name', ''),
+            'type': institution.get('type', ''),
+            'address': institution.get('address', ''),
+            'phone': institution.get('phone',''),
+            'Email': institution.get('Email',''),
+            'website': institution.get('website',''),
+            'status': institution.get('status','')
+        })
+    return jsonify(institutions)
+
+@app.route('/updateInstitution', methods=['POST'])
+def update_institution():
+    data = request.json
+    print(data)
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV
+    
+    # 假设每个机构的_id是通过请求发送的
+    institution_name = data.get('name')
+    if not institution_name:
+        return jsonify({"error": "Missing institution name"}), 400
+
+    # 更新操作
+    update_result = db.Institution.update_one(
+        {"name": institution_name},
+        {"$set": {
+            "name": data.get('name'),
+            "type": data.get('type'),
+            "address": data.get('address'),
+            "status": data.get('status'),
+        }}
+    )
+
+    if update_result.modified_count > 0:
+        print("suc")
+        return jsonify({"success": True}), 200
+    else:
+        print("unsuc")
+        return jsonify({"error": "No institution updated"}), 404

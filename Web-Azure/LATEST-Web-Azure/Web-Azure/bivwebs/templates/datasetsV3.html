@@ -80,50 +80,74 @@
 
 <div class="container-fluid">
     <div class="row" style="margin-top: 70px;">
-        <div class="card shadow w-50">
-            <div class="card-header">Dataset</div>
-            <div class="card-body">
-                <div class="row">
-                    <!-- 左侧内容，固定宽度 -->
-                    <div class="col-md-5">
-                        <div class="mb-3">
-                            <div id="filterContainer">
-                                <label for="institutionFilter">Filter by Institution:</label>
-                                <select id="institutionFilter">
-                                    <option value="all">All</option>
-                                    <!-- 动态添加其他institution选项 -->
-                                </select>
+        <div class="col-6">
+            <div class="card shadow">
+                <div class="card-header">Dataset</div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- 左侧内容，固定宽度 -->
+                        <div class="col-md-5">
+                            <div class="mb-3">
+                                <div id="filterContainer">
+                                    <label for="institutionFilter">Filter by Institution:</label>
+                                    <select id="institutionFilter">
+                                        <option value="all">All</option>
+                                        <!-- 动态添加其他institution选项 -->
+                                    </select>
+                                </div>
+                                <!-- <h5 class="card-title">Dataset List</h5> -->
+                                <div id="datasetList" class="table table-striped table-hover"></div>
                             </div>
-                            <!-- <h5 class="card-title">Dataset List</h5> -->
-                            <div id="datasetList" class="table table-striped table-hover"></div>
+                            <div class="form-group">
+                                <label for="filename">TifFile:<span class="required">*</span></label>
+                                <input type="file" class="form-control-file" id="fileInputTiff">
+                                <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
+                            </div>
+                            <div class="form-group">
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill" id="progress-bar-fill">0%</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="filename">TifFile:<span class="required">*</span></label>
-                            <input type="file" class="form-control-file" id="fileInputTiff">
-                            <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
-                        </div>
-                        <div class="form-group">
-                            <div class="progress-bar">
-                                <div class="progress-bar-fill" id="progress-bar-fill">0%</div>
+                        <!-- 右侧内容，固定宽度 -->
+                        <div class="col-md-7">
+                            <!-- <h5 class="card-title">Dataset Info</h5> -->
+                            <div id="datasetInfo">
+                                <!-- The data will be dynamically populated by JavaScript -->
+                            </div>
+                            <div class="mt-3">
+                                <button id="updateDatasetBtn" type="submit"
+                                    class="btn btn-sm btn-primary btn-icon-only">Update</button>
+                                <button id="downloadDatasetBtn" class="btn btn-sm btn-primary btn-icon-only">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button id="deleteDatasetBtn" class="btn btn-sm btn-danger ml-2 btn-icon-only">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <!-- 右侧内容，固定宽度 -->
-                    <div class="col-md-7">
-                        <!-- <h5 class="card-title">Dataset Info</h5> -->
-                        <div id="datasetInfo">
-                            <!-- The data will be dynamically populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card shadow">
+                <div class="card-header">Institution</div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- 机构列表容器 -->
+                        <div class="col-3">
+                            <h5>Institution List</h5>
+                            <div id="institutionList" class="list-group"></div>
+                            <button id="newInstitutionBtn" class="btn btn-primary">New</button>
+
                         </div>
-                        <div class="mt-3">
-                            <button id="updateDatasetBtn" type="submit"
-                                class="btn btn-sm btn-primary btn-icon-only">Update</button>
-                            <button id="downloadDatasetBtn" class="btn btn-sm btn-primary btn-icon-only">
-                                <i class="fas fa-download"></i>
-                            </button>
-                            <button id="deleteDatasetBtn" class="btn btn-sm btn-danger ml-2 btn-icon-only">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                        <!-- 机构详细信息容器 -->
+                        <div class="col-9">
+                            <h5>Institution Details</h5>
+                            <div id="institutionDetails"></div>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -143,101 +167,99 @@
     });
 
 
-    function renderDatasetList() {
-        getDatasets().then(datasets => {
-            const datasetList = document.getElementById('datasetList');
-            datasetList.innerHTML = ''; // clear existing content
+    function renderDatasetList(datasets) {
+        const datasetList = document.getElementById('datasetList');
+        datasetList.innerHTML = ''; // 清除现有内容
 
-            // 创建表格结构
-            const table = document.createElement('table');
-            table.classList.add('list-group');
+        // 创建表格结构
+        const table = document.createElement('table');
+        table.classList.add('list-group');
 
-            // 创建并添加表头
-            const thead = document.createElement('thead');
-            const headerRow = document.createElement('tr');
+        // 创建并添加表头
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
 
-            const institutionHeader = document.createElement('th');
-            institutionHeader.textContent = 'Institution';
+        const institutionHeader = document.createElement('th');
+        institutionHeader.textContent = 'Institution';
 
-            const poNumHeader = document.createElement('th');
-            poNumHeader.textContent = 'PO_#';
+        const poNumHeader = document.createElement('th');
+        poNumHeader.textContent = 'PO_#';
 
-            const nameHeader = document.createElement('th');
-            nameHeader.textContent = 'Name';
+        const nameHeader = document.createElement('th');
+        nameHeader.textContent = 'Name';
 
-            headerRow.appendChild(institutionHeader);
-            headerRow.appendChild(nameHeader);
-            headerRow.appendChild(poNumHeader);
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
+        headerRow.appendChild(institutionHeader);
+        headerRow.appendChild(nameHeader);
+        headerRow.appendChild(poNumHeader);
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
 
-            // 创建并填充表格体
-            const tbody = document.createElement('tbody');
-            datasets.forEach(dataset => {
-                const row = document.createElement('tr');
-                row.dataset.name = dataset.name; // 便于之后获取选中的数据集名称
-                row.style.cursor = "pointer"; // 使行看起来是可点击的
+        // 创建并填充表格体
+        const tbody = document.createElement('tbody');
+        datasets.forEach(dataset => {
+            const row = document.createElement('tr');
+            row.dataset.name = dataset.name; // 便于之后获取选中的数据集名称
+            row.style.cursor = "pointer"; // 使行看起来是可点击的
 
-                const institutionCell = document.createElement('td');
-                institutionCell.textContent = dataset.institution;
+            const institutionCell = document.createElement('td');
+            institutionCell.textContent = dataset.institution;
 
-                const nameCell = document.createElement('td');
-                nameCell.textContent = dataset.name;
+            const nameCell = document.createElement('td');
+            nameCell.textContent = dataset.name;
 
-                const poNumCell = document.createElement('td');
-                poNumCell.textContent = dataset.po_num;
+            const poNumCell = document.createElement('td');
+            poNumCell.textContent = dataset.po_num;
 
-                row.appendChild(institutionCell);
-                row.appendChild(nameCell);
-                row.appendChild(poNumCell)
+            row.appendChild(institutionCell);
+            row.appendChild(nameCell);
+            row.appendChild(poNumCell);
 
-                tbody.appendChild(row);
-            });
-            table.appendChild(tbody);
+            tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
 
-            datasetList.appendChild(table);
+        datasetList.appendChild(table);
 
-            tbody.addEventListener('click', (event) => {
-                const selectedRow = event.target.closest('tr');
-                if (selectedRow) {
-                    selectedDatasetName = selectedRow.dataset.name;
+        tbody.addEventListener('click', (event) => {
+            const selectedRow = event.target.closest('tr');
+            if (selectedRow) {
+                selectedDatasetName = selectedRow.dataset.name;
 
-                    // 移除之前选中行的selected-dataset类
-                    const allRows = document.querySelectorAll('#datasetList tr');
-                    allRows.forEach((row) => {
-                        row.classList.remove('selected-dataset');
-                    });
+                // 移除之前选中行的selected-dataset类
+                const allRows = document.querySelectorAll('#datasetList tr');
+                allRows.forEach((row) => {
+                    row.classList.remove('selected-dataset');
+                });
 
-                    // 为当前选中的行添加selected-dataset类
-                    selectedRow.classList.add('selected-dataset');
+                // 为当前选中的行添加selected-dataset类
+                selectedRow.classList.add('selected-dataset');
 
-                    // 获取选中的数据集信息
-                    fetch('/getDatasetsData', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            'datasetName': selectedDatasetName,
-                        }),
+                // 获取选中的数据集信息
+                fetch('/getDatasetsData', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        'datasetName': selectedDatasetName,
+                    }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // 在这里处理数据集详细信息的更新
+                        updateDatasetList(data);
                     })
-                        .then(response => response.json())
-                        .then(data => {
-                            // 在这里处理数据集详细信息的更新
-                            updateDatasetList(data);
-                        })
-                        .catch((error) => {
-                            console.error('Error:', error)
-                        });
-                }
-            });
-
-
-            if (datasets.length > 0) {
-                const firstRow = tbody.querySelector('tr');
-                firstRow.click();
+                    .catch((error) => {
+                        console.error('Error:', error)
+                    });
             }
         });
+
+
+        if (datasets.length > 0) {
+            const firstRow = tbody.querySelector('tr');
+            firstRow.click();
+        }
     }
 
     document.getElementById("downloadDatasetBtn").addEventListener("click", function () {
@@ -423,25 +445,19 @@
     }
 
     function filterDatasets(institution) {
+        // 假设 getDatasets() 返回所有数据集的一个Promise
         getDatasets().then(datasets => {
+            // 根据所选机构过滤数据集
             const filteredDatasets = institution === 'all' ? datasets : datasets.filter(dataset => dataset.institution === institution);
-            console.log("选择的", filteredDatasets)
-            renderDatasetList(filteredDatasets); // 重新渲染表格
+            // 重新渲染表格
+            renderDatasetList(filteredDatasets);
         });
     }
 
     document.getElementById('institutionFilter').addEventListener('change', (e) => {
+        // 传递选中的机构名称到filterDatasets函数
         filterDatasets(e.target.value);
     });
-
-    // getDatasets().then(datasets => {
-    //     // 填充筛选器选项
-    //     populateFilter(datasets);
-    //     // 初始渲染表格
-    //     // renderDatasetList(datasets);
-    // });
-
-
 
     function getDatasets() {
         return fetch('getDatasets')
@@ -454,6 +470,185 @@
                 return [];
             });
     }
+
+
+    function getInstitutions() {
+        return fetch('/getInstitutions')
+            .then(response => response.json())
+            .then(institutions => {
+                console.log(institutions)
+                return institutions;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                return [];
+            });
+    }
+
+    function renderInstitutionList(institutions) {
+        const institutionList = document.getElementById('institutionList');
+        institutionList.innerHTML = ''; // 清空现有内容
+
+        institutions.forEach((institution, index) => {
+            const item = document.createElement('div');
+            item.className = 'list-group-item list-group-item-action';
+            item.textContent = institution.name;
+            item.onclick = () => showInstitutionDetails(institution);
+            institutionList.appendChild(item);
+
+            // 自动选中并显示第一个机构的详细信息
+            if (index === 0) {
+                showInstitutionDetails(institution);
+            }
+        });
+    }
+
+
+    function showInstitutionDetails(institution) {
+        const institutionDetails = document.getElementById('institutionDetails');
+
+        // 假设的类型和状态选项
+        const typeOptions = ['Industry', 'Academic', 'Government', 'Others'];
+        const statusOptions = ['Active', 'Inactive', 'Pending'];
+
+        // 创建下拉选项的HTML
+        const typeSelectHTML = typeOptions.map(option => `<option value="${option}" ${institution.type === option ? 'selected' : ''}>${option}</option>`).join('');
+        const statusSelectHTML = statusOptions.map(option => `<option value="${option}" ${institution.status === option ? 'selected' : ''}>${option}</option>`).join('');
+
+        // 设置详细信息的HTML
+        institutionDetails.innerHTML = `
+        <form id="institutionForm">
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" class="form-control" name="name" value="${institution.name}">
+            </div>
+            <div class="form-group">
+                <label>Type:</label>
+                <select class="form-control" name="type">
+                    ${typeSelectHTML}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Address:</label>
+                <input type="text" class="form-control" name="address" value="${institution.address}">
+            </div>
+            <div class="form-group">
+                <label>Phone Number:</label>
+                <input type="text" class="form-control" name="phoneNum" value="${institution.phone}">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="text" class="form-control" name="Email" value="${institution.Email}">
+            </div>
+            <div class="form-group">
+                <label>Website:</label>
+                <input type="text" class="form-control" name="website" value="${institution.website}">
+            </div>
+            <div class="form-group">
+                <label>Status:</label>
+                <select class="form-control" name="status">
+                    ${statusSelectHTML}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    `;
+
+        // 添加表单提交事件监听器
+        document.getElementById('institutionForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            updateInstitutionDetails(); // 实现这个函数来处理表单提交
+        });
+    }
+
+    function updateInstitutionDetails() {
+        const form = document.getElementById('institutionForm');
+        const formData = new FormData(form);
+        const updatedDetails = {};
+        formData.forEach((value, key) => {
+            updatedDetails[key] = value;
+        });
+
+        // 以下是发送更新请求到后端的示例代码
+        // 你需要根据实际的API端点和要求来调整这部分代码
+        fetch('/updateInstitution', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedDetails),
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                // 处理成功更新后的逻辑，如提示用户或刷新页面等
+                window.location.reload();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                // 处理错误情况
+            });
+    }
+    
+    document.getElementById('newInstitutionBtn').addEventListener('click', function () {
+        const institutionDetails = document.getElementById('institutionDetails');
+        // 清空详细信息区域，并提供空白表单
+        institutionDetails.innerHTML = `
+        <form id="institutionForm">
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" class="form-control" name="name" value="">
+            </div>
+            <div class="form-group">
+                <label>Type:</label>
+                <select class="form-control" name="type">
+                    <option value="Research">Research</option>
+                    <option value="Academic">Academic</option>
+                    <!-- 添加其他选项 -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Address:</label>
+                <input type="text" class="form-control" name="address" value="">
+            </div>
+            <div class="form-group">
+                <label>Status:</label>
+                <select class="form-control" name="status">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <!-- 添加其他选项 -->
+                </select>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="submitInstitutionForm()">Update</button>
+        </form>
+    `;
+    });
+
+    // 修改submitInstitutionForm函数来区分是更新还是新建
+    function submitInstitutionForm() {
+        const form = document.getElementById('institutionForm');
+        const formData = new FormData(form);
+        let institutionData = {};
+        formData.forEach((value, key) => {
+            institutionData[key] = value;
+        });
+
+        // 根据institutionData是否含有_id字段来判断是创建新机构还是更新现有机构
+        if (institutionData._id) {
+            // 更新机构信息的逻辑
+        } else {
+            // 创建新机构的逻辑
+            createNewInstitution(institutionData); // 实现这个函数来处理创建新机构
+        }
+    }
+
+
+    window.addEventListener("DOMContentLoaded", function () {
+        getInstitutions().then(institutions => {
+            renderInstitutionList(institutions);
+        });
+    });
+
 </script>
 
 {% endblock content %}
