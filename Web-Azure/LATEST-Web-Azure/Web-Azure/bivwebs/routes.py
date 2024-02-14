@@ -1595,6 +1595,46 @@ def delete_dataset():
     send = '{ "success": "cookie"}'
     return jsonify({'status': 'success', 'message': 'Delete successfully'})
 
+# 更新数据集信息的路由
+@app.route('/updateDataset', methods=['POST'])
+def update_dataset():
+    try:
+        data = request.json
+        client = MongoClient(app.config['mongo'])
+        db = client.BIV 
+        print(data)
+        # 在实际应用中，你可以根据 dataset_id 来查找并更新对应的数据集信息
+        # 这里只是一个简单的示例，假设你有一个名为 "datasets" 的集合
+        update_result = db.datasets.update_one(
+        {"name": data.get('name')},
+        {"$set": {
+            "name": data.get('name'),
+            "voxels.x": float(data.get('voxels[x]')),
+            "voxels.y": float(data.get('voxels[y]')),
+            "voxels.z": float(data.get('voxels[z]')),
+            "dims3.x": float(data.get('dims3[x]')),
+            "dims3.y": float(data.get('dims3[y]')),
+            "dims3.z": float(data.get('dims3[z]')),
+            "dims2.x": float(data.get('dims2[x]')),
+            "dims2.y": float(data.get('dims2[y]')),
+            "dims2.z": float(data.get('dims2[z]')),
+            "pixelLengthUM": data.get('pixelLengthUM'),
+            "zskip":float(data.get('zskip')),
+            "info.specimen":data.get('info[specimen]'),
+            "info.PI":data.get('info[PI]'),
+            "info.thickness":data.get('info[thickness]'),
+            "info.voxels":data.get('info[voxels]')
+        }}
+    )
+
+        if update_result.modified_count > 0:
+            return jsonify({'status': 'success', 'message': 'Dataset updated successfully'}), 200
+        else:
+            return jsonify({'status': 'error', 'message': 'No dataset updated'}), 404
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 @app.route('/getInstitutions', methods=['GET'])
 def get_institutions():
     institutions = []
@@ -1619,7 +1659,6 @@ def get_institutions():
 @app.route('/updateInstitution', methods=['POST'])
 def update_institution():
     data = request.json
-    print(data)
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     

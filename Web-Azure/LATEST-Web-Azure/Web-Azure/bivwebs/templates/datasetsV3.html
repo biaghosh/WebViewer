@@ -260,6 +260,8 @@
             const firstRow = tbody.querySelector('tr');
             firstRow.click();
         }
+
+
     }
 
     document.getElementById("downloadDatasetBtn").addEventListener("click", function () {
@@ -325,7 +327,6 @@
 
     function updateDatasetList(datasets) {
         const dataset = datasets[0]
-        console.log(dataset)
         const datasetInfoDiv = document.getElementById('datasetInfo');
         datasetInfoDiv.innerHTML = ''; // 清空现有内容
 
@@ -370,16 +371,16 @@
 
         <div class="xyz-container">
             <div class="flex-item title">Dims2:</div>
-            <div class="flex-item">X: <input type="text" class="form-control" name="dims2[x]" value="${dataset.dims2.x}" /></div>
-            <div class="flex-item">Y: <input type="text" class="form-control" name="dims2[y]" value="${dataset.dims2.y}" /></div>
-            <div class="flex-item">Z: <input type="text" class="form-control" name="dims2[z]" value="${dataset.dims2.z}" /></div>
+            <div class="flex-item">X: <input type="number" class="form-control" name="dims2[x]" value="${dataset.dims2.x}" /></div>
+            <div class="flex-item">Y: <input type="number" class="form-control" name="dims2[y]" value="${dataset.dims2.y}" /></div>
+            <div class="flex-item">Z: <input type="number" class="form-control" name="dims2[z]" value="${dataset.dims2.z}" /></div>
         </div>
         
         <div class="xyz-container">
             <div class="flex-item title">Image Dims:</div>
-            <div class="flex-item">X: <input type="text" class="form-control" name="imageDims[x]" value="${dataset.imageDims.x}" /></div>
-            <div class="flex-item">Y: <input type="text" class="form-control" name="imageDims[y]" value="${dataset.imageDims.y}" /></div>
-            <div class="flex-item">Z: <input type="text" class="form-control" name="imageDims[z]" value="${dataset.imageDims.z}" /></div>
+            <div class="flex-item">X: <input type="number" class="form-control" name="imageDims[x]" value="${dataset.imageDims.x}" /></div>
+            <div class="flex-item">Y: <input type="number" class="form-control" name="imageDims[y]" value="${dataset.imageDims.y}" /></div>
+            <div class="flex-item">Z: <input type="number" class="form-control" name="imageDims[z]" value="${dataset.imageDims.z}" /></div>
         </div>  
 
         <div class="xyz-container">
@@ -403,28 +404,25 @@
         form.innerHTML = formHTML;
         datasetInfoDiv.appendChild(form);
 
-        // 添加表单提交事件监听
+        // const form = document.querySelector('.dataset-info-form');
         form.addEventListener('submit', function (e) {
             e.preventDefault();
-            const formData = new FormData(e.target);
+            const formData = new FormData(form);
             const updateData = Object.fromEntries(formData.entries());
-            // 注意：这里可能需要进一步处理updateData以符合后端接口的期望格式
-
-            // 替换为实际的更新数据API
+            // console.log("updateData",updateData)
+            // 发送更新请求
             fetch('/updateDataset', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    'datasetId': dataset._id, // 如果需要
-                    'updateData': updateData,
-                }),
+                body: JSON.stringify(updateData),
             })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
                         alert('Dataset updated successfully!');
+                        // 可能需要重新加载或更新数据集列表
                     } else {
                         alert('Failed to update dataset.');
                     }
@@ -432,6 +430,12 @@
                 .catch(error => console.error('Error:', error));
         });
     }
+
+    document.getElementById('updateDatasetBtn').addEventListener('click', function () {
+        // 触发表单提交
+        document.querySelector('.dataset-info-form').dispatchEvent(new Event('submit'));
+    });
+
 
     function populateFilter(datasets) {
         const institutionSet = new Set(datasets.map(dataset => dataset.institution));
@@ -589,7 +593,7 @@
                 // 处理错误情况
             });
     }
-    
+
     document.getElementById('newInstitutionBtn').addEventListener('click', function () {
         const institutionDetails = document.getElementById('institutionDetails');
         // 清空详细信息区域，并提供空白表单
@@ -647,6 +651,48 @@
         getInstitutions().then(institutions => {
             renderInstitutionList(institutions);
         });
+    });
+
+    document.getElementById('submitBtn').addEventListener('click', async function () {
+
+        const fileInputTiff = document.getElementById('fileInputTiff');
+        const fileTiff = fileInputTiff.files[0];
+        // Create an array containing all input boxes that need to be checked
+
+        const formData = new FormData();
+        formData.append('dataset-name', fileInputTiff.files[0].name);
+        // formData.append('modality', modality.value);
+        // formData.append('exposure', exposure.value);
+        // formData.append('wavelength', wavelength.value);
+        // formData.append('FileName', fileTiff.name);
+        // formData.append('fileContent', fileTiff); // Add the file content here
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
+
+        var fileExtension = fileInputTiff.files[0].name.split('.').pop().toLowerCase(); // Get file extension name
+        if (fileExtension !== 'tif') {
+            alert('Wrong file format! Please upload the .tif file');
+            return;
+        }
+
+        // Start getProgress function
+        shouldContinue = true;
+        getProgress();
+
+        const response = await fetch('/UploadDatase1t', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            console.error('Upload failed:', response.statusText);
+        } else {
+            shouldContinue = false
+            const data = await response.json();
+            alert(data.message)
+            submitBtn.disabled = false;
+        }
     });
 
 </script>
