@@ -329,7 +329,7 @@ def get_datasets():
         datasets.append({
             'name': dataset['name'],
             'institution': dataset['institution'],
-            'po_num': dataset['PO_#']
+            'ponum': dataset['ponum']
         })
     return jsonify(datasets)
 
@@ -1357,18 +1357,15 @@ def driver():
     # Reset progress at the start of a new job
     data = request.form
     dataset_name = data.get('dataset-name')
-    voxels_x = data.get('voxels_x')
-    voxels_y = data.get('voxels_y')
-    voxels_z = data.get('voxels_z')
-    ImageDim_x = data.get('ImageDims_x')
-    ImageDim_y =  data.get('ImageDims_y')
-    ImageDim_z = data.get('ImageDims_z')
-    Dims2_x = data.get('Dims2_x')
-    Dims2_y = data.get('Dims2_y')
-    Dims2_z = data.get('Dims2_z')
-    Dims3_x = data.get('Dims3_x')
-    Dims3_y = data.get('Dims3_y')
-    Dims3_z = data.get('Dims3_z')
+    # voxels_x = data.get('voxels_x')
+    # voxels_y = data.get('voxels_y')
+    # voxels_z = data.get('voxels_z')
+    # Dims2_x = data.get('Dims2_x')
+    # Dims2_y = data.get('Dims2_y')
+    # Dims2_z = data.get('Dims2_z')
+    # Dims3_x = data.get('Dims3_x')
+    # Dims3_y = data.get('Dims3_y')
+    # Dims3_z = data.get('Dims3_z')
     pixelLengthUM = data.get('pixelLengthUM')
     zskip = data.get('zskip')
     specimen = data.get('spcimenName')
@@ -1378,36 +1375,10 @@ def driver():
     Modality = data.get('modality')
     exposure = data.get('exposure')
     wavelength = data.get('wavelength')
-    FileName = data.get('FileName')
     # Extract Tiff content
     file = request.files['fileContent']
     file_content = file.read()
 
-    # input_data = {
-    #     'dataset_name':dataset_name,
-    #     'Modality': Modality,
-    #     'voxels_x':voxels_x,
-    #     'voxels_y':voxels_y,
-    #     'voxels_z':voxels_z,
-    #     'ImageDim_x':ImageDim_x,
-    #     'ImageDim_y':ImageDim_y,
-    #     'ImageDim_z':ImageDim_z,
-    #     'Dims2_x':Dims2_x,
-    #     'Dims2_y':Dims2_y,
-    #     'Dims2_z':Dims2_z,
-    #     'Dims3_x':Dims3_x,
-    #     'Dims3_y':Dims3_y,
-    #     'Dims3_z':Dims3_z,
-    #     'pixelLengthUM':pixelLengthUM,
-    #     'zskip':zskip,
-    #     'spcimenName':spcimenName,
-    #     'PI':PI,
-    #     'voxel_size':voxel_size,
-    #     'thickness':thickness,
-    #     'exposure': exposure,
-    #     'wavelength': wavelength,
-    #     'FileName': FileName
-    # }
     jobs = {}
     jobs[1] = [dataset_name, Modality, exposure, wavelength, file_content]
     # print("jobs1",jobs[1])
@@ -1447,10 +1418,10 @@ def driver():
                 exposure:[wavelength]
                             }
                     },
-            'voxels':{'x':voxels_x,'y':voxels_y,'z':voxels_z},
-            'dims2':{'x':int(Dims2_x),'y': int(Dims2_y),'z': int(Dims2_z)},
-            'dims3':{'x':int(Dims3_x),'y': int(Dims3_y),'z': int(Dims3_z)},
-            'pixelLengthUM':pixelLengthUM,
+            'voxels':{'x':1,'y':1,'z':2.048},
+            'dims2':{'x':int(mongoRecord[str(job[0])]['imageDims']['x'] * 2),'y': int(mongoRecord[str(job[0])]['imageDims']['y'] * 2),'z': int(mongoRecord[str(job[0])]['imageDims']['z'] * 2)},
+            'dims3':{'x':int(mongoRecord[str(job[0])]['imageDims']['x']),'y': int(mongoRecord[str(job[0])]['imageDims']['y']),'z': int(mongoRecord[str(job[0])]['imageDims']['z'])},
+            'pixelLengthUM':"100.5",
             'imageDims':{'x':mongoRecord[str(job[0])]['imageDims']['x'],'y':mongoRecord[str(job[0])]['imageDims']['y'],'z':mongoRecord[str(job[0])]['imageDims']['z']},
             'zskip':zskip,
             'info':{'specimen': specimen,'PI': PI,'voxels': voxel_size,'thickness':thickness},
@@ -1609,6 +1580,8 @@ def update_dataset():
         {"name": data.get('name')},
         {"$set": {
             "name": data.get('name'),
+            "institution": data.get('institution'),
+            "ponum":data.get("ponum"),
             "voxels.x": float(data.get('voxels[x]')),
             "voxels.y": float(data.get('voxels[y]')),
             "voxels.z": float(data.get('voxels[z]')),
@@ -1661,26 +1634,46 @@ def update_institution():
     data = request.json
     client = MongoClient(app.config['mongo'])
     db = client.BIV
+
+    print("打印",data)
     
-    # 假设每个机构的_id是通过请求发送的
     institution_name = data.get('name')
     if not institution_name:
         return jsonify({"error": "Missing institution name"}), 400
 
-    # 更新操作
-    update_result = db.Institution.update_one(
-        {"name": institution_name},
-        {"$set": {
-            "name": data.get('name'),
-            "type": data.get('type'),
-            "address": data.get('address'),
-            "status": data.get('status'),
-        }}
-    )
+    # 检查机构是否存在
+    existing_institution = db.Institution.find_one({"name": institution_name})
 
-    if update_result.modified_count > 0:
-        print("suc")
-        return jsonify({"success": True}), 200
+    if existing_institution:
+        # 如果机构存在，则更新
+        update_result = db.Institution.update_one(
+            {"name": institution_name},
+            {"$set": {
+                "name": data.get('name'),
+                "type": data.get('type'),
+                "address": data.get('address'),
+                "phone": data.get('phone'),
+                "website": data.get('website'),
+                "Email": data.get('Email'),
+                "status": data.get('status'),
+            }}
+        )
+        if update_result.modified_count > 0:
+            return jsonify({"success": True}), 200
+        else:
+            return jsonify({"error": "No institution updated"}), 404
     else:
-        print("unsuc")
-        return jsonify({"error": "No institution updated"}), 404
+        # 如果机构不存在，则插入新数据
+        insert_result = db.Institution.insert_one({
+                "name": data.get('name'),
+                "type": data.get('type'),
+                "address": data.get('address'),
+                "phone": data.get('phone'),
+                "website": data.get('website'),
+                "Email": data.get('Email'),
+                "status": data.get('status'),
+        })
+        if insert_result.inserted_id:
+            return jsonify({"success": True, "message": "New institution added"}), 201
+        else:
+            return jsonify({"error": "Failed to add new institution"}), 500

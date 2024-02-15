@@ -71,16 +71,35 @@
             /* 在项目之间添加一些间隔 */
         }
 
+        .flex-item.institution {
+            flex: 4;
+            /* 机构字段占用最多空间 */
+        }
+
+        .flex-item.ponum {
+            flex: 2;
+            /* PO#字段占用较少空间 */
+        }
+
         .flex-item.title {
             font-weight: bold;
             /* 如果需要，增加标题的粗细 */
+        }
+
+        .file-format-hint {
+            margin-left: 10px;
+            /* 在提示词和按钮之间添加一些间距 */
+            color: #666;
+            /* 设置提示词的颜色 */
+            font-size: 0.9em;
+            /* 设置提示词的字体大小 */
         }
     </style>
 </head>
 
 <div class="container-fluid">
     <div class="row" style="margin-top: 70px;">
-        <div class="col-6">
+        <div class="col-7">
             <div class="card shadow">
                 <div class="card-header">Dataset</div>
                 <div class="card-body">
@@ -102,6 +121,7 @@
                                 <label for="filename">TifFile:<span class="required">*</span></label>
                                 <input type="file" class="form-control-file" id="fileInputTiff">
                                 <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
+                                <span class="file-format-hint">(DatasetName#Modality#Exposure#Wavelength.tif)</span>
                             </div>
                             <div class="form-group">
                                 <div class="progress-bar">
@@ -130,7 +150,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6">
+        <div class="col-5">
             <div class="card shadow">
                 <div class="card-header">Institution</div>
                 <div class="card-body">
@@ -157,6 +177,7 @@
 
 <script>
     let selectedDatasetName = ""
+    let institutionsList = [];
     window.addEventListener("DOMContentLoaded", function () {
         getDatasets().then(datasets => {
             // 填充筛选器选项
@@ -208,7 +229,7 @@
             nameCell.textContent = dataset.name;
 
             const poNumCell = document.createElement('td');
-            poNumCell.textContent = dataset.po_num;
+            poNumCell.textContent = dataset.ponum;
 
             row.appendChild(institutionCell);
             row.appendChild(nameCell);
@@ -330,12 +351,26 @@
         const datasetInfoDiv = document.getElementById('datasetInfo');
         datasetInfoDiv.innerHTML = ''; // 清空现有内容
 
+        let institutionSelectHTML = '<select class="form-control" name="institution">';
+        // console.log(institutionsList)
+        institutionsList.forEach(institution => {
+            const isSelected = dataset.institution === institution.name ? ' selected' : '';
+            institutionSelectHTML += `<option value="${institution.name}"${isSelected}>${institution.name}</option>`;
+        });
+
+        institutionSelectHTML += '</select>';
+        console.log(institutionSelectHTML)
+
         const form = document.createElement('form');
         form.className = 'dataset-info-form';
         let formHTML = `
         <div class="xyz-container">
             <div class="flex-item title">Name:</div>
             <div class="flex-item"><input type="text" class="form-control" name="name" value="${dataset.name}" /></div>
+            <div class="flex-item title">Institution:</div>
+            <div class="flex-item institution">${institutionSelectHTML}</div>
+            <div class="flex-item title">PO#:</div>
+            <div class="flex-item ponum"><input type="text" class="form-control" name="ponum" value="${dataset.ponum}" /></div>
         </div>`;
 
         if (dataset.types) {
@@ -434,6 +469,7 @@
     document.getElementById('updateDatasetBtn').addEventListener('click', function () {
         // 触发表单提交
         document.querySelector('.dataset-info-form').dispatchEvent(new Event('submit'));
+        window.location.reload();
     });
 
 
@@ -480,7 +516,6 @@
         return fetch('/getInstitutions')
             .then(response => response.json())
             .then(institutions => {
-                console.log(institutions)
                 return institutions;
             })
             .catch(error => {
@@ -538,7 +573,7 @@
             </div>
             <div class="form-group">
                 <label>Phone Number:</label>
-                <input type="text" class="form-control" name="phoneNum" value="${institution.phone}">
+                <input type="text" class="form-control" name="phone" value="${institution.phone}">
             </div>
             <div class="form-group">
                 <label>Email:</label>
@@ -596,6 +631,11 @@
 
     document.getElementById('newInstitutionBtn').addEventListener('click', function () {
         const institutionDetails = document.getElementById('institutionDetails');
+        const typeOptions = ['Industry', 'Academic', 'Government', 'Others'];
+        const statusOptions = ['Active', 'Inactive', 'Pending'];
+        const statusSelectHTML = statusOptions.map(option => `<option value="${option}">${option}</option>`).join('');
+        const typeSelectHTML = typeOptions.map(option => `<option value="${option}"}>${option}</option>`).join('');
+
         // 清空详细信息区域，并提供空白表单
         institutionDetails.innerHTML = `
         <form id="institutionForm">
@@ -603,26 +643,40 @@
                 <label>Name:</label>
                 <input type="text" class="form-control" name="name" value="">
             </div>
+
             <div class="form-group">
                 <label>Type:</label>
                 <select class="form-control" name="type">
-                    <option value="Research">Research</option>
-                    <option value="Academic">Academic</option>
-                    <!-- 添加其他选项 -->
+                    ${typeSelectHTML}
                 </select>
             </div>
+
             <div class="form-group">
                 <label>Address:</label>
                 <input type="text" class="form-control" name="address" value="">
             </div>
+
+            <div class="form-group">
+                <label>Phone Number:</label>
+                <input type="text" class="form-control" name="phone" value="">
+            </div>
+
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="text" class="form-control" name="Email" value="">
+            </div>
+
+            <div class="form-group">
+                <label>Website:</label>
+                <input type="text" class="form-control" name="website" value="">
+            </div>
             <div class="form-group">
                 <label>Status:</label>
                 <select class="form-control" name="status">
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                    <!-- 添加其他选项 -->
+                    ${statusSelectHTML}
                 </select>
             </div>
+
             <button type="button" class="btn btn-primary" onclick="submitInstitutionForm()">Update</button>
         </form>
     `;
@@ -637,18 +691,14 @@
             institutionData[key] = value;
         });
 
-        // 根据institutionData是否含有_id字段来判断是创建新机构还是更新现有机构
-        if (institutionData._id) {
-            // 更新机构信息的逻辑
-        } else {
-            // 创建新机构的逻辑
-            createNewInstitution(institutionData); // 实现这个函数来处理创建新机构
-        }
+        updateInstitutionDetails();
     }
 
 
     window.addEventListener("DOMContentLoaded", function () {
         getInstitutions().then(institutions => {
+            console.log("机构", institutions)
+            institutionsList = institutions;
             renderInstitutionList(institutions);
         });
     });
@@ -658,14 +708,20 @@
         const fileInputTiff = document.getElementById('fileInputTiff');
         const fileTiff = fileInputTiff.files[0];
         // Create an array containing all input boxes that need to be checked
+        const filename = fileInputTiff.files[0].name.split('.')[0]
+        const datasetName = filename.split('#')[0]
+        const Modality = filename.split('#')[1]
+        const Exposure = filename.split('#')[2]
+        const Wavelength = filename.split('#')[3]
 
+        console.log(filename)
         const formData = new FormData();
-        formData.append('dataset-name', fileInputTiff.files[0].name);
-        // formData.append('modality', modality.value);
-        // formData.append('exposure', exposure.value);
-        // formData.append('wavelength', wavelength.value);
-        // formData.append('FileName', fileTiff.name);
-        // formData.append('fileContent', fileTiff); // Add the file content here
+        formData.append('dataset-name', datasetName);
+        formData.append('modality', Modality);
+        formData.append('exposure', Exposure);
+        formData.append('wavelength', Wavelength);
+        formData.append('FileName', fileTiff.name);
+        formData.append('fileContent', fileTiff); // Add the file content here
         for (let [key, value] of formData.entries()) {
             console.log(key, value);
         }
@@ -680,7 +736,7 @@
         shouldContinue = true;
         getProgress();
 
-        const response = await fetch('/UploadDatase1t', {
+        const response = await fetch('/UploadDataset', {
             method: 'POST',
             body: formData
         });
@@ -694,6 +750,37 @@
             submitBtn.disabled = false;
         }
     });
+
+    function getProgress() {
+        if (!shouldContinue) {
+            console.log("Exiting getProgress because shouldContinue is false");
+            return;
+        }
+
+        fetch('/progress')
+            .then(response => {
+                if (!response.ok) {
+                    console.error('Response not OK:', response);
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const progress = data.progress;
+                const progress_per = progress * 100;
+                console.log(progress, progress_per);
+                document.getElementById('progress-bar-fill').style.width = progress_per + '%';
+                document.getElementById('progress-bar-fill').textContent = Math.round(progress_per) + '%';
+
+                // If shouldContinue still true，invoke getProgress
+                if (shouldContinue) {
+                    setTimeout(getProgress, 1000); // set 1 second delay time 
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });
+    }
 
 </script>
 
