@@ -1634,8 +1634,6 @@ def update_institution():
     data = request.json
     client = MongoClient(app.config['mongo'])
     db = client.BIV
-
-    print("打印",data)
     
     institution_name = data.get('name')
     if not institution_name:
@@ -1677,3 +1675,18 @@ def update_institution():
             return jsonify({"success": True, "message": "New institution added"}), 201
         else:
             return jsonify({"error": "Failed to add new institution"}), 500
+
+@app.route('/deleteInstitution', methods=['POST'])
+def delete_institution():
+    institution_name = request.json['name']
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV
+    institutions = db.Institution
+
+    # 删除机构
+    result = institutions.delete_one({"name": institution_name})
+
+    if result.deleted_count > 0:
+        return jsonify({'status': 'success', 'message': 'Institution deleted successfully'})
+    else:
+        return jsonify({'status': 'error', 'message': 'Failed to delete institution'})

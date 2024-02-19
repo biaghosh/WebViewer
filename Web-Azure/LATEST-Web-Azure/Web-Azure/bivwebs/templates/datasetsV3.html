@@ -3,41 +3,51 @@
 
 <head>
     <style>
-        /* 基础样式重置 */
+        /* Basic style reset*/
         * {
             box-sizing: border-box;
         }
 
+        .list-group-item:hover {
+            cursor: pointer;
+            background-color: #f0f0f0;
+        }
+
+        .list-group-item.selected {
+            background-color: #e0e0e0;
+        }
+
+
         .list-group {
             width: 100%;
-            /* 设置表格宽度 */
+            /* Set table width */
             table-layout: fixed;
-            /* 启用固定表格布局 */
+            /* Enable fixed table layout */
             border-collapse: collapse;
-            /* 折叠边框 */
+            /* Collapse boraders */
         }
 
         .list-group th,
         .list-group td {
             width: 55%;
-            /* 假设你有两列，每列占一半宽度 */
+            /* Each colums taking up half the width */
             text-align: center;
-            /* 文本左对齐 */
+            /* Text left align */
             padding: 12px;
-            /* 单元格内边距 */
+            /* Cell padding */
             border: 1px solid #ddd;
-            /* 单元格边框 */
+            /* Cell border */
             box-sizing: border-box;
-            /* 边框和内边距包含在宽度内 */
+            /* Border and padding included in width */
         }
 
         .list-group th {
             background-color: #343a40;
-            /* 深灰色背景 */
+            /* Dark gray background */
             color: #ffffff;
-            /* 白色文字 */
+            /* White text */
             position: sticky;
-            /* 表头固定 */
+            /* Sticky table header */
             top: 0;
             z-index: 1;
         }
@@ -61,38 +71,38 @@
         .xyz-container {
             display: flex;
             align-items: center;
-            /* 确保所有项在交叉轴上居中对齐 */
+            /* Ensure all itmes are centered along the corss axis */
             margin-bottom: 10px;
-            /* 或根据需要调整间距 */
+            /* Adjust spacing as needed */
         }
 
         .flex-item {
             margin-right: 10px;
-            /* 在项目之间添加一些间隔 */
+            /* Add some spacing between items */
         }
 
         .flex-item.institution {
             flex: 4;
-            /* 机构字段占用最多空间 */
+            /* Institution field takes up the most space */
         }
 
         .flex-item.ponum {
             flex: 2;
-            /* PO#字段占用较少空间 */
+            /* PO#field takes up less space */
         }
 
         .flex-item.title {
             font-weight: bold;
-            /* 如果需要，增加标题的粗细 */
+            /* Incresase the boldness of the title of needed */
         }
 
         .file-format-hint {
             margin-left: 10px;
-            /* 在提示词和按钮之间添加一些间距 */
+            /* Add some spacing between the hint and the button */
             color: #666;
-            /* 设置提示词的颜色 */
+            /* Set the color of the hint */
             font-size: 0.9em;
-            /* 设置提示词的字体大小 */
+            /* Set the font size of the hint */
         }
     </style>
 </head>
@@ -104,14 +114,14 @@
                 <div class="card-header">Dataset</div>
                 <div class="card-body">
                     <div class="row">
-                        <!-- 左侧内容，固定宽度 -->
+                        <!-- Left content, fixed width -->
                         <div class="col-md-5">
                             <div class="mb-3">
                                 <div id="filterContainer">
                                     <label for="institutionFilter">Filter by Institution:</label>
                                     <select id="institutionFilter">
                                         <option value="all">All</option>
-                                        <!-- 动态添加其他institution选项 -->
+                                        <!-- Dynamically add other institution -->
                                     </select>
                                 </div>
                                 <!-- <h5 class="card-title">Dataset List</h5> -->
@@ -129,9 +139,8 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- 右侧内容，固定宽度 -->
+                        <!-- Right content, fixed width -->
                         <div class="col-md-7">
-                            <!-- <h5 class="card-title">Dataset Info</h5> -->
                             <div id="datasetInfo">
                                 <!-- The data will be dynamically populated by JavaScript -->
                             </div>
@@ -155,14 +164,13 @@
                 <div class="card-header">Institution</div>
                 <div class="card-body">
                     <div class="row">
-                        <!-- 机构列表容器 -->
+                        <!-- Organization list container -->
                         <div class="col-3">
                             <h5>Institution List</h5>
-                            <div id="institutionList" class="list-group"></div>
+                            <div id="institutionList" class="table table-striped table-hover"></div>
                             <button id="newInstitutionBtn" class="btn btn-primary">New</button>
-
                         </div>
-                        <!-- 机构详细信息容器 -->
+                        <!-- Organization details container -->
                         <div class="col-9">
                             <h5>Institution Details</h5>
                             <div id="institutionDetails"></div>
@@ -532,14 +540,24 @@
             const item = document.createElement('div');
             item.className = 'list-group-item list-group-item-action';
             item.textContent = institution.name;
-            item.onclick = () => showInstitutionDetails(institution);
+            item.onclick = () => {
+                // Remove 'selected' class from all items
+                document.querySelectorAll('#institutionList .list-group-item').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                // Add 'selected' class to clicked item
+                item.classList.add('selected');
+                showInstitutionDetails(institution);
+            };
             institutionList.appendChild(item);
 
-            // 自动选中并显示第一个机构的详细信息
+            // Automatically select and show details for the first institution
             if (index === 0) {
+                item.classList.add('selected');
                 showInstitutionDetails(institution);
             }
         });
+
     }
 
 
@@ -590,6 +608,7 @@
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">Update</button>
+            <button type="button" class="btn btn-primary" onclick="deleteInstitution()">Delete</button>
         </form>
     `;
 
@@ -682,6 +701,32 @@
     `;
     });
 
+    function deleteInstitution() {
+        const institutionName = document.querySelector('#institutionForm [name="name"]').value;
+        if (confirm(`Are you sure you want to delete the institution "${institutionName}"?`)) {
+            fetch('/deleteInstitution', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: institutionName }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Institution deleted successfully!');
+                        window.location.reload(); // 刷新页面以更新机构列表
+                    } else {
+                        alert('Failed to delete institution.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    }
+
+
+
+
     // 修改submitInstitutionForm函数来区分是更新还是新建
     function submitInstitutionForm() {
         const form = document.getElementById('institutionForm');
@@ -697,7 +742,6 @@
 
     window.addEventListener("DOMContentLoaded", function () {
         getInstitutions().then(institutions => {
-            console.log("机构", institutions)
             institutionsList = institutions;
             renderInstitutionList(institutions);
         });
@@ -713,8 +757,6 @@
         const Modality = filename.split('#')[1]
         const Exposure = filename.split('#')[2]
         const Wavelength = filename.split('#')[3]
-
-        console.log(filename)
         const formData = new FormData();
         formData.append('dataset-name', datasetName);
         formData.append('modality', Modality);
