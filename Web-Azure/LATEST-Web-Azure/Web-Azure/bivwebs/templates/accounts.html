@@ -40,7 +40,6 @@
             <div class="card shadow">
                 <div class="card-header">
                     Active Users
-
                 </div>
                 <div id="viewUsersCard" class="card-body">
                     <!-- table -->
@@ -254,25 +253,25 @@
                     const li = document.createElement('li');
                     li.classList.add('list-group-item');
                     li.textContent = dataset;
-                    // 添加点击事件监听器
+                    // Add click event listener
                     datasetList.appendChild(li);
                 });
                 assignedDatasets.appendChild(datasetList);
-                // 添加事件监听器
+                // Add event listener
                 datasetList.addEventListener('click', (event) => {
                     const selectedLi = event.target.closest('li');
                     if (selectedLi) {
-                        // 在控制台上打印选中的数据集名称
+                        // Print the selected data set name on the console
                         // console.log('Selected dataset:', selectedLi.textContent);
                         selectedAssignedDatasetName = selectedLi.textContent
-                        // 从所有其他li元素中删除selected-dataset类
+                        // Remove selected-dataset class from all other li elements
                         const allLiElements = document.querySelectorAll('#assignedDatasets li');
                         allLiElements.forEach((li) => {
                             if (li !== selectedLi) {
                                 li.classList.remove('selected-dataset');
                             }
                         });
-                        // 向选定的li元素添加selected-dataset类
+                        // Add selected-dataset class to selected li element
                         selectedLi.classList.add('selected-dataset');
                     }
                 });
@@ -377,7 +376,6 @@
                         if (li !== selectedLi) {
                             li.classList.remove('selected-dataset');
                         }
-
                     });
                     // Add the selected-dataset class to the selected li element
                     selectedLi.classList.add('selected-dataset');
@@ -386,9 +384,5 @@
 
         });
     }
-
-
-
-
 </script>
 {% endblock %}

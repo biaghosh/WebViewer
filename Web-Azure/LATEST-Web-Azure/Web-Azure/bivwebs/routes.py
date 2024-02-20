@@ -1566,16 +1566,15 @@ def delete_dataset():
     send = '{ "success": "cookie"}'
     return jsonify({'status': 'success', 'message': 'Delete successfully'})
 
-# 更新数据集信息的路由
+# Route to update dataset information
 @app.route('/updateDataset', methods=['POST'])
 def update_dataset():
     try:
         data = request.json
         client = MongoClient(app.config['mongo'])
         db = client.BIV 
-        print(data)
-        # 在实际应用中，你可以根据 dataset_id 来查找并更新对应的数据集信息
-        # 这里只是一个简单的示例，假设你有一个名为 "datasets" 的集合
+        # In practical applications, you can find and update the corresponding dataset information based on dataset_id
+        # Here's just a simple example, assuming you have a collection called "datasets"
         update_result = db.datasets.update_one(
         {"name": data.get('name')},
         {"$set": {
@@ -1613,12 +1612,10 @@ def get_institutions():
     institutions = []
     client = MongoClient(app.config['mongo'])
     db = client.BIV
-    collection = db.Institution  # 假设机构数据存储在'institutions'集合中
-    # print(collection)
+    collection = db.Institution  # Assume institution data is stored in the 'institutions' collection
     for institution in collection.find():
         print(institution)
         institutions.append({
-            # 'id': str(institution['_id']),  # MongoDB的_id字段是ObjectId类型，需要转换为字符串
             'name': institution.get('name', ''),
             'type': institution.get('type', ''),
             'address': institution.get('address', ''),
@@ -1639,11 +1636,11 @@ def update_institution():
     if not institution_name:
         return jsonify({"error": "Missing institution name"}), 400
 
-    # 检查机构是否存在
+    # Check if the organization exists
     existing_institution = db.Institution.find_one({"name": institution_name})
 
     if existing_institution:
-        # 如果机构存在，则更新
+        # Update if institution exists
         update_result = db.Institution.update_one(
             {"name": institution_name},
             {"$set": {
@@ -1661,7 +1658,7 @@ def update_institution():
         else:
             return jsonify({"error": "No institution updated"}), 404
     else:
-        # 如果机构不存在，则插入新数据
+        # If the institution does not exist, insert new data
         insert_result = db.Institution.insert_one({
                 "name": data.get('name'),
                 "type": data.get('type'),
@@ -1683,7 +1680,7 @@ def delete_institution():
     db = client.BIV
     institutions = db.Institution
 
-    # 删除机构
+    # Delete organization
     result = institutions.delete_one({"name": institution_name})
 
     if result.deleted_count > 0:
