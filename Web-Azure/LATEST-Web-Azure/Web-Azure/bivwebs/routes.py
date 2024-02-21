@@ -145,7 +145,6 @@ def getAnnotations():
 
 @app.route("/saveAnnotation", methods=['POST'])
 def saveAnnotation():
-    # print(session['email'])
     if 'email' not in session:
         return redirect(url_for('login'))
     json = request.get_json()
@@ -521,7 +520,6 @@ def volRender():
 
 @app.route("/getSlice", methods=['POST'])
 def getSlice():
-    print("getSlice")
     if 'email' not in session:
         return redirect(url_for('login'))
     json = request.get_json()
@@ -632,7 +630,6 @@ def getView():
     db = client.BIV
     ds = db.views
     data = '{}'
-    # print(json, file=sys.stdout)
     if 'name' not in json:
         data = ds.find({
             "dataset": json["dataset"]
@@ -643,7 +640,6 @@ def getView():
             "name": json["name"]
         })
     return make_response(dumps(data), 200)
-
 
 @app.route("/saveMask", methods=['POST'])
 def saveMask():
@@ -735,9 +731,8 @@ def saveMaskNoInterpolation():
         })
     ds.update_one({"dataset": json["dataset"], "name": json["name"],
                   "datetime": json["datetime"]}, {"$set": {"interpolated": "no"}})
-
+    
     return make_response(dumps(vertList), 200)
-
 
 @app.route("/getMasks", methods=['POST'])
 def getMasks():
@@ -751,9 +746,7 @@ def getMasks():
         "dataset": json["dataset"],
         "user": session['email']
     })
-
     return make_response(dumps(data), 200)
-
 
 @app.route("/getMaskSlices", methods=['POST'])
 def getMaskSlices():
@@ -1402,7 +1395,6 @@ def driver():
             mongoRecord[str(job[0])]['type'] = job[1][1] #bf or fl
             mongoRecord[str(job[0])]['exp'] = job[1][2] #exp
             mongoRecord[str(job[0])]['wv'] = job[1][3] #wv
-            print("mongoRecord",mongoRecord)
             mongoRecord[str(job[0])]['fp'] = job[1][4]
             startProcess(mongoRecord, str(job[0]), 1 )
 
@@ -1614,7 +1606,6 @@ def get_institutions():
     db = client.BIV
     collection = db.Institution  # Assume institution data is stored in the 'institutions' collection
     for institution in collection.find():
-        print(institution)
         institutions.append({
             'name': institution.get('name', ''),
             'type': institution.get('type', ''),
