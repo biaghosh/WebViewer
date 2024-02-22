@@ -101,7 +101,6 @@ function changeExposure() {
     wavelengthSelect.disabled = false
     for (const wave in dsInfo.types[modSelect.value][exposureSelect.value]) {
         waveCounter++
-        // console.log("dayinss",wave)
         let opt = document.createElement('option')
         opt.appendChild(document.createTextNode(`${dsInfo.types[modSelect.value][exposureSelect.value][wave]}nm`))
         opt.value = wave
