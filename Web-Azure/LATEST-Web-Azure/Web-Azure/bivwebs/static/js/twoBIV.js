@@ -73,6 +73,7 @@ function changeMod() {
     let expCounter = 0, waveCounter = 0
     exposureSelect.disabled = false
     for (const exp in dsInfo.types[modSelect.value]) {
+        console.log(exp)
         expCounter++
         let opt = document.createElement('option')
         opt.appendChild(document.createTextNode(exp))
@@ -83,16 +84,15 @@ function changeMod() {
             waveCounter++
         }
     }
-    if (expCounter < 2 && waveCounter < 2) {
-        exposureSelect.selectedIndex = "0"
-        changeExposure()
+    // if (expCounter < 2 && waveCounter < 2) {
+    exposureSelect.selectedIndex = "0"
+    changeExposure()
 
-    }
+    // }
 }
 
 exposureSelect.addEventListener("change", changeExposure)
 function changeExposure() {
-
     if (!exposureSelect.value)
         return
 
@@ -101,10 +101,12 @@ function changeExposure() {
     wavelengthSelect.disabled = false
     for (const wave in dsInfo.types[modSelect.value][exposureSelect.value]) {
         waveCounter++
+        // console.log("dayinss",wave)
         let opt = document.createElement('option')
         opt.appendChild(document.createTextNode(`${dsInfo.types[modSelect.value][exposureSelect.value][wave]}nm`))
         opt.value = wave
         wavelengthSelect.appendChild(opt)
+        console.log(wavelengthSelect)
     }
 
     if (waveCounter < 2) {
@@ -1363,7 +1365,7 @@ window.addEventListener('resize', () => {
     if (!cameraXY)
         return
     cameraXY.aspect = (xyDiv.offsetWidth / 360)//@TODO HARDCODE
-    console.log("宽度",xyDiv.offsetWidth)
+    console.log("宽度", xyDiv.offsetWidth)
     cameraXY.updateProjectionMatrix()
     rendererXY.setSize(xyDiv.offsetWidth, 300)
 
@@ -2037,7 +2039,7 @@ function orthoClick(evt) {
     let rect = canvasXY.getBoundingClientRect()
     let x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
     let y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
-    console.log(x,y)
+    console.log(x, y)
     rayCaster.setFromCamera({ 'x': x, 'y': y }, cameraXY)
     var intersects = []
     mesh.raycast(rayCaster, intersects)

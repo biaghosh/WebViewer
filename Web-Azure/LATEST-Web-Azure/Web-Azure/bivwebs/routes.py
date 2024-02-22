@@ -1350,15 +1350,6 @@ def driver():
     # Reset progress at the start of a new job
     data = request.form
     dataset_name = data.get('dataset-name')
-    # voxels_x = data.get('voxels_x')
-    # voxels_y = data.get('voxels_y')
-    # voxels_z = data.get('voxels_z')
-    # Dims2_x = data.get('Dims2_x')
-    # Dims2_y = data.get('Dims2_y')
-    # Dims2_z = data.get('Dims2_z')
-    # Dims3_x = data.get('Dims3_x')
-    # Dims3_y = data.get('Dims3_y')
-    # Dims3_z = data.get('Dims3_z')
     pixelLengthUM = data.get('pixelLengthUM')
     zskip = data.get('zskip')
     specimen = data.get('spcimenName')
@@ -1406,6 +1397,8 @@ def driver():
         # Save data to MongoDB
         doc = {
             'name': dataset_name,
+            "institution" : "",
+            "ponum" : 1,
             'types':{Modality:{
                 exposure:[wavelength]
                             }
@@ -1417,22 +1410,29 @@ def driver():
             'imageDims':{'x':mongoRecord[str(job[0])]['imageDims']['x'],'y':mongoRecord[str(job[0])]['imageDims']['y'],'z':mongoRecord[str(job[0])]['imageDims']['z']},
             'zskip':zskip,
             'info':{'specimen': specimen,'PI': PI,'voxels': voxel_size,'thickness':thickness},
+            
         }
     if not datasets.find_one({'name': dataset_name}):   
         datasets.insert_one(doc)
     else:
-        query = {'name': dataset_name}
+       # 如果数据集存在，则更新文档以添加新的exposure和wavelength
         types_key = f"types.{Modality}"
-        # 
-        exposure_key = f"{types_key}.{exposure}" 
+        exposure_key = f"{types_key}.{exposure}"
 
+        # 检查Modality键是否已存在
+        if datasets.find_one({types_key: {"$exists": True}}):
+            # 如果Modality键已存在，检查exposure键是否已存在
+            if datasets.find_one({exposure_key: {"$exists": True}}):
+                # 如果exposure键已存在，则向列表中添加新的wavelength
+                update = {"$push": {exposure_key: wavelength}}
+            else:
+                # 如果exposure键不存在，则创建新的exposure和wavelength
+                update = {"$set": {exposure_key: [wavelength]}}
+        else:
+            # 如果Modality键不存在，则创建新的Modality、exposure和wavelength
+            update = {"$set": {types_key: {exposure: [wavelength]}}}
         # 
-        update = {
-            "$set": {
-                exposure_key: [wavelength]
-        }
-    }
-        # 
+        query = {'name': dataset_name}
         datasets.update_one(query, update, upsert=True)
 
     # Azure storage account name and account key, these information should be obtained from the Azure portal
