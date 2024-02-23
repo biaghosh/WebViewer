@@ -192,7 +192,6 @@ def saveAnnotation():
     json["user"] = session['email']
     return make_response(jsonify(json), 200)
 
-
 @app.route("/updateAnnotation", methods=['POST'])
 def updateAnnotation():
     if 'email' not in session:
@@ -206,9 +205,6 @@ def updateAnnotation():
     ds.update_one({
         "dataset": json["dataset"],
         "slice": json["slice"],
-        #                "moduality": json["moduality"],
-        #                "exposure": json["exposure"],
-        #                "wavelength": json["wavelength"],
         "text": json["text"],
         "instance": json["instance"],
         "status": 'active'
