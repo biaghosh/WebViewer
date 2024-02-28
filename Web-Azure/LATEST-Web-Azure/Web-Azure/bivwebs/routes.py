@@ -522,7 +522,6 @@ def getSlice():
     im = sio.imread("C:\websw\\bivwebs\static\cryoData\\" +
                     json['name'] + "\\" + json['wavelength'] + "Volume.tif", plugin='tifffile')
     img = Image.fromarray(im[int(json["slice"])])
-    # print(im.shape, file=sys.stdout)
     width, height = img.size
     width *= float(json["scale"])
     height *= float(json["scale"])
@@ -600,7 +599,6 @@ def saveView():
     send = '{ "name": "' + json["name"] + '"}'
     return make_response(send, 200)
 
-
 @app.route("/delView", methods=['POST'])
 def delView():
     if 'email' not in session:
@@ -613,7 +611,6 @@ def delView():
         "dataset": json["dataset"],
         "name": json["name"]
     })
-
     return make_response('{}', 200)
 
 
@@ -666,7 +663,6 @@ def saveMask():
 
     for i in range(len(maskList)-1):
         sliceGap = int(maskList[i+1]['slice']) - int(maskList[i]['slice'])
-
         for x in range(1, sliceGap):
             precisionIncrement = 1 / (sliceGap / x)
             result = interp_shape(
@@ -687,7 +683,7 @@ def saveMask():
     # issue 2 masks will have to be their own document, size limit reached
     ds.update_one({"dataset": json["dataset"], "name": json["name"],
                   "datetime": json["datetime"]}, {"$set": {"interpolated": "yes"}})
-
+    
     return make_response(dumps(maskList), 200)
 
 
