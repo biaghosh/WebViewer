@@ -485,7 +485,8 @@ def createUser():
     # userId = users.find_one_and_update({},{ '$inc': {"id" : 1}})
 
     # Add new user
-    users.insert_one({"email": json['email'], "level": json['level'],
+    print(json)
+    users.insert_one({"institution":json['institution'],"email": json['email'], "level": json['level'],
                      "multiAvailable": True, "logins": 0, "lastLogin": '', 'datasets': []})
     send = '{ "success": "cookie"}'
     return make_response(send, 200)

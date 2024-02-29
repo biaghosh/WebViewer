@@ -96,6 +96,13 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="institutionSelect">Institution</label>
+                        <select id="institutionSelect" class="form-control">
+                            <!--All institution will be filled here dynamically-->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
                         <button id="createUserBtn" type="submit" class="btn btn-primary">Create</button>
                     </div>
                 </div>
@@ -150,11 +157,14 @@
             });
     }
 
+    
     document.getElementById("createUserBtn").addEventListener('click', () => {
         //validate
         let email = document.getElementById("email")
         let pass = document.getElementById("pass")
         let level = document.getElementById("levelSelect")
+        let institution = document.getElementById("institutionSelect")
+        console.log(institution)
         //fetch
         fetch('/createUser', {
             method: 'POST',
@@ -163,7 +173,8 @@
             },
             body: JSON.stringify({
                 'email': email.value,
-                'level': level.value
+                'level': level.value,
+                'institution': institution.value
             }),
         })
             .then(response => response.json())
@@ -179,7 +190,6 @@
     })
 
     document.getElementById("deleteUserBtn").addEventListener('click', () => {
-
         if (!selectedUserEmail || selectedUserEmail.trim() === "") {
             alert("Please select an user to delete");
             return; // This will exit the function early if no email is selected
@@ -314,6 +324,7 @@
                 console.error('Error:', error)
             })
     }
+
     function handleTableRowClick(event) {
         const selectedRow = event.target.closest('tr');
         if (selectedRow) {
@@ -384,5 +395,38 @@
 
         });
     }
+
+    function populateInstitutionSelect(institutions) {
+        const select = document.getElementById('institutionSelect');
+        select.innerHTML = ''; // Clear all Options
+
+        institutions.forEach(institution => {
+            const option = document.createElement('option');
+            option.value = institution.name;
+            option.textContent = institution.name;
+            select.appendChild(option);
+        });
+    }
+
+    function getInstitutions() {
+        return fetch('/getInstitutions')
+            .then(response => response.json())
+            .then(institutions => {
+                return institutions;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                return [];
+            });
+    }
+
+    // Get the list of institutions and populate the dropdown when the page loads
+    window.addEventListener("DOMContentLoaded", function () {
+        getInstitutions().then(institutions => {
+            populateInstitutionSelect(institutions);
+        });
+    });
+
+
 </script>
 {% endblock %}
