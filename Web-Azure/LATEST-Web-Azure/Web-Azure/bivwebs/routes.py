@@ -32,7 +32,6 @@ import math, zipfile
 import concurrent.futures
 from io import BytesIO
 
-
 # Set a global variable to track progress
 progress = {}
 
@@ -418,7 +417,6 @@ def multiviewer():
     ds = user["datasets"]
     return render_template('multithree.html', title='Multi-Viewer', datasets=ds)
 
-
 @app.route("/accounts")
 def accounts():
     if 'email' not in session:
@@ -426,7 +424,6 @@ def accounts():
     if session['level'] != 'admin':
         return render_template('403.html'), 403
     return render_template('accounts.html', title='Accounts')
-
 
 @app.route("/datasets")
 def datasets():
@@ -485,7 +482,6 @@ def createUser():
     # userId = users.find_one_and_update({},{ '$inc': {"id" : 1}})
 
     # Add new user
-    print(json)
     users.insert_one({"institution":json['institution'],"email": json['email'], "level": json['level'],
                      "multiAvailable": True, "logins": 0, "lastLogin": '', 'datasets': []})
     send = '{ "success": "cookie"}'
