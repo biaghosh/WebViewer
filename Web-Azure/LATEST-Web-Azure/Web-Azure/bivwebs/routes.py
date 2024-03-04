@@ -1595,6 +1595,9 @@ def get_institutions():
     db = client.BIV
     collection = db.Institution  # Assume institution data is stored in the 'institutions' collection
     for institution in collection.find():
+        orders = institution.get('orders', [])
+        po_numbers = [order.get('PO_number', '') for order in orders]
+
         institutions.append({
             'name': institution.get('name', ''),
             'type': institution.get('type', ''),
@@ -1602,7 +1605,8 @@ def get_institutions():
             'phone': institution.get('phone',''),
             'Email': institution.get('Email',''),
             'website': institution.get('website',''),
-            'status': institution.get('status','')
+            'status': institution.get('status',''),
+            'orders': po_numbers  # 只包含 PO number 的列表
         })
     return jsonify(institutions)
 
@@ -1667,3 +1671,17 @@ def delete_institution():
         return jsonify({'status': 'success', 'message': 'Institution deleted successfully'})
     else:
         return jsonify({'status': 'error', 'message': 'Failed to delete institution'})
+    
+
+@app.route('/getOrderDetails/<institution_name>/<po_number>', methods=['GET'])
+def get_order_details(institution_name, po_number):
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV
+    collection = db.Institution
+    institution = collection.find_one({'name': institution_name})
+    if institution:
+        for order in institution.get('orders', []):
+            if order.get('PO_number') == po_number:
+                return jsonify(order)
+    return jsonify({'error': 'Order not found'}), 404
+

@@ -104,6 +104,30 @@
             font-size: 0.9em;
             /* Set the font size of the hint */
         }
+
+        .order-list {
+            max-height: 200px;
+            /* Adjust the height as needed */
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .order-list ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .order-list li {
+            cursor: pointer;
+            padding: 5px 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-list li:hover {
+            background-color: #f0f0f0;
+        }
     </style>
 </head>
 
@@ -562,41 +586,47 @@
 
 
     function showInstitutionDetails(institution) {
+        console.log(institution);
         const institutionDetails = document.getElementById('institutionDetails');
 
-        // 假设的类型和状态选项
+        // Assume the type and status options
         const typeOptions = ['Industry', 'Academic', 'Government', 'Others'];
         const statusOptions = ['Active', 'Inactive', 'Pending'];
 
-        // 创建下拉选项的HTML
+        // Create drop down options
         const typeSelectHTML = typeOptions.map(option => `<option value="${option}" ${institution.type === option ? 'selected' : ''}>${option}</option>`).join('');
         const statusSelectHTML = statusOptions.map(option => `<option value="${option}" ${institution.status === option ? 'selected' : ''}>${option}</option>`).join('');
 
-        // 设置详细信息的HTML
+        // Generate showing PO-Number order list
+        const ordersHTML = institution.orders.map(poNumber => `
+        <div class="list-group-item list-group-item-action" onclick="showOrderDetails('${institution.name}', '${poNumber}')">${poNumber}</div>
+    `).join('');
+
+        // Set the details HTML
         institutionDetails.innerHTML = `
         <form id="institutionForm">
-            <div class="form-group">
-                <label>Name:</label>
+            <div class="xyz-container">
+                <div class="flex-item title">Name:</div>
                 <input type="text" class="form-control" name="name" value="${institution.name}">
-            </div>
-            <div class="form-group">
-                <label>Type:</label>
+                <div class="flex-item title">Type:</div>
                 <select class="form-control" name="type">
                     ${typeSelectHTML}
                 </select>
+            </div>  
+
+            <div class="xyz-container">
+                <div class="flex-item title">Phone Number:</div>
+                <input type="text" class="form-control" name="phone" value="${institution.phone}">
+
+                <div class="flex-item title">Email:</div>
+                <input type="text" class="form-control" name="Email" value="${institution.Email}">
             </div>
+
             <div class="form-group">
                 <label>Address:</label>
                 <input type="text" class="form-control" name="address" value="${institution.address}">
             </div>
-            <div class="form-group">
-                <label>Phone Number:</label>
-                <input type="text" class="form-control" name="phone" value="${institution.phone}">
-            </div>
-            <div class="form-group">
-                <label>Email:</label>
-                <input type="text" class="form-control" name="Email" value="${institution.Email}">
-            </div>
+
             <div class="form-group">
                 <label>Website:</label>
                 <input type="text" class="form-control" name="website" value="${institution.website}">
@@ -607,17 +637,29 @@
                     ${statusSelectHTML}
                 </select>
             </div>
+            <div class="xyz-container">
+                <label>Orders:</label>
+                <div class="orders list-group" style="max-height: 200px; overflow-y: scroll;">
+                    ${ordersHTML}
+                </div>
+                <div id="orderDetails"></div>
+            </div>
+
+            
+
             <button type="submit" class="btn btn-primary">Update</button>
             <button type="button" class="btn btn-primary" onclick="deleteInstitution()">Delete</button>
         </form>
     `;
 
-        // 添加表单提交事件监听器
+        // Add form submit event listener
         document.getElementById('institutionForm').addEventListener('submit', function (e) {
             e.preventDefault();
-            updateInstitutionDetails(); // 实现这个函数来处理表单提交
+            updateInstitutionDetails(); // Implement this function to handle form submission
         });
     }
+
+
 
     function updateInstitutionDetails() {
         const form = document.getElementById('institutionForm');
@@ -696,6 +738,7 @@
                 </select>
             </div>
 
+
             <button type="button" class="btn btn-primary" onclick="submitInstitutionForm()">Update</button>
         </form>
     `;
@@ -723,9 +766,6 @@
                 .catch(error => console.error('Error:', error));
         }
     }
-
-
-
 
     // 修改submitInstitutionForm函数来区分是更新还是新建
     function submitInstitutionForm() {
@@ -823,6 +863,30 @@
                 console.error('Fetch error:', error);
             });
     }
+
+    function showOrderDetails(institutionName, poNumber) {
+        fetch(`/getOrderDetails/${institutionName}/${poNumber}`)
+            .then(response => response.json())
+            .then(orderDetails => {
+                // 映射 datasets 数组为 HTML 字符串
+                const datasetsHTML = orderDetails.datasets.map(dataset => `
+                <div>
+                    <p>Dataset ID: ${dataset.dataset_id}</p>
+                    <p>Name: ${dataset.name}</p>
+                </div>
+            `).join('');
+
+                // 更新页面以显示订单的详细信息
+                document.getElementById('orderDetails').innerHTML = `
+                <p>Order PO Number: ${orderDetails.PO_number}</p>
+                <p>Order Date: ${orderDetails.date}</p>
+                <div>Datasets: ${datasetsHTML}</div>
+            `;
+            })
+            .catch(error => console.error('Error fetching order details:', error));
+    }
+
+
 
 </script>
 
