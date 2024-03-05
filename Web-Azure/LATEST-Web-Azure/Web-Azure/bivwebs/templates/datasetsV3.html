@@ -128,6 +128,59 @@
         .order-list li:hover {
             background-color: #f0f0f0;
         }
+
+        .orders-container {
+            display: flex;
+        }
+
+        .orders {
+            flex: 1;
+            max-height: 300px;
+            /* Adjust the height as needed */
+            overflow-y: scroll;
+        }
+
+        .order-details {
+            flex: 1;
+            max-height: 300px;
+            /* Adjust the height as needed */
+            overflow-y: scroll;
+            margin-left: 40px;
+            /* Adjust the space between the two columns */
+        }
+
+
+        .order-info {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .po-number {
+            flex: 1;
+        }
+
+        .order-date {
+            flex: 1;
+            text-align: right;
+        }
+
+        .order-info-header,
+        .order-info {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .po-number-header,
+        .po-number,
+        .order-date-header,
+        .order-date {
+            flex: 1;
+        }
+
+        .order-date-header,
+        .order-date {
+            text-align: right;
+        }
     </style>
 </head>
 
@@ -313,8 +366,6 @@
             const firstRow = tbody.querySelector('tr');
             firstRow.click();
         }
-
-
     }
 
     document.getElementById("downloadDatasetBtn").addEventListener("click", function () {
@@ -597,29 +648,47 @@
         const typeSelectHTML = typeOptions.map(option => `<option value="${option}" ${institution.type === option ? 'selected' : ''}>${option}</option>`).join('');
         const statusSelectHTML = statusOptions.map(option => `<option value="${option}" ${institution.status === option ? 'selected' : ''}>${option}</option>`).join('');
 
-        // Generate showing PO-Number order list
-        const ordersHTML = institution.orders.map(poNumber => `
-        <div class="list-group-item list-group-item-action" onclick="showOrderDetails('${institution.name}', '${poNumber}')">${poNumber}</div>
-    `).join('');
+        // Generate showing PO-Number order list with two columns
+        const ordersHeader = `
+        <div class="list-group-item">
+            <div class="order-info-header">
+                <span class="po-number-header">PO Number</span>
+                <span class="order-date-header">Order Date</span>
+            </div>
+        </div>
+`;
+        const ordersHTML = institution.orders.map(order => `
+    <div class="list-group-item list-group-item-action" onclick="showOrderDetails('${institution.name}', '${order.PO_number}')">
+        <div class="order-info">
+            <span class="po-number">${order.PO_number}</span>
+            <span class="order-date">${order.date}</span>
+        </div>
+    </div>
+`).join('');
+
+        // Combine header and list items
+        const ordersListHTML = ordersHeader + ordersHTML;
+
 
         // Set the details HTML
         institutionDetails.innerHTML = `
         <form id="institutionForm">
             <div class="xyz-container">
                 <div class="flex-item title">Name:</div>
-                <input type="text" class="form-control" name="name" value="${institution.name}">
+                <div class="flex-item"><input type="text" class="form-control" name="name" value="${institution.name}"></div>
+
                 <div class="flex-item title">Type:</div>
-                <select class="form-control" name="type">
+                <div class="flex-item"><select class="form-control" name="type">
                     ${typeSelectHTML}
-                </select>
+                </select></div>
             </div>  
 
             <div class="xyz-container">
                 <div class="flex-item title">Phone Number:</div>
-                <input type="text" class="form-control" name="phone" value="${institution.phone}">
+                <div class="flex-item"><input type="text" class="form-control" name="phone" value="${institution.phone}"></div>
 
                 <div class="flex-item title">Email:</div>
-                <input type="text" class="form-control" name="Email" value="${institution.Email}">
+                <div class="flex-item"><input type="text" class="form-control" name="Email" value="${institution.Email}"></div>
             </div>
 
             <div class="form-group">
@@ -637,20 +706,22 @@
                     ${statusSelectHTML}
                 </select>
             </div>
-            <div class="xyz-container">
-                <label>Orders:</label>
-                <div class="orders list-group" style="max-height: 200px; overflow-y: scroll;">
-                    ${ordersHTML}
+
+                <div class="form-group">
+                    <label>Orders:</label>
+                    <div class="orders-container">
+                        <div class="orders list-group">
+                        ${ordersListHTML}
+                    </div>
+                    <div id="orderDetails" class="order-details"></div>
                 </div>
-                <div id="orderDetails"></div>
             </div>
-
-            
-
             <button type="submit" class="btn btn-primary">Update</button>
             <button type="button" class="btn btn-primary" onclick="deleteInstitution()">Delete</button>
         </form>
     `;
+
+    
 
         // Add form submit event listener
         document.getElementById('institutionForm').addEventListener('submit', function (e) {
@@ -871,7 +942,6 @@
                 // 映射 datasets 数组为 HTML 字符串
                 const datasetsHTML = orderDetails.datasets.map(dataset => `
                 <div>
-                    <p>Dataset ID: ${dataset.dataset_id}</p>
                     <p>Name: ${dataset.name}</p>
                 </div>
             `).join('');
@@ -879,14 +949,11 @@
                 // 更新页面以显示订单的详细信息
                 document.getElementById('orderDetails').innerHTML = `
                 <p>Order PO Number: ${orderDetails.PO_number}</p>
-                <p>Order Date: ${orderDetails.date}</p>
                 <div>Datasets: ${datasetsHTML}</div>
             `;
             })
             .catch(error => console.error('Error fetching order details:', error));
     }
-
-
 
 </script>
 

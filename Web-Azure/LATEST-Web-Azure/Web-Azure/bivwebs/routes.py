@@ -1596,7 +1596,7 @@ def get_institutions():
     collection = db.Institution  # Assume institution data is stored in the 'institutions' collection
     for institution in collection.find():
         orders = institution.get('orders', [])
-        po_numbers = [order.get('PO_number', '') for order in orders]
+        # po_numbers = [order.get('PO_number', '') for order in orders]
 
         institutions.append({
             'name': institution.get('name', ''),
@@ -1606,7 +1606,7 @@ def get_institutions():
             'Email': institution.get('Email',''),
             'website': institution.get('website',''),
             'status': institution.get('status',''),
-            'orders': po_numbers  # 只包含 PO number 的列表
+            'orders': orders  # 只包含 PO number 的列表
         })
     return jsonify(institutions)
 
