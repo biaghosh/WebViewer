@@ -82,7 +82,7 @@
         }
 
         .flex-item.institution {
-            flex: 4;
+            flex: 2;
             /* Institution field takes up the most space */
         }
 
@@ -354,6 +354,8 @@
                     .then(data => {
                         // 在这里处理数据集详细信息的更新
                         updateDatasetList(data);
+                        // 根据数据集的机构填充PO#下拉菜单
+                        populatePoNumberSelect(data[0].institution,data[0].ponum);
                     })
                     .catch((error) => {
                         console.error('Error:', error)
@@ -431,6 +433,7 @@
 
     function updateDatasetList(datasets) {
         const dataset = datasets[0]
+        console.log(dataset)
         const datasetInfoDiv = document.getElementById('datasetInfo');
         datasetInfoDiv.innerHTML = ''; // 清空现有内容
 
@@ -442,7 +445,6 @@
         });
 
         institutionSelectHTML += '</select>';
-        console.log(institutionSelectHTML)
 
         const form = document.createElement('form');
         form.className = 'dataset-info-form';
@@ -453,7 +455,9 @@
             <div class="flex-item title">Institution:</div>
             <div class="flex-item institution">${institutionSelectHTML}</div>
             <div class="flex-item title">PO#:</div>
-            <div class="flex-item ponum"><input type="text" class="form-control" name="ponum" value="${dataset.ponum}" /></div>
+            <div class="flex-item ponum"><select id="poNumberSelect" class="form-control">
+        <!-- 选项将通过JavaScript动态添加 -->
+        </select></div>
         </div>`;
 
         if (dataset.types) {
@@ -521,13 +525,14 @@
 
         form.innerHTML = formHTML;
         datasetInfoDiv.appendChild(form);
-
         // const form = document.querySelector('.dataset-info-form');
         form.addEventListener('submit', function (e) {
             e.preventDefault();
             const formData = new FormData(form);
             const updateData = Object.fromEntries(formData.entries());
-            // console.log("updateData",updateData)
+            const selectedPoNumber = document.getElementById('poNumberSelect').value;
+            updateData.ponum = selectedPoNumber;
+            console.log("updateData", updateData)
             // 发送更新请求
             fetch('/updateDataset', {
                 method: 'POST',
@@ -550,7 +555,6 @@
     }
 
     document.getElementById('updateDatasetBtn').addEventListener('click', function () {
-        // 触发表单提交
         document.querySelector('.dataset-info-form').dispatchEvent(new Event('submit'));
         window.location.reload();
     });
@@ -637,7 +641,7 @@
 
 
     function showInstitutionDetails(institution) {
-        console.log(institution);
+        // console.log(institution);
         const institutionDetails = document.getElementById('institutionDetails');
 
         // Assume the type and status options
@@ -665,10 +669,9 @@
         </div>
     </div>
 `).join('');
-
+        const orderstrail = `<button class="btn btn-sm btn-primary" onclick="generateAndInsertOrder('${institution.name}')">Generate Order</button>`;
         // Combine header and list items
-        const ordersListHTML = ordersHeader + ordersHTML;
-
+        const ordersListHTML = ordersHeader + ordersHTML + orderstrail;
 
         // Set the details HTML
         institutionDetails.innerHTML = `
@@ -700,6 +703,7 @@
                 <label>Website:</label>
                 <input type="text" class="form-control" name="website" value="${institution.website}">
             </div>
+
             <div class="form-group">
                 <label>Status:</label>
                 <select class="form-control" name="status">
@@ -707,21 +711,20 @@
                 </select>
             </div>
 
-                <div class="form-group">
-                    <label>Orders:</label>
-                    <div class="orders-container">
-                        <div class="orders list-group">
+            <div class="form-group">
+                <label>Orders:</label>
+                <div class="orders-container">
+                    <div class="orders list-group">
                         ${ordersListHTML}
                     </div>
                     <div id="orderDetails" class="order-details"></div>
                 </div>
             </div>
+
             <button type="submit" class="btn btn-primary">Update</button>
             <button type="button" class="btn btn-primary" onclick="deleteInstitution()">Delete</button>
         </form>
     `;
-
-    
 
         // Add form submit event listener
         document.getElementById('institutionForm').addEventListener('submit', function (e) {
@@ -729,8 +732,6 @@
             updateInstitutionDetails(); // Implement this function to handle form submission
         });
     }
-
-
 
     function updateInstitutionDetails() {
         const form = document.getElementById('institutionForm');
@@ -740,8 +741,6 @@
             updatedDetails[key] = value;
         });
 
-        // 以下是发送更新请求到后端的示例代码
-        // 你需要根据实际的API端点和要求来调整这部分代码
         fetch('/updateInstitution', {
             method: 'POST',
             headers: {
@@ -751,8 +750,6 @@
         })
             .then(response => response.json())
             .then(data => {
-                console.log('Success:', data);
-                // 处理成功更新后的逻辑，如提示用户或刷新页面等
                 window.location.reload();
             })
             .catch((error) => {
@@ -808,8 +805,6 @@
                     ${statusSelectHTML}
                 </select>
             </div>
-
-
             <button type="button" class="btn btn-primary" onclick="submitInstitutionForm()">Update</button>
         </form>
     `;
@@ -875,9 +870,6 @@
         formData.append('wavelength', Wavelength);
         formData.append('FileName', fileTiff.name);
         formData.append('fileContent', fileTiff); // Add the file content here
-        for (let [key, value] of formData.entries()) {
-            console.log(key, value);
-        }
 
         var fileExtension = fileInputTiff.files[0].name.split('.').pop().toLowerCase(); // Get file extension name
         if (fileExtension !== 'tif') {
@@ -954,6 +946,55 @@
             })
             .catch(error => console.error('Error fetching order details:', error));
     }
+
+    function generateAndInsertOrder(institutionName) {
+        const today = new Date().toISOString().slice(0, 10); // 获取当前日期
+        const newOrder = {
+            PO_number: 'PO' + Math.floor(Math.random() * 1000000), // 随机生成PO_number
+            date: today,
+            datasets: [] // 假设新订单没有数据集
+        };
+
+        // 发送请求到后端插入新订单
+        fetch('/insertOrder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ institutionName, newOrder }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Order generated and inserted successfully!');
+                    window.location.reload(); // 刷新页面以显示新订单
+                } else {
+                    alert('Failed to generate and insert order.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function populatePoNumberSelect(institutionName,currentPoNumber) {
+        const poNumberSelect = document.getElementById('poNumberSelect');
+        poNumberSelect.innerHTML = ''; // 清空现有选项
+
+        // 从后端获取订单信息
+        fetch(`/getOrdersByInstitution/${institutionName}`)
+            .then(response => response.json())
+            .then(orders => {
+                orders.forEach(order => {
+                    const option = document.createElement('option');
+                    option.value = order.PO_number;
+                    option.textContent = order.PO_number;
+                    poNumberSelect.appendChild(option);
+                });
+                poNumberSelect.value = currentPoNumber;
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+
 
 </script>
 

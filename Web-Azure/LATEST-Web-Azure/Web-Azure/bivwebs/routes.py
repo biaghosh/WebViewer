@@ -1552,8 +1552,10 @@ def delete_dataset():
 def update_dataset():
     try:
         data = request.json
+        print(data)
         client = MongoClient(app.config['mongo'])
         db = client.BIV 
+        collection = db.Institution
         # In practical applications, you can find and update the corresponding dataset information based on dataset_id
         # Here's just a simple example, assuming you have a collection called "datasets"
         update_result = db.datasets.update_one(
@@ -1578,7 +1580,13 @@ def update_dataset():
             "info.thickness":data.get('info[thickness]'),
             "info.voxels":data.get('info[voxels]')
         }}
-    )
+    )   
+        print(collection)
+        # 更新机构的订单，添加数据集信息
+        collection.update_one(
+            {'name': data.get('institution'), 'orders.PO_number': data.get("ponum")},
+            {'$push': {'orders.$.datasets': {'name': data.get('name')}}}
+        )
 
         if update_result.modified_count > 0:
             return jsonify({'status': 'success', 'message': 'Dataset updated successfully'}), 200
@@ -1685,3 +1693,35 @@ def get_order_details(institution_name, po_number):
                 return jsonify(order)
     return jsonify({'error': 'Order not found'}), 404
 
+@app.route('/insertOrder', methods=['POST'])
+def insert_order():
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV
+    collection = db.Institution
+
+    data = request.json
+    institution_name = data['institutionName']
+    new_order = data['newOrder']
+
+    # 在对应机构的订单列表中插入新订单
+    result = collection.update_one(
+        {'name': institution_name},
+        {'$push': {'orders': new_order}}
+    )
+
+    if result.modified_count > 0:
+        return jsonify({'status': 'success'})
+    else:
+        return jsonify({'status': 'error', 'message': 'Failed to insert order'})
+    
+@app.route('/getOrdersByInstitution/<institutionName>')
+def get_orders_by_institution(institutionName):
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV
+    collection = db.Institution
+    institution = collection.find_one({'name': institutionName})
+    if institution and 'orders' in institution:
+        orders = institution['orders']
+        return jsonify([{'PO_number': order['PO_number']} for order in orders])
+    else:
+        return jsonify([])
