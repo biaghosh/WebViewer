@@ -1623,7 +1623,10 @@ def update_institution():
     data = request.json
     client = MongoClient(app.config['mongo'])
     db = client.BIV
+<<<<<<< Updated upstream
     
+=======
+>>>>>>> Stashed changes
     institution_name = data.get('name')
     if not institution_name:
         return jsonify({"error": "Missing institution name"}), 400
