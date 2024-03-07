@@ -52,8 +52,6 @@
             z-index: 1;
         }
 
-
-
         .progress-bar {
             width: 100%;
             background-color: #f3f3f3;
@@ -135,7 +133,7 @@
 
         .orders {
             flex: 1;
-            max-height: 300px;
+            max-height: 150px;
             /* Adjust the height as needed */
             overflow-y: scroll;
         }
@@ -355,7 +353,7 @@
                         // 在这里处理数据集详细信息的更新
                         updateDatasetList(data);
                         // 根据数据集的机构填充PO#下拉菜单
-                        populatePoNumberSelect(data[0].institution,data[0].ponum);
+                        populatePoNumberSelect(data[0].institution, data[0].ponum);
                     })
                     .catch((error) => {
                         console.error('Error:', error)
@@ -669,9 +667,10 @@
         </div>
     </div>
 `).join('');
-        const orderstrail = `<button class="btn btn-sm btn-primary" onclick="generateAndInsertOrder('${institution.name}')">Generate Order</button>`;
+        const orderstrail = `<input type="text" class="form-control" placeholder="Enter PO Number" id="newPoNumber">
+        <button class="btn btn-sm btn-primary" onclick="generateAndInsertOrder('${institution.name}')">Generate Order</button>`;
         // Combine header and list items
-        const ordersListHTML = ordersHeader + ordersHTML + orderstrail;
+        const ordersListHTML = ordersHeader + ordersHTML;
 
         // Set the details HTML
         institutionDetails.innerHTML = `
@@ -720,7 +719,10 @@
                     <div id="orderDetails" class="order-details"></div>
                 </div>
             </div>
-
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="Enter PO Number" id="newPoNumber">
+                <button class="btn btn-sm btn-primary" onclick="generateAndInsertOrder('${institution.name}')">Generate Order</button>
+            </div>
             <button type="submit" class="btn btn-primary">Update</button>
             <button type="button" class="btn btn-primary" onclick="deleteInstitution()">Delete</button>
         </form>
@@ -741,6 +743,8 @@
             updatedDetails[key] = value;
         });
 
+        console.log(updatedDetails)
+
         fetch('/updateInstitution', {
             method: 'POST',
             headers: {
@@ -750,7 +754,7 @@
         })
             .then(response => response.json())
             .then(data => {
-                window.location.reload();
+                // window.location.reload();
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -950,7 +954,7 @@
     function generateAndInsertOrder(institutionName) {
         const today = new Date().toISOString().slice(0, 10); // 获取当前日期
         const newOrder = {
-            PO_number: 'PO' + Math.floor(Math.random() * 1000000), // 随机生成PO_number
+            PO_number: document.getElementById('newPoNumber').value, // 随机生成PO_number
             date: today,
             datasets: [] // 假设新订单没有数据集
         };
@@ -975,7 +979,7 @@
             .catch(error => console.error('Error:', error));
     }
 
-    function populatePoNumberSelect(institutionName,currentPoNumber) {
+    function populatePoNumberSelect(institutionName, currentPoNumber) {
         const poNumberSelect = document.getElementById('poNumberSelect');
         poNumberSelect.innerHTML = ''; // 清空现有选项
 

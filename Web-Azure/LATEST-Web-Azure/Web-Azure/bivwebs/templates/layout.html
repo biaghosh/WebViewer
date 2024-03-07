@@ -60,18 +60,11 @@
         {% endif %}
         {% if session['level'] == 'admin' %}
 
-        <a class="nav-link" id="accounts-link" href="/accounts"> <i class="fas fa-users-cog"></i> Accounts
-        </a>
+        <a class="nav-link" id="accounts-link" href="/accounts"> <i class="fas fa-users-cog"></i> Accounts </a>
 
-<<<<<<< Updated upstream
-=======
-        <!-- <a class="nav-link" id="datasets-link" href="/datasets"> <i class="fas fa-database"></i> Datasets
-        </a> -->
-
->>>>>>> Stashed changes
-        <a class="nav-link" id="datasets-link" href="/datasetsNew"> <i class="fas fa-database"></i> Datasets
-        </a>
+        <a class="nav-link" id="datasets-link" href="/datasetsNew"> <i class="fas fa-database"></i> Datasets </a>
         {% endif %}
+
       </ul>
 
       {% if 'email' in session %}
@@ -81,6 +74,7 @@
       <a class="nav-link" href="/login"><i class="fas fa-sign-in-alt"></i> Login</a>
       {% endif %}
     </div>
+
   </nav>
   {% block content %}{% endblock %}
   {% block scripts %}
