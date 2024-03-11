@@ -982,7 +982,6 @@
     function populatePoNumberSelect(institutionName, currentPoNumber) {
         const poNumberSelect = document.getElementById('poNumberSelect');
         poNumberSelect.innerHTML = ''; // Clear existing options
-
         // Get order information from backend
         fetch(`/getOrdersByInstitution/${institutionName}`)
             .then(response => response.json())
