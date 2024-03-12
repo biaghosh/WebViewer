@@ -265,6 +265,7 @@
         getDatasets().then(datasets => {
             // Populate filter options
             populateFilter(datasets);
+
             // Initial rendering form
             renderDatasetList(datasets);
         });
@@ -754,7 +755,7 @@
         })
             .then(response => response.json())
             .then(data => {
-                // window.location.reload();
+                window.location.reload();
             })
             .catch((error) => {
                 console.error('Error:', error);
