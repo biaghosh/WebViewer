@@ -402,7 +402,7 @@ def viewer():
     users = db.Users
     user = users.find_one({"email": session['email']})
     ds = user["datasets"]
-    return render_template('three_new popup.html', title='Viewer', datasets=ds)
+    return render_template('three.html', title='Viewer', datasets=ds)
 
 
 @app.route("/multiviewer")
