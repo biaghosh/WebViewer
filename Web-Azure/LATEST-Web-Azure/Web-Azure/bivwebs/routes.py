@@ -439,7 +439,7 @@ def datasetsNew():
         return redirect(url_for('login'))
     if session['level'] != 'admin':
         return render_template('403.html'), 403
-    return render_template('datasetsV3.html', title='Datasets')
+    return render_template('datasets.html', title='Datasets')
 
 @app.route("/getUsers", methods=['GET'])
 def getUsers():

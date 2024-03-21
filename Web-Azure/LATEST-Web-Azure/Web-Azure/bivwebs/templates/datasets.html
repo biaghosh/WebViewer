@@ -1,14 +1,55 @@
 {% extends 'layout.html' %}
 {% block content %}
-
+<script type="module" src="/static/js/datasets.js"></script>
 <head>
     <style>
-        .upload-form-group {
-            margin-bottom: 15px;
+        /* Basic style reset*/
+        * {
+            box-sizing: border-box;
         }
 
-        .required {
-            color: red;
+        .list-group-item:hover {
+            cursor: pointer;
+            background-color: #f0f0f0;
+        }
+
+        .list-group-item.selected {
+            background-color: #e0e0e0;
+        }
+
+
+        .list-group {
+            width: 100%;
+            /* Set table width */
+            table-layout: fixed;
+            /* Enable fixed table layout */
+            border-collapse: collapse;
+            /* Collapse boraders */
+        }
+
+        .list-group th,
+        .list-group td {
+            width: 55%;
+            /* Each colums taking up half the width */
+            text-align: center;
+            /* Text left align */
+            padding: 12px;
+            /* Cell padding */
+            border: 1px solid #ddd;
+            /* Cell border */
+            box-sizing: border-box;
+            /* Border and padding included in width */
+        }
+
+        .list-group th {
+            background-color: #343a40;
+            /* Dark gray background */
+            color: #ffffff;
+            /* White text */
+            position: sticky;
+            /* Sticky table header */
+            top: 0;
+            z-index: 1;
         }
 
         .progress-bar {
@@ -24,401 +65,198 @@
             line-height: 30px;
             color: white;
         }
+
+        .xyz-container {
+            display: flex;
+            align-items: center;
+            /* Ensure all itmes are centered along the corss axis */
+            margin-bottom: 10px;
+            /* Adjust spacing as needed */
+        }
+
+        .flex-item {
+            margin-right: 10px;
+            /* Add some spacing between items */
+        }
+
+        .flex-item.institution {
+            flex: 2;
+            /* Institution field takes up the most space */
+        }
+
+        .flex-item.ponum {
+            flex: 2;
+            /* PO#field takes up less space */
+        }
+
+        .flex-item.title {
+            font-weight: bold;
+            /* Incresase the boldness of the title of needed */
+        }
+
+        .file-format-hint {
+            margin-left: 10px;
+            /* Add some spacing between the hint and the button */
+            color: #666;
+            /* Set the color of the hint */
+            font-size: 0.9em;
+            /* Set the font size of the hint */
+        }
+
+        .order-list {
+            max-height: 200px;
+            /* Adjust the height as needed */
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .order-list ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .order-list li {
+            cursor: pointer;
+            padding: 5px 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-list li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .orders-container {
+            display: flex;
+        }
+
+        .orders {
+            flex: 1;
+            max-height: 150px;
+            /* Adjust the height as needed */
+            overflow-y: scroll;
+        }
+
+        .order-details {
+            flex: 1;
+            max-height: 300px;
+            /* Adjust the height as needed */
+            overflow-y: scroll;
+            margin-left: 40px;
+            /* Adjust the space between the two columns */
+        }
+
+
+        .order-info {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .po-number {
+            flex: 1;
+        }
+
+        .order-date {
+            flex: 1;
+            text-align: right;
+        }
+
+        .order-info-header,
+        .order-info {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .po-number-header,
+        .po-number,
+        .order-date-header,
+        .order-date {
+            flex: 1;
+        }
+
+        .order-date-header,
+        .order-date {
+            text-align: right;
+        }
     </style>
 </head>
+
 <div class="container-fluid">
     <div class="row" style="margin-top: 70px;">
-        <div class="col-6">
+        <div class="col-7">
             <div class="card shadow">
-                <div class="card-header">Upload Dataset</div>
+                <div class="card-header">Dataset</div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-2">
-                            <div class="upload-form-group">
-                                <label for="dataset-name">Dataset Name:<span class="required">*</span></label>
-                                <input type="text" id="dataset-name" name="dataset-name" class="form-control" required>
-                            </div>
-                            <div class="upload-form-group">
-                                <label for="type">Modality:<span class="required">*</span></label>
-                                <select id="modality" name="type" class="form-control" required>
-                                    <option value="Brightfield">Brightfield</option>
-                                    <option value="Fluorescent">Fluorescent</option>
-                                </select>
-                            </div>
-
-                            <div class="upload-form-group">
-                                <label for="type">Exposure:<span class="required">*</span></label>
-                                <select id="exposure" name="type" class="form-control" required>
-                                    <option value="1">1</option>
-                                    <option value="0">0</option>
-                                </select>
-                            </div>
-
-                            <div class="upload-form-group">
-                                <label for="type">Wavelength:<span class="required">*</span></label>
-                                <select id="wavelength" name="type" class="form-control" required>
-                                    <option value="430">430nm</option>
-                                    <option value="650">650nm</option>
-                                </select>
-                            </div>
-                            <div class="upload-form-group">
-                                <label for="axis">Axis:<span class="required">*</span></label><br>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="axis" id="xy" value="xy">
-                                    <label class="form-check-label" for="xy">xy</label>
+                        <!-- Left content, fixed width -->
+                        <div class="col-md-5">
+                            <div class="mb-3">
+                                <div id="filterContainer">
+                                    <label for="institutionFilter">Filter by Institution:</label>
+                                    <select id="institutionFilter">
+                                        <option value="all">All</option>
+                                        <!-- Dynamically add other institution -->
+                                    </select>
                                 </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="axis" id="xz" value="xz">
-                                    <label class="form-check-label" for="xz">xz</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="axis" id="yz" value="yz">
-                                    <label class="form-check-label" for="yz">yz</label>
+                                <!-- <h5 class="card-title">Dataset List</h5> -->
+                                <div id="datasetList" class="table table-striped table-hover"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="filename">TifFile:<span class="required">*</span></label>
+                                <input type="file" class="form-control-file" id="fileInputTiff">
+                                <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
+                                <span class="file-format-hint">(DatasetName#Modality#Exposure#Wavelength.tif)</span>
+                            </div>
+                            <div class="form-group">
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill" id="progress-bar-fill">0%</div>
                                 </div>
                             </div>
-                            <div class="upload-form-group">
-                                <label for="pixelLengthUM">pixelLengthUM:<span class="required">*</span></label>
-                                <input type="text" id="pixelLengthUM" name="pixelLengthUM" class="form-control"
-                                    required>
-                            </div>
-                            <div class="upload-form-group">
-                                <label for="zskip">zskip:<span class="required">*</span></label>
-                                <input type="text" id="zskip" name="zskip" class="form-control" required>
-                            </div>
                         </div>
-                        <div class="col-2">
-                            <div class="upload-form-group">
-                                <label for="voxels">voxels:<span class="required">*</span></label>
-                                <input type="text" id="voxels-x" name="voxels-x" placeholder="x" class="form-control"
-                                    required>
-                                <input type="text" id="voxels-y" name="voxels-y" placeholder="y" class="form-control"
-                                    required>
-                                <input type="text" id="voxels-z" name="voxels-z" placeholder="z" class="form-control"
-                                    required>
+                        <!-- Right content, fixed width -->
+                        <div class="col-md-7">
+                            <div id="datasetInfo">
+                                <!-- The data will be dynamically populated by JavaScript -->
                             </div>
-                            <div class="upload-form-group">
-                                <label for="ImageDims">ImageDims:<span class="required">*</span></label>
-                                <input type="text" id="ImageDims-x" name="ImageDims-x" placeholder="x"
-                                    class="form-control" required>
-                                <input type="text" id="ImageDims-y" name="ImageDims-y" placeholder="y"
-                                    class="form-control" required>
-                                <input type="text" id="ImageDims-z" name="ImageDims-z" placeholder="z"
-                                    class="form-control" required>
-                            </div>
-                            <div class="upload-form-group">
-                                <label for="Dims2">Dims2:<span class="required">*</span></label>
-                                <input type="text" id="Dims2-x" name="Dims2-x" placeholder="x" class="form-control"
-                                    required>
-                                <input type="text" id="Dims2-y" name="Dims2-y" placeholder="y" class="form-control"
-                                    required>
-                                <input type="text" id="Dims2-z" name="Dims2-z" placeholder="z" class="form-control"
-                                    required>
-                            </div>
-                            <div class="upload-form-group">
-                                <label for="Dims3">Dims3:<span class="required">*</span></label>
-                                <input type="text" id="Dims3-x" name="Dims3-x" placeholder="x" class="form-control"
-                                    required>
-                                <input type="text" id="Dims3-y" name="Dims3-y" placeholder="y" class="form-control"
-                                    required>
-                                <input type="text" id="Dims3-z" name="Dims3-z" placeholder="z" class="form-control"
-                                    required>
-                            </div>
-                        </div>
-                        <div class="col-2">
-                            <div class="upload-form-group">
-                                <label for="specimen-name">Specimen Name:</label>
-                                <input type="text" id="specimen-name" name="dataset-name" class="form-control">
-                            </div>
-                            <div class="upload-form-group">
-                                <label for="PI">PI:</label>
-                                <input type="text" id="PI" name="PI" class="form-control">
-                            </div>
-                            <div class="upload-form-group">
-                                <label for="voxel_size">Voxel Size:</label>
-                                <input type="text" id="voxel_size" name="voxel_size" class="form-control">
-                            </div>
-                            <div class="upload-form-group">
-                                <label for="thickness">thickness:</label>
-                                <input type="text" id="thickness" name="thickness" class="form-control">
-                            </div>
-                        </div>
-                        <div class="col-2">
-                            <div class="upload-form-group">
-                                <label for="file">Upload:</label>
-                                <input type="file" id="file" name="file" class="form-control-file" multiple required
-                                    onchange="updateFileList()">
-                            </div>
-                            <div class="upload-form-group">
-                                <button id="upload-button" class="btn btn-primary"
-                                    onclick="uploadDataset()">Upload</button>
+                            <div class="mt-3">
+                                <button id="updateDatasetBtn" type="submit"
+                                    class="btn btn-sm btn-primary btn-icon-only">Update</button>
+                                <button id="downloadDatasetBtn" class="btn btn-sm btn-primary btn-icon-only">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button id="deleteDatasetBtn" class="btn btn-sm btn-danger ml-2 btn-icon-only">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-6">
+        <div class="col-5">
             <div class="card shadow">
-                <div class="card-header">3D Convert</div>
+                <div class="card-header">Institution</div>
                 <div class="card-body">
-                    <div class="card border-0">
-                        <div class="card-body">
-                            <div class="row">
-                                <form id="job-form">
-                                    <div class="form-group">
-                                        <label for="type">Modality:<span class="required">*</span></label>
-                                        <select id="modality_3D" name="type" class="form-control" required>
-                                            <option value="Brightfield">Brightfield</option>
-                                            <option value="fluorescent">Fluorescent</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="type">Exposure:<span class="required">*</span></label>
-                                        <select id="exposure_3D" name="type" class="form-control" required>
-                                            <option value="1">1</option>
-                                            <option value="0">0</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="type">Wavelength:<span class="required">*</span></label>
-                                        <select id="wavelength_3D" name="type" class="form-control" required>
-                                            <option value="430">430nm</option>
-                                            <option value="650">650nm</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="filename">TifFile:<span class="required">*</span></label>
-                                        <input type="file" class="form-control-file" id="fileInputTiff">
-                                    </div>
-                                    <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
-                                    <div class="form-group">
-                                        <div class="progress-bar">
-                                            <div class="progress-bar-fill" id="progress-bar-fill">0%</div>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
+                    <div class="row">
+                        <!-- Organization list container -->
+                        <div class="col-3">
+                            <h5>Institution List</h5>
+                            <div id="institutionList" class="table table-striped table-hover"></div>
+                            <button id="newInstitutionBtn" class="btn btn-primary">New</button>
                         </div>
+                        <!-- Organization details container -->
+                        <div class="col-9">
+                            <h5>Institution Details</h5>
+                            <div id="institutionDetails"></div>
+                        </div>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <script src="https://cdn.socket.io/3.0.3/socket.io.min.js"></script>
-    <script>
-        function updateFileList() {
-            // 获取input file元素
-            const inputElement = document.getElementById('file');
-
-            // 获取或创建用于显示文件名的列表
-            let fileListDisplay = document.getElementById('fileListDisplay');
-            if (!fileListDisplay) {
-                fileListDisplay = document.createElement('ul');
-                fileListDisplay.id = 'fileListDisplay';
-                inputElement.after(fileListDisplay);
-            }
-
-            // 清空先前的文件列表
-            fileListDisplay.innerHTML = '';
-
-            // 为每个选中的文件添加一个列表项
-            for (let i = 0; i < inputElement.files.length; i++) {
-                const listItem = document.createElement('li');
-                listItem.textContent = inputElement.files[i].name;
-                fileListDisplay.appendChild(listItem);
-            }
-        }
-
-        async function uploadDataset() {
-            const datasetNameInput = document.getElementById('dataset-name');
-            const modality = document.getElementById('modality');
-            const exposure = document.getElementById('exposure');
-            const wavelength = document.getElementById('wavelength');
-            const axisInput = document.querySelector('input[name="axis"]:checked');
-            const voxels_x = document.getElementById('voxels-x');
-            const voxels_y = document.getElementById('voxels-y');
-            const voxels_z = document.getElementById('voxels-z');
-            const ImageDims_x = document.getElementById('ImageDims-x');
-            const ImageDims_y = document.getElementById('ImageDims-y');
-            const ImageDims_z = document.getElementById('ImageDims-z');
-            const Dims2_x = document.getElementById('Dims2-x');
-            const Dims2_y = document.getElementById('Dims2-y');
-            const Dims2_z = document.getElementById('Dims2-z');
-            const Dims3_x = document.getElementById('Dims3-x');
-            const Dims3_y = document.getElementById('Dims3-y');
-            const Dims3_z = document.getElementById('Dims3-z');
-            const pixelLengthUM = document.getElementById('pixelLengthUM');
-            const zskip = document.getElementById('zskip')
-            const specimenName = document.getElementById('specimen-name');
-            const PI = document.getElementById('PI');
-            const voxel_size = document.getElementById('voxel_size');
-            const thickness = document.getElementById('thickness');
-            const fileInput = document.getElementById('file');
+</div>
 
 
-
-            // Create an array containing all input boxes that need to be checked
-            const requiredInputs = [datasetNameInput, axisInput, voxels_x, voxels_y, voxels_z, ImageDims_x, ImageDims_y, ImageDims_z, Dims3_x, Dims3_y, Dims3_z, pixelLengthUM, zskip];
-
-            // Iterate over each input box, if any of them are empty, stop the upload and show a warning
-            for (let input of requiredInputs) {
-                if (input.value.trim() === '') {
-                    alert('Please fill out all required fields.');
-                    return;
-                }
-            }
-
-            const formData = new FormData();
-            formData.append('dataset-name', datasetNameInput.value);
-            formData.append('modality', modality.value);
-            formData.append('exposure', exposure.value);
-            formData.append('wavelength', wavelength.value);
-            formData.append('axis', axisInput.value);
-            formData.append('voxels_x', voxels_x.value);
-            formData.append('voxels_y', voxels_y.value);
-            formData.append('voxels_z', voxels_z.value);
-            formData.append('ImageDims_x', ImageDims_x.value);
-            formData.append('ImageDims_y', ImageDims_y.value);
-            formData.append('ImageDims_z', ImageDims_z.value);
-            formData.append('Dims2_x', Dims2_x.value);
-            formData.append('Dims2_y', Dims2_y.value);
-            formData.append('Dims2_z', Dims2_z.value);
-            formData.append('Dims3_x', Dims3_x.value);
-            formData.append('Dims3_y', Dims3_y.value);
-            formData.append('Dims3_z', Dims3_z.value);
-            formData.append('pixelLengthUM', pixelLengthUM.value);
-            formData.append('zskip', zskip.value);
-            formData.append('spcimenName', specimenName.value);
-            formData.append('PI', PI.value);
-            formData.append('voxel_size', voxel_size.value);
-            formData.append('thickness', thickness.value);
-
-            for (const file of fileInput.files) {
-                formData.append('files', file);
-            }
-
-            const response = await fetch('/dataset_upload', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) {
-                console.error('Upload failed:', response.statusText);
-            } else {
-                const data = await response.json();
-                alert(data.message)
-                document.getElementById('file-names').innerText = data.files.join('\n');
-            }
-        }
-
-        function getDatasets() {
-            return fetch('getDatasets')
-                .then(response => response.json())
-                .then(datasets => {
-                    return datasets;
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    return [];
-                });
-        }
-
-        let shouldContinue = true;
-        document.getElementById('submitBtn').addEventListener('click', function () {
-            var submitBtn = document.getElementById("submitBtn");
-
-            
-            const Modality = document.getElementById('modality_3D');
-            const exposure = document.getElementById('exposure_3D');
-            const wavelength_3D = document.getElementById('wavelength_3D');
-            // const path = document.getElementById('path_3D');
-            const fileInputTiff = document.getElementById('fileInputTiff');
-            const fileTiff = fileInputTiff.files[0];
-
-
-
-            // Create an array containing all input boxes that need to be checked
-            const requiredInputs = [Modality, exposure, wavelength_3D, fileInputTiff];
-
-            // Iterate over each input box, if any of them are empty, stop the upload and show a warning
-            for (let input of requiredInputs) {
-                if (input.value.trim() === '') {
-                    alert('Please fill out all required fields.');
-                    return;
-                }
-            }
-            
-            var fileExtension = fileInputTiff.files[0].name.split('.').pop().toLowerCase(); // Get file extension name
-            if (fileExtension !== 'tif') {
-                alert('Wrong file format! Please upload the .tif file');
-                return;
-            }
-
-            // Send the file content to backend
-            var formData = new FormData();
-            formData.append('Modality', Modality.value);
-            formData.append('exposure', exposure.value);
-            formData.append('wavelength', wavelength_3D.value);
-            formData.append('FileName', fileTiff.name);
-            formData.append('fileContent', fileTiff); // Add the file content here
-
-            // Start getProgress function
-            shouldContinue = true;
-            getProgress();
-            // disabel submitBtn
-            submitBtn.disabled = true;
-            fetch('/driver', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.blob())
-                .then(blob => {
-                    shouldContinue = false
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    a.download = 'processed_images.zip';  // Set download zip file name
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    submitBtn.disabled = false;
-                })
-                .catch((error) => console.error('Error:', error));
-        });
-
-        function getProgress() {
-            if (!shouldContinue) {
-                console.log("Exiting getProgress because shouldContinue is false");
-                return;
-            }
-
-            fetch('/progress')
-                .then(response => {
-                    if (!response.ok) {
-                        console.error('Response not OK:', response);
-                        throw new Error('Network response was not ok ' + response.statusText);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    const progress = data.progress;
-                    const progress_per = progress * 100;
-                    console.log(progress, progress_per);
-                    document.getElementById('progress-bar-fill').style.width = progress_per + '%';
-                    document.getElementById('progress-bar-fill').textContent = Math.round(progress_per) + '%';
-
-                    // If shouldContinue still true，invoke getProgress
-                    if (shouldContinue) {
-                        setTimeout(getProgress, 1000); // set 1 second delay time 
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                });
-        }
-
-
-
-    </script>
-    {% endblock %}
+{% endblock content %}
