@@ -248,14 +248,11 @@ function updateDatasetList(datasets) {
         </div>  
 
         <div class="xyz-container">
-            <div class="flex-item">Pixel Length UM: <input type="text" class="form-control" name="pixelLengthUM" value="${dataset.pixelLengthUM}" /></div>
-            <div class="flex-item">Z Skip: <input type="number" class="form-control" name="zskip" value="${dataset.zskip}" /></div>
-        </div>
-
-        <div class="xyz-container">
             <div class="flex-item title">Info:</div>
             <div class="flex-item">Voxels: <input type="text" class="form-control" name="info[voxels]" value="${dataset.info.voxels}" /></div>
             <div class="flex-item">Thickness: <input type="text" class="form-control" name="info[thickness]" value="${dataset.info.thickness}" /></div>
+            <div class="flex-item">Pixel Length UM: <input type="text" class="form-control" name="pixelLengthUM" value="${dataset.pixelLengthUM}" /></div>
+            <div class="flex-item">Z Skip: <input type="number" class="form-control" name="zskip" value="${dataset.zskip}" /></div>
         </div> 
 
         <div class="xyz-container">
@@ -699,7 +696,7 @@ function showOrderDetails(institutionName, poNumber) {
 }
 
 function generateAndInsertOrder(institutionName) {
-    if (!institutionName.length) {
+    if (!document.getElementById('newPoNumber').value.length) {
         alert("Please enter a valid institution name.");
         return; // Early return to stop the function execution
     }
