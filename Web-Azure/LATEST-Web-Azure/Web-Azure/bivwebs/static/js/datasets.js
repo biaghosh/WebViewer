@@ -12,6 +12,7 @@ window.addEventListener("DOMContentLoaded", function () {
 });
 
 window.generateAndInsertOrder = generateAndInsertOrder;
+window.showOrderDetails = showOrderDetails;
 
 
 function renderDatasetList(datasets) {

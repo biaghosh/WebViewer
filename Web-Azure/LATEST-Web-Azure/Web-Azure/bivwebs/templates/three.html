@@ -12,7 +12,7 @@
     .row {
         margin-top: 10px;
     }
-    
+
     .cust-full {
         background-color: #0F71F2;
         color: white;
@@ -145,7 +145,7 @@
     }
 
     .nav-link {
-        padding: 0.5rem 1.25rem;
+        border-radius: 0.5rem;
         /* Adjust the padding as needed */
     }
 
@@ -228,6 +228,51 @@
     .my-container {
         margin-top: 70px;
     }
+
+    /* 自定义按钮样式 */
+    .btn-custom {
+        padding: 5px 15px;
+        /* 增加填充以使按钮更大 */
+        font-size: 14px;
+        /* 增大字体大小 */
+        border-radius: 25px;
+        /* 圆角边缘 */
+        border: none;
+        /* 移除边框 */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        /* 添加阴影效果 */
+        transition: all 0.2s ease;
+        /* 平滑过渡效果 */
+    }
+
+    /* 调整“Measure”按钮的颜色 */
+    .btn-measure {
+        background-color: #17a2b8;
+        /* Bootstrap的info颜色 */
+        color: white;
+    }
+
+    /* 调整“Clear”按钮的颜色 */
+    .btn-clear {
+        background-color: #dc3545;
+        /* Bootstrap的danger颜色 */
+        color: white;
+    }
+
+    /* 鼠标悬停效果 */
+    .btn-custom:hover {
+        transform: translateY(-2px);
+        /* 稍微上移 */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 被禁用按钮的样式 */
+    .btn-custom:disabled {
+        background-color: #cccccc;
+        color: #666666;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
 </style>
 <div class="container-fluid" style="height: 100vh;">
     <div id="toolsCol" class="col-lg-3 col-md-4 float-left">
@@ -275,7 +320,7 @@
                         <a class="nav-link px-2" data-toggle="tab" href="#fileCard"><i class="fas fa-file"></i>
                             File</a>
                     </li>
-                    
+
                     <li id="tab9" class="nav-item d-none">
                         <a class="nav-link px-2" data-toggle="tab" href="#settingsCard">Settings</a>
                     </li>
@@ -311,6 +356,7 @@
                         </div>
                     </form>
                 </div>
+
                 <div id="imageCard" class="card-body tab-pane">
                     <form class="form-inline" onSubmit="return false;" style="margin-top: 10px;">
                         <div class="form-group col-12">
@@ -318,13 +364,14 @@
                         </div>
 
                         <div class="form-group col-6">
-                            <button id="measureBtn" type="button" class="btn btn-info" disabled>Measure</button>
+                            <button id="measureBtn" type="button" class="btn btn-custom btn-measure"
+                                disabled>Measure</button>
                         </div>
                         <div class="form-group col-6">
-                            <button id="measureClearBtn" type="button" class="btn btn-danger mr-1"
+                            <button id="measureClearBtn" type="button" class="btn btn-custom btn-clear mr-1"
                                 disabled>Clear</button>
-
                         </div>
+
                         <div class="form-group col-12">
                             <small class="mb-1 text-wrap" style="width: 100%;">Click twice in the XY plane
                                 to display a measurement in µm.</small>
@@ -370,11 +417,11 @@
 
                 <div id="annCard" class="card-body tab-pane">
                     <div class="row">
-                        <button id="createAnnBtn" type="button" class="btn btn-secondary col-11" disabled>Create
+                        <button id="createAnnBtn" type="button" class="btn-custom col-11" disabled>Create
                             Annotation</button>
                     </div>
                     <div class="row">
-                        <button id="toggleAnnBtn" type="button" class="btn btn-secondary col-11" disabled
+                        <button id="toggleAnnBtn" type="button" class="btn-custom col-11" disabled
                             style="width: 60px;">Hide
                             Annotations</button>
                     </div>
@@ -553,7 +600,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="my-container">
         <div class="row">
             <div class="col-lg-12 col-md-6 ml-auto" style="height: 50%;">
@@ -910,6 +957,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
+
                 <div class="modal-body">
                     <div style="max-height: 250PX; overflow-y: auto;">
                         <table class="table table-bordered sticky-header">
@@ -925,6 +973,7 @@
                         </table>
                     </div>
                 </div>
+
                 <div class="modal-footer">
                     <div class="File-selector">
                         <button type="button" id="FileChooseBtn" class="btn btn-primary" disabled
