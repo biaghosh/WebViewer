@@ -1581,13 +1581,12 @@ def update_dataset():
             }}
         )
 
-        # 使用$addToSet而不是$push来防止添加重复的数据集名称
         update_org_result = collection.update_one(
             {'name': data.get('institution'), 'orders.PO_number': data.get("ponum")},
             {'$addToSet': {'orders.$.datasets': {'name': data.get('name')}}}
         )
 
-        # 检查是否有更新发生
+        # Check if there is any updates happened
         if update_result.modified_count > 0 or update_org_result.modified_count > 0:
             return jsonify({'status': 'success', 'message': 'Dataset updated successfully'}), 200
         else:

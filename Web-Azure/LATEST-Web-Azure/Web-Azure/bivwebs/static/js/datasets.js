@@ -435,24 +435,24 @@ function showInstitutionDetails(institution) {
             </div>
 
             <div class="form-group">
-                <label>Address:</label>
+                <div class="flex-item title">Address:</div>
                 <input type="text" class="form-control" name="address" value="${institution.address}">
             </div>
 
             <div class="form-group">
-                <label>Website:</label>
+                <div class="flex-item title">Website:</div>
                 <input type="text" class="form-control" name="website" value="${institution.website}">
             </div>
 
             <div class="form-group">
-                <label>Status:</label>
+                <div class="flex-item title">Status:</div>
                 <select class="form-control" name="status">
                     ${statusSelectHTML}
                 </select>
             </div>
 
             <div class="form-group">
-                <label>Orders:</label>
+                <div class="flex-item title">Orders:</div>
                 <div class="orders-container">
                     <div class="orders list-group">
                         ${ordersListHTML}
