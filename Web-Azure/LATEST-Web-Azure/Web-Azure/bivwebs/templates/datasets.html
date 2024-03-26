@@ -1,6 +1,7 @@
 {% extends 'layout.html' %}
 {% block content %}
 <script type="module" src="/static/js/datasets.js"></script>
+
 <head>
     <style>
         /* Basic style reset*/
@@ -178,6 +179,45 @@
         .order-date-header,
         .order-date {
             text-align: right;
+        }
+
+        #institutionFilter {
+            height: 40px;
+            /* Increase selector height */
+            border: 1px solid var(--border-color);
+            /* border color */
+            border-radius: 5px;
+            /* Slight border rounding */
+            background-color: white;
+            /* background color */
+            padding: 5px 10px;
+            /* Padding, leaving space for text */
+            font-size: 1rem;
+            /* font size */
+            color: var(--text-color);
+            /* text color */
+            -webkit-appearance: none;
+            /* Remove iOS default style */
+            -moz-appearance: none;
+            /* Remove Firefox default styles */
+            appearance: none;
+            /* Remove default dropdown arrow */
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path fill="%23343a40" d="M5.5 7.5l4.5 4.5 4.5-4.5z"/></svg>');
+            /* Custom drop-down arrow */
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            /* Drop down arrow position */
+            cursor: pointer;
+            /* Show pointer on mouseover */
+        }
+
+        #institutionFilter:focus {
+            outline: none;
+            /* outline when focus is removed */
+            border-color: var(--primary-color);
+            /* Border color changes when focused */
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, .25);
+            /* Add focus shadow effect */
         }
     </style>
 </head>

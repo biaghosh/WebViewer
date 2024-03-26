@@ -1547,7 +1547,6 @@ def delete_dataset():
     send = '{ "success": "cookie"}'
     return jsonify({'status': 'success', 'message': 'Delete successfully'})
 
-# Route to update dataset information
 @app.route('/updateDataset', methods=['POST'])
 def update_dataset():
     try:
@@ -1559,42 +1558,44 @@ def update_dataset():
         # In practical applications, you can find and update the corresponding dataset information based on dataset_id
         # Here's just a simple example, assuming you have a collection called "datasets"
         update_result = db.datasets.update_one(
-        {"name": data.get('name')},
-        {"$set": {
-            "name": data.get('name'),
-            "institution": data.get('institution'),
-            "ponum":data.get("ponum"),
-            "voxels.x": float(data.get('voxels[x]')),
-            "voxels.y": float(data.get('voxels[y]')),
-            "voxels.z": float(data.get('voxels[z]')),
-            "dims3.x": float(data.get('dims3[x]')),
-            "dims3.y": float(data.get('dims3[y]')),
-            "dims3.z": float(data.get('dims3[z]')),
-            "dims2.x": float(data.get('dims2[x]')),
-            "dims2.y": float(data.get('dims2[y]')),
-            "dims2.z": float(data.get('dims2[z]')),
-            "pixelLengthUM": data.get('pixelLengthUM'),
-            "zskip":float(data.get('zskip')),
-            "info.specimen":data.get('info[specimen]'),
-            "info.PI":data.get('info[PI]'),
-            "info.thickness":data.get('info[thickness]'),
-            "info.voxels":data.get('info[voxels]')
-        }}
-    )   
-        print(collection)
-        # 更新机构的订单，添加数据集信息
-        collection.update_one(
-            {'name': data.get('institution'), 'orders.PO_number': data.get("ponum")},
-            {'$push': {'orders.$.datasets': {'name': data.get('name')}}}
+            {"name": data.get('name')},
+            {"$set": {
+                "name": data.get('name'),
+                "institution": data.get('institution'),
+                "ponum": data.get("ponum"),
+                "voxels.x": float(data.get('voxels[x]')),
+                "voxels.y": float(data.get('voxels[y]')),
+                "voxels.z": float(data.get('voxels[z]')),
+                "dims3.x": float(data.get('dims3[x]')),
+                "dims3.y": float(data.get('dims3[y]')),
+                "dims3.z": float(data.get('dims3[z]')),
+                "dims2.x": float(data.get('dims2[x]')),
+                "dims2.y": float(data.get('dims2[y]')),
+                "dims2.z": float(data.get('dims2[z]')),
+                "pixelLengthUM": data.get('pixelLengthUM'),
+                "zskip": float(data.get('zskip')),
+                "info.specimen": data.get('info[specimen]'),
+                "info.PI": data.get('info[PI]'),
+                "info.thickness": data.get('info[thickness]'),
+                "info.voxels": data.get('info[voxels]')
+            }}
         )
 
-        if update_result.modified_count > 0:
+        # 使用$addToSet而不是$push来防止添加重复的数据集名称
+        update_org_result = collection.update_one(
+            {'name': data.get('institution'), 'orders.PO_number': data.get("ponum")},
+            {'$addToSet': {'orders.$.datasets': {'name': data.get('name')}}}
+        )
+
+        # 检查是否有更新发生
+        if update_result.modified_count > 0 or update_org_result.modified_count > 0:
             return jsonify({'status': 'success', 'message': 'Dataset updated successfully'}), 200
         else:
             return jsonify({'status': 'error', 'message': 'No dataset updated'}), 404
 
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 @app.route('/getInstitutions', methods=['GET'])
 def get_institutions():
