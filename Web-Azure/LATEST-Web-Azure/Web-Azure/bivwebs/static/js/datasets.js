@@ -7,12 +7,14 @@ window.addEventListener("DOMContentLoaded", function () {
 
         // Initial rendering form
         renderDatasetList(datasets);
-        
+
     });
 });
 
 window.generateAndInsertOrder = generateAndInsertOrder;
 window.showOrderDetails = showOrderDetails;
+window.submitInstitutionForm = submitInstitutionForm;
+window.deleteInstitution = deleteInstitution;
 
 
 function renderDatasetList(datasets) {
@@ -462,12 +464,15 @@ function showInstitutionDetails(institution) {
             </div>
 
             <div class="form-group">
-                <input type="text" class="form-control" placeholder="Enter PO Number" id="newPoNumber">
-                <button class="btn btn-sm btn-primary" onclick="generateAndInsertOrder('${institution.name}')">Generate Order</button>
+                <div class="flex-row-container" style="display: flex; align-items: center; justify-content: space-between;">
+                    <div class="flex-item" style="flex-grow: 1; margin-right: 10px;"><input type="text" class="form-control" placeholder="Enter PO Number" id="newPoNumber"></div>
+                    <div class="flex-item"><button class="btn btn-sm btn-primary" onclick="generateAndInsertOrder('${institution.name}')">Generate Order</button></div>
+                </div>
             </div>
+
             
-            <button type="submit" class="btn btn-primary">Update</button>
-            <button type="button" class="btn btn-primary" onclick="deleteInstitution()">Delete</button>
+            <button type="submit" class="btn btn-sm btn-primary btn-icon-only">Update</button>
+            <button type="button" class="btn btn-sm btn-danger ml-2 btn-icon-only" onclick="deleteInstitution()"><i class="fas fa-trash"></i></button>
         </form>
     `;
 
@@ -550,7 +555,7 @@ document.getElementById('newInstitutionBtn').addEventListener('click', function 
                     ${statusSelectHTML}
                 </select>
             </div>
-            <button type="button" class="btn btn-primary" onclick="submitInstitutionForm()">Update</button>
+            <button type="button" class="btn btn-sm btn-primary btn-icon-only" onclick="submitInstitutionForm()">Update</button>
         </form>
     `;
 });
