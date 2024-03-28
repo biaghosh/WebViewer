@@ -1215,7 +1215,6 @@ def startProcess(mongoRecord, jobNum, zdown):
         maxWorkers = 2
     # if option selected?
     os.makedirs(mongoRecord[jobNum]['name'], exist_ok=True)
-    
     create3dPngZip(mongoRecord, jobNum, zdown)
     progress['progress'] = 0.1  # 30% done
     #need to remove pngs || or will they be useful for unity?
@@ -1604,8 +1603,6 @@ def get_institutions():
     collection = db.Institution  # Assume institution data is stored in the 'institutions' collection
     for institution in collection.find():
         orders = institution.get('orders', [])
-        # po_numbers = [order.get('PO_number', '') for order in orders]
-
         institutions.append({
             'name': institution.get('name', ''),
             'type': institution.get('type', ''),
@@ -1614,7 +1611,7 @@ def get_institutions():
             'Email': institution.get('Email',''),
             'website': institution.get('website',''),
             'status': institution.get('status',''),
-            'orders': orders  # 只包含 PO number 的列表
+            'orders': orders  
         })
     return jsonify(institutions)
 

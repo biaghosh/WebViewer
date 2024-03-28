@@ -107,7 +107,6 @@ function renderDatasetList(datasets) {
         }
     });
 
-
     if (datasets.length > 0) {
         const firstRow = tbody.querySelector('tr');
         firstRow.click();
