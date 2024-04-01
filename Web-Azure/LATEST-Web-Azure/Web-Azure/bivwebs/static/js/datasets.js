@@ -260,7 +260,6 @@ function updateDatasetList(datasets) {
             <div class="mb-2">Specimen: <input type="text" class="form-control" name="info[specimen]" value="${dataset.info.specimen}" /></div>
             <div class="mb-2">PI: <input type="text" class="form-control" name="info[PI]" value="${dataset.info.PI}" /></div>
         </div> 
-    
     `;
 
     form.innerHTML = formHTML;
@@ -272,7 +271,6 @@ function updateDatasetList(datasets) {
         const updateData = Object.fromEntries(formData.entries());
         const selectedPoNumber = document.getElementById('poNumberSelect').value;
         updateData.ponum = selectedPoNumber;
-        console.log("updateData", updateData)
         // Send update request
         fetch('/updateDataset', {
             method: 'POST',
@@ -298,7 +296,6 @@ document.getElementById('updateDatasetBtn').addEventListener('click', function (
     document.querySelector('.dataset-info-form').dispatchEvent(new Event('submit'));
     window.location.reload();
 });
-
 
 function populateFilter(datasets) {
     const institutionSet = new Set(datasets.map(dataset => dataset.institution));
@@ -379,7 +376,6 @@ function renderInstitutionList(institutions) {
 
 }
 
-
 function showInstitutionDetails(institution) {
     // console.log(institution);
     const institutionDetails = document.getElementById('institutionDetails');
@@ -409,8 +405,7 @@ function showInstitutionDetails(institution) {
         </div>
     </div>
 `).join('');
-    const orderstrail = `<input type="text" class="form-control" placeholder="Enter PO Number" id="newPoNumber">
-        <button class="btn btn-sm btn-primary" onclick="generateAndInsertOrder('${institution.name}')">Generate Order</button>`;
+
     // Combine header and list items
     const ordersListHTML = ordersHeader + ordersHTML;
 
