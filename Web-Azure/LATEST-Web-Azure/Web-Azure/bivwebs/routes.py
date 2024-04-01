@@ -1514,7 +1514,6 @@ def download_file():
     # List of blobs
     all_blobs = blob_service_client.get_container_client(container_name).list_blobs(name_starts_with=dataset_name)
 
-
     download_urls = []
     for blob in all_blobs:
         sas_token = generate_blob_sas(account_name=azure_storage_account_name,
@@ -1526,7 +1525,7 @@ def download_file():
 
         download_url = f"https://{azure_storage_account_name}.blob.core.windows.net/{container_name}/{blob.name}?{sas_token}"
         download_urls.append(download_url)
-    print(download_urls)
+    # print(download_urls)
     return jsonify({'download_urls': download_urls})
 
 @app.route('/deleteDataset', methods=['POST'])
