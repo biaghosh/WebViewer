@@ -26,6 +26,7 @@
 
     .cust-full:hover {
         background-color: #0F71F2;
+        
     }
 
     .cust-full:disabled {
@@ -338,6 +339,7 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        
                         <div class="form-group mx-2 my-1">
                             <label for="modSelect" class="mr-1">Modality:</label>
                             <select id="modSelect" class="form-control" disabled></select>
@@ -382,20 +384,24 @@
                             <input id="annFontNumber" class="form-control ml-2 col-4" type="number" min="0.5" max="3"
                                 step=".25" value="1" disabled>
                         </div>
+
                         <div class="form-group col-12">
                             <input id="pixelBox" class="ml-2 form-check-input" type="checkbox" disabled>
                             <label class="form-check-label mr-1" for="pixelBox">Pixel Value</label>
                             <span id="pixelSpan" class="text-center"></span>
                         </div>
                     </form>
+
                     <form class="form-inline" onSubmit="return false;" style="margin-top: 10px;">
                         <div class="form-group col-12" style="margin-top: 10px;">
                             <div class="col-12 text-center bg-secondary text-white rounded"><b>Shared</b></div>
                         </div>
+
                         <div class="form-group col-12" style="margin-top: 10px;">
                             <label for="threshold" class="mb-0 mr-1">Threshold</label>
                             <input type="range" id="threshold2D" min="0" max="3" step=".05" value="0.0">
                         </div>
+                        
                         <div class="form-group col-12">
                             <label class="form-label mt-1 mr-1">Background Color&nbsp;</label>
                             <div class="pickr" id="bg2"></div>

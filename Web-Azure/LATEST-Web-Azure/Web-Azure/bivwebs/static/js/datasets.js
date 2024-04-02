@@ -377,7 +377,6 @@ function renderInstitutionList(institutions) {
 }
 
 function showInstitutionDetails(institution) {
-    // console.log(institution);
     const institutionDetails = document.getElementById('institutionDetails');
 
     // Assume the type and status options
@@ -644,6 +643,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 });
 
 function getProgress() {
+    
     if (!shouldContinue) {
         console.log("Exiting getProgress because shouldContinue is false");
         return;
