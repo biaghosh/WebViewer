@@ -1248,6 +1248,7 @@ def create3dPngZip(mongoRecord, jobNum, zdown):
     if (pixels > 100000000):
         scale = pixels / 100000000
         scale = int(math.sqrt(scale))
+        
     #HARDCODE
     mongoRecord[jobNum]['voxel'] = {}
     mongoRecord[jobNum]['voxel']['x'] = 1
@@ -1403,21 +1404,21 @@ def driver():
     if not datasets.find_one({'name': dataset_name}):   
         datasets.insert_one(doc)
     else:
-       # 如果数据集存在，则更新文档以添加新的exposure和wavelength
+       # If the dataset exists, update the document to add the new exposure and wavelength
         types_key = f"types.{Modality}"
         exposure_key = f"{types_key}.{exposure}"
 
-        # 检查Modality键是否已存在
+        # Check if the Modality key already exists
         if datasets.find_one({types_key: {"$exists": True}}):
-            # 如果Modality键已存在，检查exposure键是否已存在
+            # If the Modality key already exists, check whether the exposure key already exists
             if datasets.find_one({exposure_key: {"$exists": True}}):
-                # 如果exposure键已存在，则向列表中添加新的wavelength
+                # If the exposure key already exists, add a new wavelength to the list
                 update = {"$push": {exposure_key: wavelength}}
             else:
-                # 如果exposure键不存在，则创建新的exposure和wavelength
+                # If the exposure key does not exist, create a new exposure and wavelength
                 update = {"$set": {exposure_key: [wavelength]}}
         else:
-            # 如果Modality键不存在，则创建新的Modality、exposure和wavelength
+            # If the Modality key does not exist, create a new Modality, exposure and wavelength
             update = {"$set": {types_key: {exposure: [wavelength]}}}
         # 
         query = {'name': dataset_name}

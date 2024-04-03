@@ -643,7 +643,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 });
 
 function getProgress() {
-    
+
     if (!shouldContinue) {
         console.log("Exiting getProgress because shouldContinue is false");
         return;
@@ -673,26 +673,29 @@ function getProgress() {
             console.error('Fetch error:', error);
         });
 }
-
 function showOrderDetails(institutionName, poNumber) {
     fetch(`/getOrderDetails/${institutionName}/${poNumber}`)
         .then(response => response.json())
         .then(orderDetails => {
-            // Mapping datasets array to HTML string
-            const datasetsHTML = orderDetails.datasets.map(dataset => `
-                <div>
-                    <p>Name: ${dataset.name}</p>
-                </div>
-            `).join('');
-
-            // Update the page to show the order details
-            document.getElementById('orderDetails').innerHTML = `
-                <p>Order PO Number: ${orderDetails.PO_number}</p>
-                <div>Datasets: ${datasetsHTML}</div>
+            // Create tables and headers
+            const tableHTML = `
+                <table class="table">
+                    <tbody>
+                        ${orderDetails.datasets.map(dataset => `
+                            <tr>
+                                <td>${dataset.name}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
             `;
+
+            // Updated page to show order details and now displays the dataset in tabular form
+            document.getElementById('orderDetails').innerHTML = tableHTML;
         })
         .catch(error => console.error('Error fetching order details:', error));
 }
+
 
 function generateAndInsertOrder(institutionName) {
     if (!document.getElementById('newPoNumber').value.length) {
