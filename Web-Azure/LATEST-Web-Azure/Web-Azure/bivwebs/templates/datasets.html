@@ -4,26 +4,46 @@
 
 <head>
     <style>
-        /* Basic style reset*/
+        /* Basic style reset */
         * {
             box-sizing: border-box;
         }
 
+        /* List group styling */
+        .list-group {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
         .list-group-item {
-            cursor: pointer;
             padding: 10px 15px;
             border-bottom: 1px solid #eee;
-            transition: background-color 0.3s ease, color 0.3s ease;
-            /* border-radius: 5px; */
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             margin-bottom: 5px;
             font-size: 16px;
             line-height: 1.5;
             color: #333;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* 特定于表头的样式 */
+        .order-info-header {
+            font-weight: bold;
+            /* 加粗字体 */
+            color: #343a40;
+            /* 暗色字体 */
+            background-color: #f8f9fa;
+            /* 浅灰色背景 */
+            border-bottom: 2px solid #dee2e6;
+            /* 较厚的底部边框 */
+            padding: 10px 15px;
+            /* 与.list-group-item保持一致的padding */
+            cursor: default;
+            /* 确保鼠标不会显示为指针 */
         }
 
         .list-group-item:hover {
-            cursor: pointer;
             background-color: #f0f0f0;
         }
 
@@ -32,40 +52,52 @@
             color: white;
         }
 
-
-        .list-group {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
+        /* Table cell styling */
         .list-group th,
         .list-group td {
-            width: 55%;
-            /* Each colums taking up half the width */
+            /* Remove the width setting to allow automatic adjustment based on content */
             text-align: center;
-            /* Text left align */
-            padding: 12px;
-            /* Cell padding */
+            /* Keep text centered */
+            padding: 13px;
+            /* Maintain cell padding */
             border: 1px solid #ddd;
-            /* Cell border */
+            /* Maintain cell border */
+            min-width: 145px;
+            /* Ensure a minimum width for each cell */
             box-sizing: border-box;
-            /* Border and padding included in width */
+            /* Include border and padding in the element's total width */
         }
+
+        /* 用于标识不可点击的表头项 */
+        .list-group-item.header {
+            cursor: default;
+            pointer-events: none;
+            /* 禁用点击事件 */
+            background-color: #f8f9fa;
+            /* 浅灰色背景，可根据设计调整 */
+        }
+
+        /* Adjust the container class as needed */
+        .table-container {
+            width: 100%;
+            /* Use 100% of the container's width */
+            max-width: 1000px;
+            /* Or any maximum width that fits your design */
+            margin: auto;
+            /* Center the table container if less than max width */
+        }
+
+
 
         .list-group th {
             background-color: #343a40;
-            /* Dark gray background */
             color: #ffffff;
-            /* White text */
             position: sticky;
-            /* Sticky table header */
             top: 0;
             z-index: 1;
         }
 
-
-
+        /* Progress bar styling */
         .progress-bar {
             width: 100%;
             background-color: #f3f3f3;
@@ -80,49 +112,64 @@
             color: white;
         }
 
+        /* Flex container for aligning items */
         .xyz-container {
             display: flex;
             align-items: center;
-            /* Ensure all itmes are centered along the corss axis */
             margin-bottom: 10px;
-            /* Adjust spacing as needed */
         }
 
+        /* Flex items with adjustable margins */
         .flex-item {
             margin-right: 10px;
-            /* Add some spacing between items */
+            /* Spacing between items, adjusted as needed */
         }
 
-        .flex-item.institution {
-            flex: 2;
-            /* Institution field takes up the most space */
+        .flex-item:last-child {
+            margin-right: 0;
+            /* No margin for the last item */
         }
 
+        .flex-item.institution,
         .flex-item.ponum {
             flex: 2;
-            /* PO#field takes up less space */
+            /* Taking up more space */
         }
 
         .flex-item.title {
             font-weight: bold;
-            /* Incresase the boldness of the title of needed */
         }
 
+        /* Hints for file formats */
         .file-format-hint {
             margin-left: 10px;
-            /* Add some spacing between the hint and the button */
             color: #666;
-            /* Set the color of the hint */
             font-size: 0.9em;
-            /* Set the font size of the hint */
+        }
+
+        /* Styling for the order list */
+        .order-list,
+        .orders,
+        .order-details {
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: scroll;
         }
 
         .order-list {
             max-height: 200px;
-            /* Adjust the height as needed */
-            overflow-y: scroll;
-            border: 1px solid #ccc;
-            padding: 10px;
+        }
+
+        .orders {
+            flex: 1;
+            max-height: 150px;
+        }
+
+        .order-details {
+            flex: 1;
+            margin-left: 40px;
+            /* Space between columns */
+            max-height: 300px;
         }
 
         .order-list ul {
@@ -131,6 +178,7 @@
             padding: 0;
         }
 
+        .order-list li:hover,
         .order-list li {
             cursor: pointer;
             padding: 5px 10px;
@@ -141,96 +189,49 @@
             background-color: #f0f0f0;
         }
 
+        /* Flexbox layout for orders and their details */
         .orders-container {
             display: flex;
         }
 
-        .orders {
-            flex: 1;
-            max-height: 150px;
-            /* Adjust the height as needed */
-            overflow-y: scroll;
-        }
-
-        .order-details {
-            flex: 1;
-            max-height: 300px;
-            /* Adjust the height as needed */
-            overflow-y: scroll;
-            margin-left: 40px;
-            /* Adjust the space between the two columns */
-        }
-
-
-        .order-info {
+        /* Flexbox layout for types in rows */
+        .types-row {
             display: flex;
             justify-content: space-between;
+            margin-bottom: 20px;
         }
 
-        .po-number {
-            flex: 1;
+        /* Adjusting delete button styles */
+        .delete-button {
+            cursor: pointer;
+            color: red;
+            font-size: 0.9em;
+            margin-left: 5px;
         }
 
-        .order-date {
-            flex: 1;
-            text-align: right;
-        }
-
-        .order-info-header,
-        .order-info {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .po-number-header,
-        .po-number,
-        .order-date-header,
-        .order-date {
-            flex: 1;
-        }
-
-        .order-date-header,
-        .order-date {
-            text-align: right;
-        }
-
+        /* Styling for dropdown filter */
         #institutionFilter {
             height: 40px;
-            /* Increase selector height */
-            border: 1px solid var(--border-color);
-            /* border color */
+            border: 1px solid #ccc;
             border-radius: 5px;
-            /* Slight border rounding */
             background-color: white;
-            /* background color */
             padding: 5px 10px;
-            /* Padding, leaving space for text */
             font-size: 1rem;
-            /* font size */
-            color: var(--text-color);
-            /* text color */
+            color: #333;
             -webkit-appearance: none;
-            /* Remove iOS default style */
             -moz-appearance: none;
-            /* Remove Firefox default styles */
             appearance: none;
-            /* Remove default dropdown arrow */
+            cursor: pointer;
+            /* Custom dropdown arrow styling */
             background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path fill="%23343a40" d="M5.5 7.5l4.5 4.5 4.5-4.5z"/></svg>');
-            /* Custom drop-down arrow */
             background-repeat: no-repeat;
             background-position: right 10px top 50%;
-            /* Drop down arrow position */
-            cursor: pointer;
-            /* Show pointer on mouseover */
         }
 
         #institutionFilter:focus {
             outline: none;
-            /* outline when focus is removed */
-            border-color: var(--primary-color);
-            /* Border color changes when focused */
+            border-color: #007bff;
             box-shadow: 0 0 0 2px rgba(0, 123, 255, .25);
-            /* Add focus shadow effect */
         }
     </style>
 </head>
@@ -260,7 +261,8 @@
                                 <div class="flex-row-container"
                                     style="display: flex; align-items: center; justify-content: space-between;">
                                     <input type="file" class="form-control-file" id="fileInputTiff">
-                                    <button type="button" class="btn btn-sm btn-primary btn-icon-only" id="submitBtn">Submit</button>
+                                    <button type="button" class="btn btn-sm btn-primary btn-icon-only"
+                                        id="submitBtn">Submit</button>
                                 </div>
                                 <span class="file-format-hint">(DatasetName#Modality#Exposure#Wavelength.tif)</span>
                             </div>

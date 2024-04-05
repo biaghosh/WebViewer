@@ -15,6 +15,7 @@ window.generateAndInsertOrder = generateAndInsertOrder;
 window.showOrderDetails = showOrderDetails;
 window.submitInstitutionForm = submitInstitutionForm;
 window.deleteInstitution = deleteInstitution;
+window.deleteWavelength = deleteWavelength;
 
 
 function renderDatasetList(datasets) {
@@ -203,21 +204,35 @@ function updateDatasetList(datasets) {
         </select></div>
         </div>`;
 
+    // 假设 dataset.types 已经被定义
     if (dataset.types) {
-        let typesContent = '<div class="flex-item title">Types:</div>';
-        Object.keys(dataset.types).forEach((type) => {
-            typesContent += `<li>${type}:`;
-            Object.keys(dataset.types[type]).forEach((exposure) => {
+        let typesContent = '<div class="types-row">';
+
+        Object.keys(dataset.types).forEach((type, index) => {
+            // 对每种类型使用 flex-item 容器
+            typesContent += `<div class="flex-item"><div class="type-name">{ ${type} }</div><div class="exposures">`;
+
+            Object.keys(dataset.types[type]).forEach(exposure => {
+                typesContent += `<div>[ Exposure ${exposure}:`;
                 const wavelengths = dataset.types[type][exposure];
-                typesContent += ` Exposure ${exposure} - Wavelengths: ${wavelengths.join(', ')}`;
+                wavelengths.forEach(wavelength => {
+                    typesContent += `<span class="wavelength"> (Wavelength: ${wavelength} <span class="delete-button" onclick="deleteWavelength('${type}', '${exposure}', '${wavelength}')">&#x2715;</span>)</span>`;
+                });
+                typesContent += ` ]</div>`;
             });
-            typesContent += '</li>';
+
+            typesContent += '</div></div>';
+
+            // 每两个类型创建一个新行
+            if ((index + 1) % 2 === 0) typesContent += '</div><div class="types-row">';
         });
-        typesContent += '</ul>';
+
+        typesContent += '</div>'; // 结束最后一行
         datasetInfoDiv.innerHTML = typesContent;
     } else {
         datasetInfoDiv.innerHTML = '<p>No types information available.</p>';
     }
+
 
     formHTML += `
         <div class="xyz-container">
@@ -389,13 +404,14 @@ function showInstitutionDetails(institution) {
 
     // Generate showing PO-Number order list with two columns
     const ordersHeader = `
-        <div class="list-group-item">
-            <div class="order-info-header">
-                <span class="po-number-header">PO Number</span>
-                <span class="order-date-header">Order Date</span>
-            </div>
+    <div class="list-group-item header">
+        <div class="order-info-header">
+            <span class="po-number-header">PO Number</span>
+            <span class="order-date-header">Order Date</span>
         </div>
+    </div>
 `;
+
     const ordersHTML = institution.orders.map(order => `
     <div class="list-group-item list-group-item-action" onclick="showOrderDetails('${institution.name}', '${order.PO_number}')">
         <div class="order-info">
@@ -404,6 +420,7 @@ function showInstitutionDetails(institution) {
         </div>
     </div>
 `).join('');
+
 
     // Combine header and list items
     const ordersListHTML = ordersHeader + ordersHTML;
@@ -747,3 +764,13 @@ function populatePoNumberSelect(institutionName, currentPoNumber) {
         })
         .catch(error => console.error('Error:', error));
 }
+
+function deleteWavelength(type, exposure, wavelength) {
+    // 从 dataset 中删除指定的 wavelength
+    // 这里的实现将取决于你的数据结构
+    console.log(`Delete Wavelength: ${wavelength} from Type: ${type}, Exposure: ${exposure}`);
+
+    // 假设你有一个函数来重新渲染你的数据视图
+    // renderData();
+}
+
