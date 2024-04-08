@@ -1277,7 +1277,6 @@ def create3dPngZip(mongoRecord, jobNum, zdown):
 temp_dir = tempfile.mkdtemp()
 
 def createXyViewTIFF(index, mongoRecord, jobNum):
-    print("XY")
     filename = mongoRecord[jobNum]['fp'] #% index
     tiff = Image.open(BytesIO(filename))
     tiff.seek(index)
@@ -1292,7 +1291,6 @@ def createXyViewTIFF(index, mongoRecord, jobNum):
     subprocess.call(cmd)
 
 def createXzViewTIFF(index, mongoRecord, jobNum):
-    print("XZ")
     filename = mongoRecord[jobNum]['fp'] #% index #3.7 supports this but not 3.8
     tiff = Image.open(BytesIO(filename))
     #tiff.seek(index)
@@ -1310,7 +1308,6 @@ def createXzViewTIFF(index, mongoRecord, jobNum):
     subprocess.call(cmd)
 
 def createYzViewTIFF(index, mongoRecord, jobNum):
-    print("YZ")
     filename = mongoRecord[jobNum]['fp'] #% index #3.7 supports this but not 3.8
     tiff = Image.open(BytesIO(filename))
     #tiff.seek(index)
@@ -1384,7 +1381,7 @@ def driver():
         files_and_dirs = os.listdir(base_dir)
 
         # Save data to MongoDB
-        doc = {
+        doc = {    
             'name': dataset_name,
             "institution" : "",
             "ponum" : 1,
@@ -1429,7 +1426,6 @@ def driver():
     azure_storage_account_key = "PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw=="
     share = "data"
     # Create Azure ShareFileClient
-
     # The directory path that needs to be created
 
     for item in files_and_dirs:
@@ -1452,7 +1448,6 @@ def driver():
             fileExtension = file_name.split(".")[-1]
             if fileExtension != 'basis': 
                 continue
-
             # build file path
             file_path = os.path.join(dir_path, file_name)
             # Create a ShareFileClient object and upload files
