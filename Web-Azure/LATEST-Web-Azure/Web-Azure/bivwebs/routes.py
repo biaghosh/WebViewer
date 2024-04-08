@@ -1720,3 +1720,32 @@ def get_orders_by_institution(institutionName):
         return jsonify([{'PO_number': order['PO_number']} for order in orders])
     else:
         return jsonify([])
+
+@app.route('/delete-wavelength', methods=['POST'])
+def delete_wavelength():
+    print("进来了")
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV  # 请替换为你的数据库名称
+    collection = db.datasets
+
+    data = request.json
+    print(data)
+    type = data.get('type')
+    datasetName = data.get('datasetName')
+    exposure = data.get('exposure')
+    wavelength = data.get('wavelength')
+
+    if not type or not exposure or not wavelength:
+        return jsonify({'status': 'error', 'message': 'Missing required fields'}), 400
+
+    # 构造查询和更新路径
+    query = {'name': datasetName}
+    update_path = f'types.{type}.{exposure}'
+
+    # 使用 `$pull` 操作符从数组中移除波长
+    result = collection.update_one(query, {'$pull': {update_path: wavelength}})
+
+    if result.modified_count > 0:
+        return jsonify({'status': 'success', 'message': 'Wavelength deleted successfully'}), 200
+    else:
+        return jsonify({'status': 'error', 'message': 'Failed to delete wavelength'}), 400

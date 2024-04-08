@@ -766,11 +766,33 @@ function populatePoNumberSelect(institutionName, currentPoNumber) {
 }
 
 function deleteWavelength(type, exposure, wavelength) {
-    // 从 dataset 中删除指定的 wavelength
-    // 这里的实现将取决于你的数据结构
-    console.log(`Delete Wavelength: ${wavelength} from Type: ${type}, Exposure: ${exposure}`);
+    console.log(type, exposure, wavelength)
+    fetch('/delete-wavelength', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        // Include datasetName in the request body
+        body: JSON.stringify({
+            datasetName: selectedDatasetName, // Using the global variable selectedDatasetName
+            type,
+            exposure,
+            wavelength
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+            // 更新数据视图的逻辑可以放在这里
+            // 可能不想立即重载整个页面，而是更新显示的数据集列表
+            // window.location.reload(); // 为了提供更好的用户体验，考虑不使用此行
+            // updateDatasetDetails(selectedDatasetName); // 假设这是更新数据集详细信息的函数
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
 
-    // 假设你有一个函数来重新渲染你的数据视图
-    // renderData();
+    console.log(`Request sent to delete wavelength: ${wavelength} from type: ${type}, exposure: ${exposure}, for dataset: ${selectedDatasetName}`);
 }
+
 
