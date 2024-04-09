@@ -1431,7 +1431,6 @@ def driver():
     for item in files_and_dirs:
         filesNameList = os.listdir(os.path.join(base_dir, item))
         dir_s = [dataset_name,"basis", Modality, exposure, wavelength, item]
-
         # Create a ShareDirectoryClient object and create directories step by step
         dir_path = ""
         for dir_name in dir_s:
@@ -1469,7 +1468,6 @@ def driver():
     blob_client = container_client.get_blob_client(blob_name)
     with open(compressed_file_path, "rb") as f:
         blob_client.upload_blob(f)
-
     return jsonify({"message": "File Uploaded Successfully"}), 200
 
 @app.route('/progress', methods=['GET'])
