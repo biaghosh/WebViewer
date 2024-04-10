@@ -847,9 +847,7 @@ maskLoadInput = document.getElementById("maskLoadInput"),
 
 /*** END SECTION */
 
-
 function getSceneClicks(evt) {
-    console.log("getScene")
     let rect = canvasXY.getBoundingClientRect()
     mouse.x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1;
     mouse.y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1;
@@ -1755,7 +1753,6 @@ yzVertLineGeom = new THREE.BufferGeometry()
 yzHorzLineGeom = new THREE.BufferGeometry()
 
 function loadOrthos(fullLoad = true) {
-    console.log("loadOrthos")
     orthosActive = true
     sceneXY.add(xLine)
     sceneXY.add(yLine)
@@ -2030,7 +2027,6 @@ function updateMeshes() {
 }
 //update
 function orthoClick(evt) {
-    console.log("xyclick")
     if (draggedAnn) {
         draggedAnn = false
         return
@@ -2222,8 +2218,9 @@ threshold.addEventListener('change', ()=> {
 }) **/
 
 zclip.addEventListener('input', () => {
+    console.log("zclip input")
     if (zLockBox.checked) {
-
+        console.log(zclip.value, parseInt(dsInfo["imageDims"]["z"]))
         if (zclip.value > parseInt(dsInfo["imageDims"]["z"]))
             zclip.value = dsInfo["imageDims"]["z"] - 1
 
@@ -2234,9 +2231,11 @@ zclip.addEventListener('input', () => {
 })
 
 slider.addEventListener("change", () => {
+    console.log("slider change")
     xyInput.value = slider.value
     zclip.value = slider.value
     if (zLockBox.checked) {
+        console.log("zlockbox")
         zclip.value = slider.value
         zclip.dispatchEvent(keyEvent)
     }

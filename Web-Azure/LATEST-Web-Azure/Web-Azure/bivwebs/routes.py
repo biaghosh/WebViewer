@@ -889,129 +889,69 @@ def getFiles():
         })
     return make_response(dumps(data), 200)
 
-@app.route('/upload',methods=['POST'])
+@app.route('/upload', methods=['POST'])
 def store_image():
     if 'file' not in request.files:
         return 'No file part', 400
-    
+
     file = request.files['file']
+    if file.filename == '':
+        return 'No selected file', 400
+
     datasetName = request.form.get('datasetName')
     filename = secure_filename(file.filename)
+    format = filename.rsplit('.', 1)[1].lower()
 
+    content_types = {
+        "mp4": ("videos", 'video/mp4'),
+        "png": ("images", 'image/png'),
+        "jpg": ("images", 'image/jpeg'),
+        "txt": ("txt", 'text/plain'),
+    }
+
+    if format not in content_types:
+        return 'Unsupported file format', 400
+
+    container_name, content_type = content_types[format]
+
+    # Setup Azure Blob Service Client
+    AZURE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=bivlargefiles;AccountKey=PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw==;EndpointSuffix=core.windows.net"
+    blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
+    container_client = blob_service_client.get_container_client(container_name)
+
+    # Upload the file
+    blob_name = filename
+    content_settings = ContentSettings(content_type=content_type)
+    container_client.upload_blob(blob_name, file.stream, overwrite=True, content_settings=content_settings)
+
+    # Generate the Blob URL
+    sas_token = generate_blob_sas(
+        account_name=blob_service_client.account_name,
+        container_name=container_name,
+        blob_name=blob_name,
+        account_key=blob_service_client.credential.account_key,
+        permission=BlobSasPermissions(read=True),
+        expiry=datetime.utcnow() + timedelta(hours=1)
+    )
+    blob_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{container_name}/{blob_name}"
+
+    # MongoDB Document
+    doc = {
+        "name": filename,
+        'upload_date': datetime.now(),
+        "dataset": datasetName,
+        "user": session['email'],
+        "format": format,
+        "URL": blob_url
+    }
+
+    # MongoDB GridFS
     client = MongoClient(app.config['mongo'])
     db = client.BIV
-    fs = gridfs.GridFS(db,collection='files')
-    format = filename.split(".")[-1]
+    fs = gridfs.GridFS(db, collection='files')
+    fs.put(file, **doc)
 
-    if format == "mp4":
-        # Replace with your own connection string
-        AZURE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=bivlargefiles;AccountKey=PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw==;EndpointSuffix=core.windows.net"
-        CONTAINER_NAME = "videos"
-        blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
-        
-        # Generate a unique blob name
-        blob_name = file.filename
-        # Get a reference to the container
-        container_client = blob_service_client.get_container_client(CONTAINER_NAME)
-
-        # Upload the video
-        content_settings = ContentSettings(content_type='video/mp4')
-        container_client.upload_blob(blob_name, file.stream, content_settings=content_settings)
-
-        # Generate the Blob URL
-        sas_token = generate_blob_sas(
-            account_name=blob_service_client.account_name,
-            container_name=CONTAINER_NAME,
-            blob_name=blob_name,
-            account_key=blob_service_client.credential.account_key,
-            permission=BlobSasPermissions(read=True),
-            expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-        )
-        blob_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{CONTAINER_NAME}/{blob_name}"
-        doc = {
-            "name" : filename,
-            'upload_date': datetime.datetime.now(),
-            "dataset" : datasetName,
-            "user" : session['email'],
-            "format": format,
-            "URL": blob_url
-        }
-        fs.put(file,**doc)
-    elif format == "png" or format == "jpg":
-        # Replace with your own connection string
-        AZURE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=bivlargefiles;AccountKey=PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw==;EndpointSuffix=core.windows.net"
-        CONTAINER_NAME = "images"
-        blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
-        
-        # Generate a unique blob name
-        blob_name = file.filename
-
-        # Get a reference to the container
-        container_client = blob_service_client.get_container_client(CONTAINER_NAME)
-
-        # Upload the image
-        content_settings = ContentSettings(content_type='image/png')
-        container_client.upload_blob(blob_name, file.stream, content_settings=content_settings)
-
-        # Generate the Blob URL
-        sas_token = generate_blob_sas(
-            account_name=blob_service_client.account_name,
-            container_name=CONTAINER_NAME,
-            blob_name=blob_name,
-            account_key=blob_service_client.credential.account_key,
-            permission=BlobSasPermissions(read=True),
-            expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-        )
-        blob_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{CONTAINER_NAME}/{blob_name}"
-
-        doc = {
-            "name" : filename,
-            'upload_date': datetime.datetime.now(),
-            "dataset" : datasetName,
-            "user" : session['email'],
-            "format": format,
-            "URL": blob_url
-        }
-        fs.put(file,**doc)
-    elif format == "txt":
-        # Replace with your own connection string
-        AZURE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=bivlargefiles;AccountKey=PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw==;EndpointSuffix=core.windows.net"
-        CONTAINER_NAME = "txt"
-        blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
-        
-        # Generate a unique blob name
-        blob_name = file.filename
-
-        # Get a reference to the container
-        container_client = blob_service_client.get_container_client(CONTAINER_NAME)
-
-        # Upload the txt file
-        content_settings = ContentSettings(content_type='text/plain')
-        container_client.upload_blob(blob_name, file.stream, content_settings=content_settings)
-
-        # Generate the Blob URL
-        sas_token = generate_blob_sas(
-            account_name=blob_service_client.account_name,
-            container_name=CONTAINER_NAME,
-            blob_name=blob_name,
-            account_key=blob_service_client.credential.account_key,
-            permission=BlobSasPermissions(read=True),
-            expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-        )
-        blob_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{CONTAINER_NAME}/{blob_name}"
-        # print(blob_url)
-        doc = {
-            "name" : filename,
-            'upload_date': datetime.datetime.now(),
-            "dataset" : datasetName,
-            "user" : session['email'],
-            "format": format,
-            "URL": blob_url
-        }
-        fs.put(file,**doc)
-        
-    
-    return make_response('{}',200)
+    return make_response('{}', 200)
 
 @app.route('/download',methods=['POST'])
 def download_files():

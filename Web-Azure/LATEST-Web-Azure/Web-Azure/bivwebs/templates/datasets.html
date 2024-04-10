@@ -87,8 +87,6 @@
             /* Center the table container if less than max width */
         }
 
-
-
         .list-group th {
             background-color: #343a40;
             color: #ffffff;
@@ -208,7 +206,6 @@
             font-size: 0.9em;
             margin-left: 5px;
         }
-
     </style>
 </head>
 
@@ -232,6 +229,7 @@
                                 <!-- <h5 class="card-title">Dataset List</h5> -->
                                 <div id="datasetList" class="table table-striped table-hover"></div>
                             </div>
+
                             <div class="form-group">
                                 <label for="filename">TifFile:<span class="required">*</span></label>
                                 <div class="flex-row-container"
@@ -242,12 +240,15 @@
                                 </div>
                                 <span class="file-format-hint">(DatasetName#Modality#Exposure#Wavelength.tif)</span>
                             </div>
+
                             <div class="form-group">
                                 <div class="progress-bar">
                                     <div class="progress-bar-fill" id="progress-bar-fill">0%</div>
                                 </div>
                             </div>
+
                         </div>
+
                         <!-- Right content, fixed width -->
                         <div class="col-md-7">
                             <div id="datasetInfo">
