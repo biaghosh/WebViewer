@@ -1276,6 +1276,7 @@ def driver():
     # Reset progress at the start of a new job
     data = request.form
     dataset_name = data.get('dataset-name')
+    insitution_name = data.get('institution-name')
     pixelLengthUM = data.get('pixelLengthUM')
     zskip = data.get('zskip')
     specimen = data.get('spcimenName')
@@ -1323,7 +1324,7 @@ def driver():
         # Save data to MongoDB
         doc = {    
             'name': dataset_name,
-            "institution" : "",
+            "institution" : insitution_name,
             "ponum" : 1,
             'types':{Modality:{
                 exposure:[wavelength]
@@ -1334,7 +1335,7 @@ def driver():
             'dims3':{'x':int(mongoRecord[str(job[0])]['imageDims']['x']),'y': int(mongoRecord[str(job[0])]['imageDims']['y']),'z': int(mongoRecord[str(job[0])]['imageDims']['z'])},
             'pixelLengthUM':"100.5",
             'imageDims':{'x':mongoRecord[str(job[0])]['imageDims']['x'],'y':mongoRecord[str(job[0])]['imageDims']['y'],'z':mongoRecord[str(job[0])]['imageDims']['z']},
-            'zskip':zskip,
+            'zskip':1,
             'info':{'specimen': specimen,'PI': PI,'voxels': voxel_size,'thickness':thickness},
             
         }
@@ -1510,7 +1511,6 @@ def update_dataset():
                 "info.voxels": data.get('info[voxels]')
             }}
         )
-
         update_org_result = collection.update_one(
             {'name': data.get('institution'), 'orders.PO_number': data.get("ponum")},
             {'$addToSet': {'orders.$.datasets': {'name': data.get('name')}}}

@@ -412,11 +412,6 @@
                                     title="Auto Zooming"
                                     data-content="The views will share the same view level"></i>&nbsp;</label>
                             <input class="form-check-input" type="checkbox" id="zoomCheckbox" checked>&nbsp;
-                            <label class="form-check-label mr-1" for="zLockCheckbox">Z Lock:
-                                <i class="fas fa-info-circle d-none" data-toggle="popover" data-placement="top"
-                                    title="Z Lock"
-                                    data-content="The 3D viewer will clip at the Z slice selected in the 2D viewer"></i>&nbsp;</label>
-                            <input class="form-check-input" type="checkbox" id="zLockCheckbox" checked>
                         </div>
                     </form>
                 </div>
@@ -681,6 +676,14 @@
                                     </div>
                                     <div class="height: 160px">
                                         <form class="form-inline" onSubmit="return false;">
+                                            <div class="form-group">
+                                                <label class="form-check-label mr-1" for="zLockCheckbox">Z Lock:
+                                                    <i class="fas fa-info-circle d-none" data-toggle="popover"
+                                                        data-placement="top" title="Z Lock"
+                                                        data-content="The 3D viewer will clip at the Z slice selected in the 2D viewer"></i>&nbsp;</label>
+                                                <input class="form-check-input" type="checkbox" id="zLockCheckbox"
+                                                    checked>
+                                            </div>
                                             <div class="form-group">
                                                 <label for="zSliceInput">Z Clip:
                                                     <input class="form-check-input ml-1" type="checkbox"

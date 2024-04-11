@@ -1,5 +1,6 @@
-let selectedDatasetName = ""
+let selectedDatasetName = "";
 let institutionsList = [];
+let shouldContinue = true;
 window.addEventListener("DOMContentLoaded", function () {
     getDatasets().then(datasets => {
         // Populate filter options
@@ -7,7 +8,6 @@ window.addEventListener("DOMContentLoaded", function () {
 
         // Initial rendering form
         renderDatasetList(datasets);
-
     });
 });
 
@@ -388,7 +388,6 @@ function renderInstitutionList(institutions) {
             showInstitutionDetails(institution);
         }
     });
-
 }
 
 function showInstitutionDetails(institution) {
@@ -622,11 +621,13 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     const fileTiff = fileInputTiff.files[0];
     // Create an array containing all input boxes that need to be checked
     const filename = fileInputTiff.files[0].name.split('.')[0]
-    const datasetName = filename.split('#')[0]
-    const Modality = filename.split('#')[1]
-    const Exposure = filename.split('#')[2]
-    const Wavelength = filename.split('#')[3]
+    const institutionName = filename.split('#')[0]
+    const datasetName = filename.split('#')[1]
+    const Modality = filename.split('#')[2]
+    const Exposure = filename.split('#')[3]
+    const Wavelength = filename.split('#')[4]
     const formData = new FormData();
+    formData.append('institution-name',institutionName);
     formData.append('dataset-name', datasetName);
     formData.append('modality', Modality);
     formData.append('exposure', Exposure);
@@ -635,13 +636,20 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     formData.append('fileContent', fileTiff); // Add the file content here
 
     var fileExtension = fileInputTiff.files[0].name.split('.').pop().toLowerCase(); // Get file extension name
+    const institutionExists = institutionsList.find(institution => institution.name === institutionName);
+
+    if (!institutionExists) {
+        alert('Institution name does not exist in the list.');
+        return;
+    }
+
     if (fileExtension !== 'tif') {
         alert('Wrong file format! Please upload the .tif file');
         return;
     }
 
     // Start getProgress function
-    shouldContinue = true;
+    
     getProgress();
 
     const response = await fetch('/UploadDataset', {

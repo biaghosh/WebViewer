@@ -73,7 +73,6 @@ function changeMod() {
     let expCounter = 0, waveCounter = 0
     exposureSelect.disabled = false
     for (const exp in dsInfo.types[modSelect.value]) {
-        console.log(exp)
         expCounter++
         let opt = document.createElement('option')
         opt.appendChild(document.createTextNode(exp))
@@ -105,7 +104,6 @@ function changeExposure() {
         opt.appendChild(document.createTextNode(`${dsInfo.types[modSelect.value][exposureSelect.value][wave]}nm`))
         opt.value = wave
         wavelengthSelect.appendChild(opt)
-        console.log(wavelengthSelect)
     }
 
     if (waveCounter < 2) {
@@ -478,7 +476,6 @@ let clickHandler = {
                 document.getElementById("measureBtn").disabled = false
                 //document.getElementById("createMaskBtn").disabled = false
                 document.getElementById("measureClearBtn").disabled = false
-
                 drawLine()
                 document.documentElement.style.cursor = 'default'
             }
@@ -716,7 +713,6 @@ finishedMaskBtn.addEventListener('click', () => {
     })
         .then(response => response.json())
         .then(data => {
-            console.log(data)
             //slow iteration, see if there's a modern approach
             vertsHolder = []
             let verts = [];
@@ -737,7 +733,6 @@ finishedMaskBtn.addEventListener('click', () => {
                         }
                     }
                     //issue 1: need to order it as if it was drawn
-                    console.log(verts)
                     vertsHolder.push({ slice: data[s].slice, verts: verts })
                     verts = []
                 }
@@ -1362,7 +1357,6 @@ window.addEventListener('resize', () => {
     if (!cameraXY)
         return
     cameraXY.aspect = (xyDiv.offsetWidth / 360)//@TODO HARDCODE
-    console.log("宽度", xyDiv.offsetWidth)
     cameraXY.updateProjectionMatrix()
     rendererXY.setSize(xyDiv.offsetWidth, 300)
 
@@ -1387,7 +1381,6 @@ function hideLoading(which) {
 
 function updateSlice() {
     //showLoading('xy')
-    console.log("updateSlice")
     var sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/xy/${slider.value}.basis?${SAS}`;
 
     loader.load(sasUrl, function (texture) {
@@ -1642,7 +1635,6 @@ exportSizeSelect.addEventListener('change', () => {
 })
 
 exportBtn.onclick = () => {
-    console.log("takeScreenshot exportWidthSelect * exportHeightInput", exportWidthSelect, exportHeightInput)
     takeScreenshot(exportWidthSelect, exportHeightInput, exportXYZSelect.options[exportXYZSelect.selectedIndex].text)
 }
 
@@ -1653,7 +1645,6 @@ function takeScreenshot(width, height, axis) {
         height = Math.round((dsInfo["imageDims"]["y"] / dsInfo["imageDims"]["x"]) * width)
     }
     if (axis == "XY") {
-        console.log("export XY", width, height, axis)
         cameraXY.aspect = width / height;
         cameraXY.updateProjectionMatrix();
         rendererXY.setSize(width, height);
@@ -1906,7 +1897,6 @@ function animateOrtho(rend, scene, camera, mat, animationId) {
 }
 
 function xzClick(evt) {
-    console.log("xzClick")
     let rect = oRenderers['xz'].domElement.getBoundingClientRect()
     let x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
     let y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
@@ -1968,7 +1958,6 @@ function xzClick(evt) {
 }
 
 function yzClick(evt) {
-    console.log("yzClick")
     let rect = oRenderers['yz'].domElement.getBoundingClientRect()
     let x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
     let y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
@@ -2034,7 +2023,6 @@ function orthoClick(evt) {
     let rect = canvasXY.getBoundingClientRect()
     let x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
     let y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
-    console.log(x, y)
     rayCaster.setFromCamera({ 'x': x, 'y': y }, cameraXY)
     var intersects = []
     mesh.raycast(rayCaster, intersects)
@@ -2218,9 +2206,7 @@ threshold.addEventListener('change', ()=> {
 }) **/
 
 zclip.addEventListener('input', () => {
-    console.log("zclip input")
     if (zLockBox.checked) {
-        console.log(zclip.value, parseInt(dsInfo["imageDims"]["z"]))
         if (zclip.value > parseInt(dsInfo["imageDims"]["z"]))
             zclip.value = dsInfo["imageDims"]["z"] - 1
 
@@ -2231,13 +2217,13 @@ zclip.addEventListener('input', () => {
 })
 
 slider.addEventListener("change", () => {
-    console.log("slider change")
     xyInput.value = slider.value
-    zclip.value = slider.value
     if (zLockBox.checked) {
-        console.log("zlockbox")
-        zclip.value = slider.value
+        // zclip.value = slider.value
         zclip.dispatchEvent(keyEvent)
+    }
+    else {
+        zclip.value = slider.value
     }
     updateSlice()
 })
@@ -2335,7 +2321,6 @@ function loadFiles() {
                 buttonGroup.appendChild(download_button);
                 download_button.onclick = function () {
                     var filename = data[i]['name'];
-                    console.log(filename)
                     // Send the filename to the server as a JSON object
                     var xhr = new XMLHttpRequest();
                     xhr.open('POST', '/download');
