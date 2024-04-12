@@ -216,7 +216,7 @@ function updateDatasetList(datasets) {
                 typesContent += `<div>[ Exposure ${exposure}:`;
                 const wavelengths = dataset.types[type][exposure];
                 wavelengths.forEach(wavelength => {
-                    typesContent += `<span class="wavelength"> (Wavelength: ${wavelength} <span class="delete-button" onclick="deleteWavelength('${type}', '${exposure}', '${wavelength}')">&#x2715;</span>)</span>`;
+                    typesContent += `<span class="wavelength"> (Wavelength: ${wavelength}`;
                 });
                 typesContent += ` ]</div>`;
             });
@@ -627,7 +627,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     const Exposure = filename.split('#')[3]
     const Wavelength = filename.split('#')[4]
     const formData = new FormData();
-    formData.append('institution-name',institutionName);
+    formData.append('institution-name', institutionName);
     formData.append('dataset-name', datasetName);
     formData.append('modality', Modality);
     formData.append('exposure', Exposure);
@@ -649,7 +649,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     }
 
     // Start getProgress function
-    
+
     getProgress();
 
     const response = await fetch('/UploadDataset', {

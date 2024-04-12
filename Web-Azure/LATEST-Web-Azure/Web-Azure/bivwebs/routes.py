@@ -458,7 +458,7 @@ def createUser():
 
     # Get the form information submitted by the web page
     json = request.get_json()
-
+    print(json)
     # Establish database connection
     client = MongoClient(app.config['mongo'])
 
@@ -476,7 +476,7 @@ def createUser():
     # Query whether a user already exists, return if it exists, create a new user if it does not exist
 
     if json['email'] in email_list:
-        return redirect(url_for('accounts'))
+        return jsonify({"error": "Email already exists"}), 409
     # userId = db.Counts.find_one_and_update({"name": "userIncrement"},{'$inc':{ "userId" :1 }},new=True)
     # generate user id
     # userId = users.find_one_and_update({},{ '$inc': {"id" : 1}})

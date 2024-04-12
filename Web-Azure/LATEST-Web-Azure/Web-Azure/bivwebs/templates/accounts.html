@@ -123,9 +123,13 @@
         <!-- View Users-->
         <div class="col-6">
             <div class="card shadow">
-                <div class="card-header">
-                    Active Users
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Active Users</span>
+                    <select id="userInstitutionFilter" class="form-control w-auto">
+                        <!-- 机构选项将动态填充 -->
+                    </select>
                 </div>
+
                 <div id="viewUsersCard" class="card-body">
                     <!-- table -->
                 </div>
@@ -248,36 +252,33 @@
     }
 
 
-    document.getElementById("createUserBtn").addEventListener('click', () => {
-        //validate
-        let email = document.getElementById("email")
-        let pass = document.getElementById("pass")
-        let level = document.getElementById("levelSelect")
-        let institution = document.getElementById("institutionSelect")
-        console.log(institution)
-        //fetch
+    document.getElementById('createUserBtn').addEventListener('click', function () {
+        const email = document.getElementById('email').value;
+        const institution = document.getElementById('institutionSelect').value;
+        const level = document.getElementById('levelSelect').value;
+
         fetch('/createUser', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                'email': email.value,
-                'level': level.value,
-                'institution': institution.value
+                email: email,
+                institution: institution,
+                level: level
             }),
         })
             .then(response => response.json())
             .then(data => {
-                //clearform
-                email.value = ''
-                //updateTable
-                usersTable()
+                if (data.error) {
+                    alert(data.error);  // Show alert if there is an error
+                } else {
+                    alert(data.success);  // Show success message
+                }
             })
-            .catch((error) => {
-                console.error('Error:', error)
-            })
-    })
+            .catch(error => console.error('Error:', error));
+    });
+
 
     document.getElementById("deleteUserBtn").addEventListener('click', () => {
         if (!selectedUserEmail || selectedUserEmail.trim() === "") {
@@ -381,38 +382,57 @@
             });
     }
 
-    function usersTable() {
+    function usersTable(filterInstitution = 'all') {
         fetch('/getUsers', {
             method: 'GET',
         })
             .then(response => response.json())
             .then(data => {
-                let tableHTML = `<table class="table table-sm"><tbody>
-                                                    <tr>
-                                                        <th scope="row">Email</th>
-                                                        <td>Level</td>
-                                                        <td>Logins</td>
-                                                        <td>Institution</td>
-                                                        <td>Last Login</td>
-                                                    </tr>`
-                for (let i = 0; i < data.length; i++) {
-                    let date = ''
-                    if (typeof data[i]['lastLogin'] == 'object')
-                        date = new Date(data[i]['lastLogin']['$date'])
-                    tableHTML = tableHTML + `<tr class="selectable-user" onclick="handleTableRowClick(event)">
-                                                                <th scope="row">${data[i]['email']}</th>
-                                                                <td>${data[i]['level']}</td>
-                                                                <td>${data[i]['logins']}</td>
-                                                                <td>${data[i]['institution']}</td>
-                                                                <td>${date}</td>
-                                                            </tr>`
-                }
-                tableHTML = tableHTML + `</tbody></table>`
-                document.getElementById("viewUsersCard").innerHTML = tableHTML
+                let filteredData = filterInstitution === 'all' ? data : data.filter(user => user.institution === filterInstitution);
+                renderUserTable(filteredData);
             })
             .catch((error) => {
-                console.error('Error:', error)
-            })
+                console.error('Error:', error);
+                document.getElementById("viewUsersCard").innerHTML = '<div class="alert alert-danger" role="alert">Failed to load user data.</div>';
+            });
+    }
+
+    function renderUserTable(data) {
+        let tableHTML = `<table class="table table-sm"><thead>
+                        <tr>
+                            <th scope="col">Email</th>
+                            <th scope="col">Level</th>
+                            <th scope="col">Logins</th>
+                            <th scope="col">Institution</th>
+                            <th scope="col">Last Login</th>
+                        </tr>
+                    </thead><tbody>`;
+
+        data.forEach(user => {
+            let date = formatDate(user.lastLogin ? user.lastLogin['$date'] : '');
+            tableHTML += `<tr class="selectable-user" data-email="${user.email}">
+                        <th scope="row">${user.email}</th>
+                        <td>${user.level}</td>
+                        <td>${user.logins}</td>
+                        <td>${user.institution}</td>
+                        <td>${date}</td>
+                    </tr>`;
+        });
+
+        tableHTML += `</tbody></table>`;
+        const usersCard = document.getElementById("viewUsersCard");
+        usersCard.innerHTML = tableHTML;
+
+        // Add event listeners to rows
+        usersCard.querySelectorAll('.selectable-user').forEach(row => {
+            row.addEventListener('click', (event) => handleTableRowClick(event));
+        });
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
     }
 
     function handleTableRowClick(event) {
@@ -516,6 +536,33 @@
             populateInstitutionSelect(institutions);
         });
     });
+
+    function populateUserInstitutionSelect(institutions) {
+        const select = document.getElementById('userInstitutionFilter');
+        select.innerHTML = '<option value="all">All Institutions</option>'; // 允许用户选择所有机构
+
+        institutions.forEach(institution => {
+            const option = document.createElement('option');
+            option.value = institution.name;
+            option.textContent = institution.name;
+            select.appendChild(option);
+        });
+    }
+
+    // 当页面加载时，调用此函数
+    window.addEventListener("DOMContentLoaded", function () {
+        getInstitutions().then(institutions => {
+            populateUserInstitutionSelect(institutions);
+        });
+    });
+
+    document.getElementById('userInstitutionFilter').addEventListener('change', function () {
+        const selectedInstitution = this.value;
+        usersTable(selectedInstitution); // 传入选定的机构
+    });
+
+
+
 
 
 </script>
