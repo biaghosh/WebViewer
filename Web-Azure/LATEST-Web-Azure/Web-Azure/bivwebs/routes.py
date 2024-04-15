@@ -370,6 +370,7 @@ def getDatasetInfo():
                 "dims2": 1,
                 "imageDims": 1,
                 "zskip": 1,
+                "institution": 1,
                 "info": 1,
                 "ann.slice": 1,
                 "ann.user": 1,

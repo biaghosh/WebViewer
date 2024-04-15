@@ -365,11 +365,14 @@
                             <div class="col-12 text-center bg-secondary text-white rounded"><b>2D</b></div>
                         </div>
 
-                        <div class="form-group col-6">
+                        <div class="form-group col-12">
+                            <select id="planeSelect">
+                                <option value="xy">XY Plane</option>
+                                <option value="xz">XZ Plane</option>
+                                <option value="yz">YZ Plane</option>
+                            </select>
                             <button id="measureBtn" type="button" class="btn btn-custom btn-measure"
                                 disabled>Measure</button>
-                        </div>
-                        <div class="form-group col-6">
                             <button id="measureClearBtn" type="button" class="btn btn-custom btn-clear mr-1"
                                 disabled>Clear</button>
                         </div>
@@ -573,12 +576,16 @@
                 <div id="dsCard" class="card-body tab-pane">
                     <!-- JS automated-->
                     <dl class="row">
-                        <dt class="col-sm-6">Specimen Name: </dt>
-                        <dd id="specimenInfo" class="col-sm-12"></dd>
+                        <dt class="col-sm-6">Institution Name: </dt>
+                        <dd id="InstitutionName" class="col-sm-12"></dd>
                     </dl>
                     <dl class="row">
                         <dt class="col-sm-6">PI: </dt>
                         <dd id="piInfo" class="col-sm-12"></dd>
+                    </dl>
+                    <dl class="row">
+                        <dt class="col-sm-6">Specimen Name: </dt>
+                        <dd id="specimenInfo" class="col-sm-12"></dd>
                     </dl>
                     <dl class="row">
                         <dt class="col-sm-6">Voxel Size: </dt>

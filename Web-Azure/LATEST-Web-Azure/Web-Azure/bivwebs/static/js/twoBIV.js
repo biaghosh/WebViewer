@@ -5,13 +5,20 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.119.1/exampl
 import { DragControls } from './DragControls.js'
 
 //unorganized variables
-let dsChanged = true, modChanged, annSlices, dsName, files, orthosActive = true
+let dsChanged = true, modChanged, annSlices, dsName, files, orthosActive = true, currentPlane
 var changeEvent = new Event('change')
 var keyEvent = new Event('keyup')
 let xyInputTimeout
 var previousSlice
 let session
 var SAS = 'sp=r&st=2023-08-14T15:15:15Z&se=2036-06-18T15:15:00Z&spr=https&sv=2022-11-02&sig=pisDbcAw2k0FGGNHg5i4FIqJklWf9%2BAW03VkeidVsWk%3D&sr=s'
+
+let measureData = {
+    xy: { clicks: [], lines: [] },
+    xz: { clicks: [], lines: [] },
+    yz: { clicks: [], lines: [] }
+};
+
 
 dsSelect.addEventListener("change", () => {
     if (!dsSelect.value)
@@ -26,6 +33,7 @@ dsSelect.addEventListener("change", () => {
         .then(response => response.json())
         .then(data => {
             document.getElementById('loadDatasetBtn').disabled = false
+            console.log(data)
             session = data['session']
             dsName = data['dataset_info'][0]['name']
             dsInfo = data['dataset_info'][0]
@@ -248,7 +256,6 @@ function loadDynamic2D(fullLoad) {
     if (!canvasXY) {
         // xyDiv.style.height = 'auto'
         rendererXY = new THREE.WebGLRenderer({ preserveDrawingBuffer: true })
-        // console.log("load宽度",xyDiv.offsetWidth)
         rendererXY.setSize(xyDiv.offsetWidth, 300)
         rendererXY.outputEncoding = THREE.sRGBEncoding
         xyDiv.appendChild(rendererXY.domElement);
@@ -462,7 +469,6 @@ function canvasPixelEvent(e) {
         document.documentElement.style.cursor = "default";
     })
 }
-
 
 let measureCoords = []
 let clickHandler = {
@@ -1102,6 +1108,8 @@ loadViewBtn.addEventListener("click", () => {
 function populateInfoTable() {
     let dsDiv = document.getElementById("dsCard")
     //dsDiv.innerHTML = ``
+    console.log(dsInfo)
+    document.getElementById('InstitutionName').innerHTML = `${dsInfo['institution']}`
     document.getElementById('specimenInfo').innerHTML = `${dsInfo['info']['specimen']}`
     document.getElementById('piInfo').innerHTML = `${dsInfo['info']['PI']}`
     document.getElementById('voxelInfo').innerHTML = `${dsInfo['info']['voxels']}μ`
@@ -2492,7 +2500,6 @@ $('#videoPreviewModal').on('hidden.bs.modal', function () {
     videoElement.currentTime = 0;
 });
 
-
 UploadFileBtn.addEventListener('click', async function () {
     var file = fileInput.files[0]
     const formData = new FormData();
@@ -2511,6 +2518,29 @@ UploadFileBtn.addEventListener('click', async function () {
         alert('Error uploading file');
     }
 });
+
+
+document.getElementById('planeSelect').addEventListener('change', function () {
+    currentPlane = this.value;
+    console.log(currentPlane)
+    resetMeasurements(currentPlane);
+});
+
+
+function resetMeasurements(plane) {
+    measureData[plane].lines.forEach(line => scene.remove(line));
+    measureData[plane].lines = [];
+    measureData[plane].clicks = [];
+    console.log(measureData)
+}
+
+function processClick(point, plane) {
+    measureData[plane].clicks.push(point);
+    if (measureData[plane].clicks.length == 2) {
+        drawLine(measureData[plane].clicks[0], measureData[plane].clicks[1], plane);
+        measureData[plane].clicks = [];  // Reset clicks after drawing line
+    }
+}
 
 
 
