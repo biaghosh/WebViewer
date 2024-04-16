@@ -280,6 +280,13 @@ function updateDatasetList(datasets) {
     form.innerHTML = formHTML;
     datasetInfoDiv.appendChild(form);
     // const form = document.querySelector('.dataset-info-form');
+    const institutionSelect = document.querySelector('select[name="institution"]');
+    institutionSelect.addEventListener('change', function () {
+        const selectedInstitution = this.value;
+        const currentPoNumber = document.getElementById('poNumberSelect').value;
+        populatePoNumberSelect(selectedInstitution, currentPoNumber);
+    });
+
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         const formData = new FormData(form);
@@ -722,7 +729,8 @@ function showOrderDetails(institutionName, poNumber) {
 }
 
 
-function generateAndInsertOrder(institutionName) {
+function generateAndInsertOrder(institutionName,event) {
+    event.preventDefault();
     if (!document.getElementById('newPoNumber').value.length) {
         alert("Please enter a valid institution name.");
         return; // Early return to stop the function execution
@@ -747,13 +755,15 @@ function generateAndInsertOrder(institutionName) {
         .then(data => {
             if (data.status === 'success') {
                 alert('Order generated and inserted successfully!');
-                window.location.reload(); // Refresh the page to show new orders
+                updateOrderList(institutionName);  // Call to update the order list
+                console.log("插入and刷新")
             } else {
                 alert('Failed to generate and insert order.');
             }
         })
         .catch(error => console.error('Error:', error));
 }
+
 
 function populatePoNumberSelect(institutionName, currentPoNumber) {
     const poNumberSelect = document.getElementById('poNumberSelect');
@@ -802,5 +812,24 @@ function deleteWavelength(type, exposure, wavelength) {
 
     console.log(`Request sent to delete wavelength: ${wavelength} from type: ${type}, exposure: ${exposure}, for dataset: ${selectedDatasetName}`);
 }
+
+function updateOrderList(institutionName) {
+    fetch(`/getOrdersByInstitution/${institutionName}`)
+        .then(response => response.json())
+        .then(orders => {
+            const ordersContainer = document.querySelector('.orders-container'); // Change this selector to match your HTML
+            ordersContainer.innerHTML = ''; // Clear existing orders
+
+            // Assuming orders are displayed in a list
+            orders.forEach(order => {
+                const orderElement = document.createElement('div');
+                orderElement.className = 'list-group-item list-group-item-action';
+                orderElement.textContent = `PO Number: ${order.PO_number}, Date: ${order.date}`;
+                ordersContainer.appendChild(orderElement);
+            });
+        })
+        .catch(error => console.error('Error updating orders:', error));
+}
+
 
 
