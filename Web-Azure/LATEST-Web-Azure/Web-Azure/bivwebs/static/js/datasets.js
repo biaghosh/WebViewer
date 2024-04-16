@@ -756,7 +756,6 @@ function generateAndInsertOrder(institutionName,event) {
             if (data.status === 'success') {
                 alert('Order generated and inserted successfully!');
                 updateOrderList(institutionName);  // Call to update the order list
-                console.log("插入and刷新")
             } else {
                 alert('Failed to generate and insert order.');
             }
