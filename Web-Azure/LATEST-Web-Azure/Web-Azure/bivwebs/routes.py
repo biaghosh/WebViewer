@@ -1577,7 +1577,7 @@ def update_institution():
         if update_result.modified_count > 0:
             return jsonify({"success": True}), 200
         else:
-            return jsonify({"error": "No institution updated"}), 404
+            return jsonify({"success": True}), 200
     else:
         # If the institution does not exist, insert new data
         insert_result = db.Institution.insert_one({
@@ -1651,13 +1651,13 @@ def get_orders_by_institution(institutionName):
     institution = collection.find_one({'name': institutionName})
     if institution and 'orders' in institution:
         orders = institution['orders']
-        return jsonify([{'PO_number': order['PO_number']} for order in orders])
+        return jsonify([{'PO_number': order['PO_number'], 'date': order['date']} for order in orders])
+
     else:
         return jsonify([])
 
 @app.route('/delete-wavelength', methods=['POST'])
 def delete_wavelength():
-    print("进来了")
     client = MongoClient(app.config['mongo'])
     db = client.BIV  # 请替换为你的数据库名称
     collection = db.datasets

@@ -15,8 +15,7 @@ window.generateAndInsertOrder = generateAndInsertOrder;
 window.showOrderDetails = showOrderDetails;
 window.submitInstitutionForm = submitInstitutionForm;
 window.deleteInstitution = deleteInstitution;
-window.deleteWavelength = deleteWavelength;
-
+window.updateInstitutionDetails = updateInstitutionDetails;
 
 function renderDatasetList(datasets) {
     const datasetList = document.getElementById('datasetList');
@@ -177,7 +176,6 @@ document.getElementById("deleteDatasetBtn").addEventListener("click", function (
 
 function updateDatasetList(datasets) {
     const dataset = datasets[0]
-    console.log(dataset)
     const datasetInfoDiv = document.getElementById('datasetInfo');
     datasetInfoDiv.innerHTML = ''; // Clear existing content
 
@@ -516,7 +514,8 @@ function updateInstitutionDetails() {
     })
         .then(response => response.json())
         .then(data => {
-            window.location.reload();
+            console.log('good:');
+            // window.location.reload();
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -729,8 +728,7 @@ function showOrderDetails(institutionName, poNumber) {
 }
 
 
-function generateAndInsertOrder(institutionName,event) {
-    event.preventDefault();
+function generateAndInsertOrder(institutionName) {
     if (!document.getElementById('newPoNumber').value.length) {
         alert("Please enter a valid institution name.");
         return; // Early return to stop the function execution
@@ -755,7 +753,7 @@ function generateAndInsertOrder(institutionName,event) {
         .then(data => {
             if (data.status === 'success') {
                 alert('Order generated and inserted successfully!');
-                updateOrderList(institutionName);  // Call to update the order list
+                // updateOrderList(institutionName);  // Call to update the order list
             } else {
                 alert('Failed to generate and insert order.');
             }
@@ -783,7 +781,6 @@ function populatePoNumberSelect(institutionName, currentPoNumber) {
 }
 
 function deleteWavelength(type, exposure, wavelength) {
-    console.log(type, exposure, wavelength)
     fetch('/delete-wavelength', {
         method: 'POST',
         headers: {
@@ -821,8 +818,9 @@ function updateOrderList(institutionName) {
 
             // Assuming orders are displayed in a list
             orders.forEach(order => {
+                console.log(order)
                 const orderElement = document.createElement('div');
-                orderElement.className = 'list-group-item list-group-item-action';
+                // orderElement.className = 'list-group-item list-group-item-action';
                 orderElement.textContent = `PO Number: ${order.PO_number}, Date: ${order.date}`;
                 ordersContainer.appendChild(orderElement);
             });
