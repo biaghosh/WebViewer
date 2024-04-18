@@ -1,6 +1,8 @@
 let selectedDatasetName = "";
 let institutionsList = [];
 let shouldContinue = true;
+let currentSelectedInstitutionName = null;
+
 window.addEventListener("DOMContentLoaded", function () {
     getDatasets().then(datasets => {
         // Populate filter options
@@ -387,13 +389,14 @@ function renderInstitutionList(institutions) {
         };
         institutionList.appendChild(item);
 
-        // Automatically select and show details for the first institution
-        if (index === 0) {
+        // Automatically select the first institution only if no current selection is stored
+        if (index === 0 && !currentSelectedInstitutionName) {
             item.classList.add('selected');
             showInstitutionDetails(institution);
         }
     });
 }
+
 
 function showInstitutionDetails(institution) {
     const institutionDetails = document.getElementById('institutionDetails');
@@ -514,8 +517,7 @@ function updateInstitutionDetails() {
     })
         .then(response => response.json())
         .then(data => {
-            console.log('good:');
-            // window.location.reload();
+            window.location.reload();
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -704,6 +706,7 @@ function getProgress() {
             console.error('Fetch error:', error);
         });
 }
+
 function showOrderDetails(institutionName, poNumber) {
     fetch(`/getOrderDetails/${institutionName}/${poNumber}`)
         .then(response => response.json())
@@ -753,7 +756,20 @@ function generateAndInsertOrder(institutionName) {
         .then(data => {
             if (data.status === 'success') {
                 alert('Order generated and inserted successfully!');
-                // updateOrderList(institutionName);  // Call to update the order list
+                currentSelectedInstitutionName = institutionName; // Save current selected institution name
+                getInstitutions().then(institutions => {
+                    institutionsList = institutions;
+                    renderInstitutionList(institutions);
+                    // Restore the selected institution
+                    if (currentSelectedInstitutionName) {
+                        const items = document.querySelectorAll('#institutionList .list-group-item');
+                        items.forEach(item => {
+                            if (item.textContent === currentSelectedInstitutionName) {
+                                item.click();
+                            }
+                        });
+                    }
+                });
             } else {
                 alert('Failed to generate and insert order.');
             }

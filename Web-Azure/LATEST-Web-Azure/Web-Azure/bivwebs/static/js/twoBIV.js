@@ -33,7 +33,6 @@ dsSelect.addEventListener("change", () => {
         .then(response => response.json())
         .then(data => {
             document.getElementById('loadDatasetBtn').disabled = false
-            console.log(data)
             session = data['session']
             dsName = data['dataset_info'][0]['name']
             dsInfo = data['dataset_info'][0]
@@ -768,7 +767,7 @@ function loadMasks() {
         .then(response => response.json())
         .then(data => {
             maskLoadInput.disabled = false
-            maskInput.value = ''
+            // maskInput.value = ''
             brushGroup.remove(...brushGroup.children)
             brushflag = false
             let maskTableBody = document.getElementById("maskTbody")
@@ -834,10 +833,10 @@ maskLoadInput = document.getElementById("maskLoadInput"),
                 }
                 drawMask() // Go to slice automatically?
 
-                maskInput.value = maskLoadInput.value
+                // maskInput.value = maskLoadInput.value
                 //view only or edits?
                 //eraseMaskBtn.disabled = false
-                maskLoadInput.value = ''
+                // maskLoadInput.value = ''
 
             })
             .catch((error) => {
@@ -1108,7 +1107,6 @@ loadViewBtn.addEventListener("click", () => {
 function populateInfoTable() {
     let dsDiv = document.getElementById("dsCard")
     //dsDiv.innerHTML = ``
-    console.log(dsInfo)
     document.getElementById('InstitutionName').innerHTML = `${dsInfo['institution']}`
     document.getElementById('specimenInfo').innerHTML = `${dsInfo['info']['specimen']}`
     document.getElementById('piInfo').innerHTML = `${dsInfo['info']['PI']}`
@@ -1401,7 +1399,7 @@ function updateSlice() {
         if (copySliceBox.checked && vertsHolder.length !== 0) {
             let index = vertsHolder.map(e => e.slice).indexOf(String(previousSlice))
             vertsHolder.push({ slice: slider.value, verts: vertsHolder[index].verts })
-            copySliceBox.checked = false
+            // copySliceBox.checked = false
             if (!document.getElementById('minSlice').value || document.getElementById('minSlice').value > slider.value)
                 document.getElementById('minSlice').value = slider.value
             if (!document.getElementById('maxSlice').value || document.getElementById('maxSlice').value < slider.value)
@@ -1459,7 +1457,6 @@ saveViewBtn.addEventListener('click', () => {
             'xClip': clipCoords.x,
             'yClip': clipCoords.y,
             'threshold': threshold2D.value
-
         }),
     })
         .then(response => response.json())
