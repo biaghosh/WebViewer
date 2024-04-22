@@ -1229,32 +1229,48 @@ function processNewAnn(evt) {
 
 function addAnnotationEvents() {
 
-    createAnnBtn.addEventListener("click", dynamicCreateAnn)
-    function dynamicCreateAnn() {
-        createAnnBtn.disabled = true
-        canvasXY.removeEventListener("click", orthoClick)
-        canvasXY.addEventListener("click", processNewAnn)
+    // 动态创建注释的事件处理
+    if (!createAnnBtn.hasAttribute('data-listener')) {
+        createAnnBtn.addEventListener("click", dynamicCreateAnn);
+        createAnnBtn.setAttribute('data-listener', 'true'); // 标记已添加监听器
     }
 
-    toggleAnnBtn.addEventListener("click", () => {
-        if (toggleAnnBtn.innerHTML == 'Hide Annotations') {
-            annTextGroup.visible = false
-            createAnnBtn.disabled = true
-            toggleAnnBtn.innerHTML = `Show Annotations`
-        } else {
-            annTextGroup.visible = true
-            createAnnBtn.disabled = false
-            toggleAnnBtn.innerHTML = `Hide Annotations`
-        }
-    })
+    function dynamicCreateAnn() {
+        createAnnBtn.disabled = true;
+        canvasXY.removeEventListener("click", orthoClick);
+        canvasXY.addEventListener("click", processNewAnn);
+    }
 
-    canvasXY.addEventListener("click", moveAnn)
+    // 切换注释显示状态的事件处理
+    if (!toggleAnnBtn.hasAttribute('data-listener')) {
+        toggleAnnBtn.addEventListener("click", toggleAnnotations);
+        toggleAnnBtn.setAttribute('data-listener', 'true'); // 标记已添加监听器
+    }
+
+    function toggleAnnotations() {
+        if (toggleAnnBtn.innerHTML == 'Hide Annotations') {
+            annTextGroup.visible = false;
+            createAnnBtn.disabled = true;
+            toggleAnnBtn.innerHTML = 'Show Annotations';
+        } else {
+            annTextGroup.visible = true;
+            createAnnBtn.disabled = false;
+            toggleAnnBtn.innerHTML = 'Hide Annotations';
+        }
+    }
+
+    // 移动注释的事件处理
+    if (!canvasXY.hasAttribute('data-move-listener')) {
+        canvasXY.addEventListener("click", moveAnn);
+        canvasXY.setAttribute('data-move-listener', 'true'); // 标记已添加监听器
+    }
 
     function moveAnn() {
-
+        // 这里添加移动注释的代码
+        console.log("移动注释");
     }
-
 }
+
 
 function loadAnnotationsFast() {
     // console.log("loadAnnotationsFast")
@@ -2516,28 +2532,6 @@ UploadFileBtn.addEventListener('click', async function () {
     }
 });
 
-
-document.getElementById('planeSelect').addEventListener('change', function () {
-    currentPlane = this.value;
-    console.log(currentPlane)
-    resetMeasurements(currentPlane);
-});
-
-
-function resetMeasurements(plane) {
-    measureData[plane].lines.forEach(line => scene.remove(line));
-    measureData[plane].lines = [];
-    measureData[plane].clicks = [];
-    console.log(measureData)
-}
-
-function processClick(point, plane) {
-    measureData[plane].clicks.push(point);
-    if (measureData[plane].clicks.length == 2) {
-        drawLine(measureData[plane].clicks[0], measureData[plane].clicks[1], plane);
-        measureData[plane].clicks = [];  // Reset clicks after drawing line
-    }
-}
 
 
 

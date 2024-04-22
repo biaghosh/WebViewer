@@ -116,12 +116,36 @@
         .scrollable-table table {
             width: 100%;
         }
+
+        .table th,
+        .table td {
+            padding: 8px;
+            vertical-align: middle;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .form-row input,
+        .form-row select,
+        .form-row button {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .form-row>td {
+            padding: 0.5rem;
+        }
+
+        #newUserEmail,
+        #newUserLevel,
+        #newUserInstitution {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <div class="container-fluid">
     <div class="row" style="margin-top: 70px;">
         <!-- View Users-->
-        <div class="col-6">
+        <div class="col-7">
             <div class="card shadow">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>Active Users</span>
@@ -168,38 +192,6 @@
                     </div>
                 </div>
                 <button id="deleteUserBtn" type="submit" class="btn btn-danger">Delete User</button>
-            </div>
-        </div>
-        <!-- Create User-->
-        <div class="col-6">
-            <div class="card shadow">
-                <div class="card-header">
-                    Create User
-                </div>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label for="email">Email address</label>
-                        <input id="email" class="form-control" type="text">
-                    </div>
-                    <div class="form-group">
-                        <label for="levelSelect">Access Level</label>
-                        <select id="levelSelect" class="form-control">
-                            <option value="admin">Admin</option>
-                            <option value="user">User</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="institutionSelect">Institution</label>
-                        <select id="institutionSelect" class="form-control">
-                            <!--All institution will be filled here dynamically-->
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <button id="createUserBtn" type="submit"
-                            class="btn btn-sm btn-primary btn-icon-only">Create</button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -398,6 +390,7 @@
     }
 
     function renderUserTable(data) {
+        // Initialize the table with headers
         let tableHTML = `<table class="table table-sm"><thead>
                         <tr>
                             <th scope="col">Email</th>
@@ -405,29 +398,82 @@
                             <th scope="col">Logins</th>
                             <th scope="col">Institution</th>
                             <th scope="col">Last Login</th>
+                            <th scope="col">Actions</th>
                         </tr>
                     </thead><tbody>`;
 
+        // Populate the table with data from existing users
         data.forEach(user => {
             let date = formatDate(user.lastLogin ? user.lastLogin['$date'] : '');
             tableHTML += `<tr class="selectable-user" data-email="${user.email}">
-                        <th scope="row">${user.email}</th>
-                        <td>${user.level}</td>
-                        <td>${user.logins}</td>
-                        <td>${user.institution}</td>
-                        <td>${date}</td>
-                    </tr>`;
+            <td>${user.email}</td>
+            <td>${user.level}</td>
+            <td>${user.logins}</td>
+            <td>${user.institution}</td>
+            <td>${date}</td>
+            <td><button onclick="editUser('${user.email}')" class="btn btn-sm btn-warning">Edit</button></td>
+        </tr>`;
         });
 
-        tableHTML += `</tbody></table>`;
+        // Add a row for creating a new user
+        tableHTML += `</tbody><tfoot>
+        <tr class="form-row">
+            <td><input id="newUserEmail" type="text" class="form-control" placeholder="Enter email" style="width:100%;"></td>
+            <td>
+                <select id="newUserLevel" class="form-control" style="width:100%;">
+                    <option value="admin">Admin</option>
+                    <option value="user">User</option>
+                </select>
+            </td>
+            <td colspan="2">
+                <select id="institutionSelect" class="form-control" style="width:100%;">
+                    <!-- Institutions will be filled dynamically -->
+                </select>
+            </td>
+            <td colspan="2">
+                <button id="createUserBtn" type="submit" class="btn btn-sm btn-primary btn-icon-only">Create</button>
+            </td>
+        </tr>
+    </tfoot></table>`;
+
+        // Set the innerHTML of the usersCard to the new table
         const usersCard = document.getElementById("viewUsersCard");
         usersCard.innerHTML = tableHTML;
 
-        // Add event listeners to rows
+        // Add click event listeners to the user rows for selection functionality
         usersCard.querySelectorAll('.selectable-user').forEach(row => {
             row.addEventListener('click', (event) => handleTableRowClick(event));
         });
+
+        document.getElementById('createUserBtn').addEventListener('click', function () {
+            const email = document.getElementById('email').value;
+            const institution = document.getElementById('institutionSelect').value;
+            const level = document.getElementById('levelSelect').value;
+
+            fetch('/createUser', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    institution: institution,
+                    level: level
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);  // Show alert if there is an error
+                    } else {
+                        alert(data.success);  // Show success message
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
     }
+
+
 
     function formatDate(dateString) {
         if (!dateString) return '';
