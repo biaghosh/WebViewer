@@ -2,16 +2,20 @@ let selectedDatasetName = "";
 let institutionsList = [];
 let shouldContinue = true;
 let currentSelectedInstitutionName = null;
+window.addEventListener("DOMContentLoaded", function () {
+    getInstitutions().then(institutions => {
+        institutionsList = institutions;
+        populateFilter()
+    });
+});
 
 window.addEventListener("DOMContentLoaded", function () {
     getDatasets().then(datasets => {
-        // Populate filter options
-        populateFilter(datasets);
-
         // Initial rendering form
         renderDatasetList(datasets);
     });
 });
+
 
 window.generateAndInsertOrder = generateAndInsertOrder;
 window.showOrderDetails = showOrderDetails;
@@ -319,13 +323,13 @@ document.getElementById('updateDatasetBtn').addEventListener('click', function (
     window.location.reload();
 });
 
-function populateFilter(datasets) {
-    const institutionSet = new Set(datasets.map(dataset => dataset.institution));
+function populateFilter() {
     const filter = document.getElementById('institutionFilter');
-    institutionSet.forEach(institution => {
+    console.log(institutionsList)
+    institutionsList.forEach(institution => {
         const option = document.createElement('option');
-        option.value = institution;
-        option.textContent = institution;
+        option.value = institution.name;
+        option.textContent = institution.name;
         filter.appendChild(option);
     });
 }
@@ -370,32 +374,6 @@ function getInstitutions() {
         });
 }
 
-function renderInstitutionList(institutions) {
-    const institutionList = document.getElementById('institutionList');
-    institutionList.innerHTML = ''; // Clear existing content
-
-    institutions.forEach((institution, index) => {
-        const item = document.createElement('div');
-        item.className = 'list-group-item list-group-item-action';
-        item.textContent = institution.name;
-        item.onclick = () => {
-            // Remove 'selected' class from all items
-            document.querySelectorAll('#institutionList .list-group-item').forEach(el => {
-                el.classList.remove('selected');
-            });
-            // Add 'selected' class to clicked item
-            item.classList.add('selected');
-            showInstitutionDetails(institution);
-        };
-        institutionList.appendChild(item);
-
-        // Automatically select the first institution only if no current selection is stored
-        if (index === 0 && !currentSelectedInstitutionName) {
-            item.classList.add('selected');
-            showInstitutionDetails(institution);
-        }
-    });
-}
 
 
 function showInstitutionDetails(institution) {
@@ -525,57 +503,6 @@ function updateInstitutionDetails() {
         });
 }
 
-document.getElementById('newInstitutionBtn').addEventListener('click', function () {
-    const institutionDetails = document.getElementById('institutionDetails');
-    const typeOptions = ['Industry', 'Academic', 'Government', 'Others'];
-    const statusOptions = ['Active', 'Inactive', 'Pending'];
-    const statusSelectHTML = statusOptions.map(option => `<option value="${option}">${option}</option>`).join('');
-    const typeSelectHTML = typeOptions.map(option => `<option value="${option}"}>${option}</option>`).join('');
-
-    // Clear the details area and provide a blank form
-    institutionDetails.innerHTML = `
-        <form id="institutionForm">
-            <div class="form-group">
-                <label>Name:</label>
-                <input type="text" class="form-control" name="name" value="">
-            </div>
-
-            <div class="form-group">
-                <label>Type:</label>
-                <select class="form-control" name="type">
-                    ${typeSelectHTML}
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Address:</label>
-                <input type="text" class="form-control" name="address" value="">
-            </div>
-
-            <div class="form-group">
-                <label>Phone Number:</label>
-                <input type="text" class="form-control" name="phone" value="">
-            </div>
-
-            <div class="form-group">
-                <label>Email:</label>
-                <input type="text" class="form-control" name="Email" value="">
-            </div>
-
-            <div class="form-group">
-                <label>Website:</label>
-                <input type="text" class="form-control" name="website" value="">
-            </div>
-            <div class="form-group">
-                <label>Status:</label>
-                <select class="form-control" name="status">
-                    ${statusSelectHTML}
-                </select>
-            </div>
-            <button type="button" class="btn btn-sm btn-primary btn-icon-only" onclick="submitInstitutionForm()">Update</button>
-        </form>
-    `;
-});
 
 function deleteInstitution() {
     const institutionName = document.querySelector('#institutionForm [name="name"]').value;
@@ -613,12 +540,6 @@ function submitInstitutionForm() {
 }
 
 
-window.addEventListener("DOMContentLoaded", function () {
-    getInstitutions().then(institutions => {
-        institutionsList = institutions;
-        renderInstitutionList(institutions);
-    });
-});
 
 document.getElementById('submitBtn').addEventListener('click', async function () {
     const fileInputTiff = document.getElementById('fileInputTiff');

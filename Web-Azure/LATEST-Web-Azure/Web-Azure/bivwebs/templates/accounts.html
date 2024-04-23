@@ -85,6 +85,12 @@
             /* Lighter background color on hover for items not selected */
         }
 
+
+        .list-group-item.selected {
+            background-color: #007bff;
+            color: white;
+        }
+
         .list-group-item.selected-dataset {
             background-color: #d1e7fd;
             /* Distinct background color for selected items */
@@ -106,7 +112,7 @@
         }
 
         .scrollable-table {
-            max-height: 300px;
+            max-height: 170px;
             overflow-y: auto;
             margin-bottom: 20px;
             /* Adjust as necessary */
@@ -140,12 +146,73 @@
         #newUserInstitution {
             margin-bottom: 0;
         }
+
+        .overflow-auto {
+            max-height: 170px;
+            /* Adjust this value based on your needs */
+            overflow-y: auto;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .card-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e3e4e6;
+            padding: 10px 15px;
+        }
+
+        .form-row>.col-md-4 {
+            padding-right: 15px;
+            /* Adjust the right padding for spacing */
+            padding-left: 15px;
+            /* Adjust the left padding for spacing */
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+            /* Reduce margin-bottom for a tighter layout */
+        }
+
+        /* 特定于表头的样式 */
+        .order-info-header {
+            font-weight: bold;
+            /* 加粗字体 */
+            color: #343a40;
+            /* 暗色字体 */
+            background-color: #f8f9fa;
+            /* 浅灰色背景 */
+            border-bottom: 2px solid #dee2e6;
+            /* 较厚的底部边框 */
+            padding: 10px 15px;
+            /* 与.list-group-item保持一致的padding */
+            cursor: default;
+            /* 确保鼠标不会显示为指针 */
+        }
+
+        /* Styling for the order list */
+        .order-list,
+        .orders,
+        .order-details {
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: scroll;
+        }
+
+        /* Flexbox layout for orders and their details */
+        .orders-container {
+            display: flex;
+        }
     </style>
 </head>
 <div class="container-fluid">
     <div class="row" style="margin-top: 70px;">
         <!-- View Users-->
-        <div class="col-7">
+        <div class="col-6">
             <div class="card shadow">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>Active Users</span>
@@ -154,10 +221,75 @@
                     </select>
                 </div>
 
-                <div id="viewUsersCard" class="card-body">
-                    <!-- table -->
+                <div class="card-body">
+                    <!-- Fixed Table Header -->
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Email</th>
+                                <th scope="col">Level</th>
+                                <th scope="col">Logins</th>
+                                <th scope="col">Institution</th>
+                                <th scope="col">Last Login</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                    </table>
+                    <!-- Scrollable Table Body -->
+                    <div class="table-responsive" style="max-height: 170px; overflow-y: auto;">
+                        <table class="table">
+                            <tbody id="viewUsersCard">
+                                <!-- User data will be dynamically filled here -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="row">
+
+                <div class="row" style="margin-top: -20px;">
+                    <div class="col-lg-12">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <div class="form-row">
+                                    <!-- Email Address Input -->
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="email">Email address</label>
+                                            <input id="email" class="form-control" type="text">
+                                        </div>
+                                    </div>
+                                    <!-- Access Level Selection -->
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="levelSelect">Access Level</label>
+                                            <select id="levelSelect" class="form-control">
+                                                <option value="admin">Admin</option>
+                                                <option value="user">User</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <!-- Institution Selection -->
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="institutionSelect">Institution</label>
+                                            <select id="institutionSelect" class="form-control">
+                                                <!-- All institution will be filled here dynamically -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <button id="createUserBtn" type="submit"
+                                                class="btn btn-primary">Create</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row" style="margin-top: -10px;">
                     <div class="col-md-3">
                         <div class="card border-0">
                             <div class="card-body">
@@ -194,12 +326,42 @@
                 <button id="deleteUserBtn" type="submit" class="btn btn-danger">Delete User</button>
             </div>
         </div>
+        <div class="col-6">
+            <div class="card shadow">
+                <div class="card-header">Institution</div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Organization list container -->
+                        <div class="col-3">
+                            <h5>Institution List</h5>
+                            <div id="institutionList" class="table table-striped table-hover"></div>
+                            <button id="newInstitutionBtn" class="btn btn-sm btn-primary btn-icon-only">New</button>
+                        </div>
+                        <!-- Organization details container -->
+                        <div class="col-9">
+                            <h5>Institution Details</h5>
+                            <div id="institutionDetails"></div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
     window.addEventListener("DOMContentLoaded", usersTable())
     window.addEventListener("DOMContentLoaded", renderDatasetList())
+    window.addEventListener("DOMContentLoaded", function () {
+        getInstitutions().then(institutions => {
+            institutionsList = institutions;
+            renderInstitutionList(institutions);
+        });
+    });
+    let institutionsList = [];
+    let shouldContinue = true;
+    let currentSelectedInstitutionName = null;
     let selectedUserEmail;
     let selectedDatasetName;
     let selectedAssignedDatasetName;
@@ -240,11 +402,12 @@
             })
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);
-            });
+            }); 3
     }
 
 
     document.getElementById('createUserBtn').addEventListener('click', function () {
+        console.log("click User")
         const email = document.getElementById('email').value;
         const institution = document.getElementById('institutionSelect').value;
         const level = document.getElementById('levelSelect').value;
@@ -262,11 +425,8 @@
         })
             .then(response => response.json())
             .then(data => {
-                if (data.error) {
-                    alert(data.error);  // Show alert if there is an error
-                } else {
-                    alert(data.success);  // Show success message
-                }
+                alert(data.message);  // Show alert if there is an error
+                usersTable()
             })
             .catch(error => console.error('Error:', error));
     });
@@ -391,16 +551,7 @@
 
     function renderUserTable(data) {
         // Initialize the table with headers
-        let tableHTML = `<table class="table table-sm"><thead>
-                        <tr>
-                            <th scope="col">Email</th>
-                            <th scope="col">Level</th>
-                            <th scope="col">Logins</th>
-                            <th scope="col">Institution</th>
-                            <th scope="col">Last Login</th>
-                            <th scope="col">Actions</th>
-                        </tr>
-                    </thead><tbody>`;
+        let tableHTML = ``;
 
         // Populate the table with data from existing users
         data.forEach(user => {
@@ -415,27 +566,6 @@
         </tr>`;
         });
 
-        // Add a row for creating a new user
-        tableHTML += `</tbody><tfoot>
-        <tr class="form-row">
-            <td><input id="newUserEmail" type="text" class="form-control" placeholder="Enter email" style="width:100%;"></td>
-            <td>
-                <select id="newUserLevel" class="form-control" style="width:100%;">
-                    <option value="admin">Admin</option>
-                    <option value="user">User</option>
-                </select>
-            </td>
-            <td colspan="2">
-                <select id="institutionSelect" class="form-control" style="width:100%;">
-                    <!-- Institutions will be filled dynamically -->
-                </select>
-            </td>
-            <td colspan="2">
-                <button id="createUserBtn" type="submit" class="btn btn-sm btn-primary btn-icon-only">Create</button>
-            </td>
-        </tr>
-    </tfoot></table>`;
-
         // Set the innerHTML of the usersCard to the new table
         const usersCard = document.getElementById("viewUsersCard");
         usersCard.innerHTML = tableHTML;
@@ -444,36 +574,7 @@
         usersCard.querySelectorAll('.selectable-user').forEach(row => {
             row.addEventListener('click', (event) => handleTableRowClick(event));
         });
-
-        document.getElementById('createUserBtn').addEventListener('click', function () {
-            const email = document.getElementById('email').value;
-            const institution = document.getElementById('institutionSelect').value;
-            const level = document.getElementById('levelSelect').value;
-
-            fetch('/createUser', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    institution: institution,
-                    level: level
-                }),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);  // Show alert if there is an error
-                    } else {
-                        alert(data.success);  // Show success message
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        });
     }
-
-
 
     function formatDate(dateString) {
         if (!dateString) return '';
@@ -483,9 +584,10 @@
 
     function handleTableRowClick(event) {
         const selectedRow = event.target.closest('tr');
+        console.log(selectedRow)
         if (selectedRow) {
             const rowData = {
-                email: selectedRow.querySelector('th').textContent,
+                email: selectedRow.querySelector('td:nth-child(1)').textContent,
                 level: selectedRow.querySelector('td:nth-child(2)').textContent,
                 logins: selectedRow.querySelector('td:nth-child(3)').textContent,
                 lastLogin: selectedRow.querySelector('td:nth-child(4)').textContent,
@@ -607,7 +709,426 @@
         usersTable(selectedInstitution); // 传入选定的机构
     });
 
+    function getInstitutions() {
+        return fetch('/getInstitutions')
+            .then(response => response.json())
+            .then(institutions => {
+                return institutions;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                return [];
+            });
+    }
 
+    function renderInstitutionList(institutions) {
+        const institutionList = document.getElementById('institutionList');
+        institutionList.innerHTML = ''; // Clear existing content
+
+        institutions.forEach((institution, index) => {
+            const item = document.createElement('div');
+            item.className = 'list-group-item list-group-item-action';
+            item.textContent = institution.name;
+            item.onclick = () => {
+                // Remove 'selected' class from all items
+                document.querySelectorAll('#institutionList .list-group-item').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                // Add 'selected' class to clicked item
+                item.classList.add('selected');
+                showInstitutionDetails(institution);
+            };
+            institutionList.appendChild(item);
+
+            // Automatically select the first institution only if no current selection is stored
+            if (index === 0 && !currentSelectedInstitutionName) {
+                item.classList.add('selected');
+                showInstitutionDetails(institution);
+            }
+        });
+    }
+
+
+    function showInstitutionDetails(institution) {
+        console.log(institution)
+        const institutionDetails = document.getElementById('institutionDetails');
+
+        // Assume the type and status options
+        const typeOptions = ['Industry', 'Academic', 'Government', 'Others'];
+        const statusOptions = ['Active', 'Inactive', 'Pending'];
+
+        // Create drop down options
+        const typeSelectHTML = typeOptions.map(option => `<option value="${option}" ${institution.type === option ? 'selected' : ''}>${option}</option>`).join('');
+        const statusSelectHTML = statusOptions.map(option => `<option value="${option}" ${institution.status === option ? 'selected' : ''}>${option}</option>`).join('');
+
+        // Generate showing PO-Number order list with two columns
+        const ordersHeader = `
+    <div class="list-group-item header">
+        <div class="order-info-header">
+            <span class="po-number-header">PO Number</span>
+            <span class="order-date-header">Order Date</span>
+        </div>
+    </div>
+`;
+
+        const ordersHTML = institution.orders.map(order => `
+    <div class="list-group-item list-group-item-action" onclick="showOrderDetails('${institution.name}', '${order.PO_number}')">
+        <div class="order-info">
+            <span class="po-number">${order.PO_number}</span>
+            <span class="order-date">${order.date}</span>
+        </div>
+    </div>
+`).join('');
+
+
+        // Combine header and list items
+        const ordersListHTML = ordersHeader + ordersHTML;
+
+        // Set the details HTML
+        institutionDetails.innerHTML = `
+        <form id="institutionForm">
+            <div class="form-row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" name="name" id="name" value="${institution.name}">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="type">Type:</label>
+                <select class="form-control" name="type" id="type">
+                    ${typeSelectHTML}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="phone">Phone Number:</label>
+                <input type="text" class="form-control" name="phone" id="phone" value="${institution.phone}">
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="text" class="form-control" name="email" id="email" value="${institution.email}">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <input type="text" class="form-control" name="address" id="address" value="${institution.address}">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="website">Website:</label>
+                <input type="text" class="form-control" name="website" id="website" value="${institution.website}">
+            </div>
+        </div>
+    </div>
+
+            <div class="form-group">
+                <div class="flex-item title">Status:</div>
+                <select class="form-control" name="status">
+                    ${statusSelectHTML}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div class="flex-item title">Orders:</div>
+                <div class="orders-container">
+                    <div class="orders list-group">
+                        ${ordersListHTML}
+                    </div>
+                    <div id="orderDetails" class="order-details"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="flex-row-container" style="display: flex; align-items: center; justify-content: space-between;">
+                    <div class="flex-item" style="flex-grow: 1; margin-right: 10px;"><input type="text" class="form-control" placeholder="Enter PO Number" id="newPoNumber"></div>
+                    <div class="flex-item"><button class="btn btn-sm btn-primary" onclick="generateAndInsertOrder('${institution.name}')">Generate Order</button></div>
+                </div>
+            </div>
+
+            
+            <button type="submit" class="btn btn-sm btn-primary ml-2 btn-icon-only">Update</button>
+            <button type="button" class="btn btn-sm btn-danger ml-2 btn-icon-only" onclick="deleteInstitution()"><i class="fas fa-trash"></i></button>
+        </form>
+    `;
+
+        // Add form submit event listener
+        document.getElementById('institutionForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            updateInstitutionDetails(); // Implement this function to handle form submission
+        });
+    }
+
+    function updateInstitutionDetails() {
+        const form = document.getElementById('institutionForm');
+        const formData = new FormData(form);
+        const updatedDetails = {};
+        formData.forEach((value, key) => {
+            updatedDetails[key] = value;
+        });
+        console.log(updatedDetails)
+        fetch('/updateInstitution', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedDetails),
+        })
+            .then(response => response.json())
+            .then(data => {
+                // window.location.reload();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                // Handle error conditions
+            });
+    }
+
+    document.getElementById('newInstitutionBtn').addEventListener('click', function () {
+        const institutionDetails = document.getElementById('institutionDetails');
+        const typeOptions = ['Industry', 'Academic', 'Government', 'Others'];
+        const statusOptions = ['Active', 'Inactive', 'Pending'];
+        const statusSelectHTML = statusOptions.map(option => `<option value="${option}">${option}</option>`).join('');
+        const typeSelectHTML = typeOptions.map(option => `<option value="${option}"}>${option}</option>`).join('');
+
+        // Clear the details area and provide a blank form
+        institutionDetails.innerHTML = `
+        <form id="institutionForm">
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" class="form-control" name="name" value="">
+            </div>
+
+            <div class="form-group">
+                <label>Type:</label>
+                <select class="form-control" name="type">
+                    ${typeSelectHTML}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Address:</label>
+                <input type="text" class="form-control" name="address" value="">
+            </div>
+
+            <div class="form-group">
+                <label>Phone Number:</label>
+                <input type="text" class="form-control" name="phone" value="">
+            </div>
+
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="text" class="form-control" name="Email" value="">
+            </div>
+
+            <div class="form-group">
+                <label>Website:</label>
+                <input type="text" class="form-control" name="website" value="">
+            </div>
+            <div class="form-group">
+                <label>Status:</label>
+                <select class="form-control" name="status">
+                    ${statusSelectHTML}
+                </select>
+            </div>
+            <button type="button" class="btn btn-sm btn-primary btn-icon-only" onclick="submitInstitutionForm()">Update</button>
+        </form>
+    `;
+    });
+
+    function deleteInstitution() {
+        const institutionName = document.querySelector('#institutionForm [name="name"]').value;
+        if (confirm(`Are you sure you want to delete the institution "${institutionName}"?`)) {
+            fetch('/deleteInstitution', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: institutionName }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Institution deleted successfully!');
+                        window.location.reload(); // Refresh the page to update the list of institutions
+                    } else {
+                        alert('Failed to delete institution.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    }
+
+    // Modify the submitInstitutionForm function to distinguish between update and new creation
+    function submitInstitutionForm() {
+        const form = document.getElementById('institutionForm');
+        const formData = new FormData(form);
+        let institutionData = {};
+        formData.forEach((value, key) => {
+            institutionData[key] = value;
+        });
+
+        updateInstitutionDetails();
+    }
+
+
+    window.addEventListener("DOMContentLoaded", function () {
+        getInstitutions().then(institutions => {
+            institutionsList = institutions;
+            renderInstitutionList(institutions);
+        });
+    });
+
+
+    function showOrderDetails(institutionName, poNumber) {
+        fetch(`/getOrderDetails/${institutionName}/${poNumber}`)
+            .then(response => response.json())
+            .then(orderDetails => {
+                // Create tables and headers
+                const tableHTML = `
+                <table class="table">
+                    <tbody>
+                        ${orderDetails.datasets.map(dataset => `
+                            <tr>
+                                <td>${dataset.name}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+                // Updated page to show order details and now displays the dataset in tabular form
+                document.getElementById('orderDetails').innerHTML = tableHTML;
+            })
+            .catch(error => console.error('Error fetching order details:', error));
+    }
+
+
+    function generateAndInsertOrder(institutionName) {
+        if (!document.getElementById('newPoNumber').value.length) {
+            alert("Please enter a valid institution name.");
+            return; // Early return to stop the function execution
+        }
+
+        const today = new Date().toISOString().slice(0, 10); // Get current date
+        const newOrder = {
+            PO_number: document.getElementById('newPoNumber').value,
+            date: today,
+            datasets: [] // Assume that the new order does not have a data set
+        };
+
+        // Send a request to the backend to insert a new order
+        fetch('/insertOrder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ institutionName, newOrder }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Order generated and inserted successfully!');
+                    currentSelectedInstitutionName = institutionName; // Save current selected institution name
+                    getInstitutions().then(institutions => {
+                        institutionsList = institutions;
+                        renderInstitutionList(institutions);
+                        // Restore the selected institution
+                        if (currentSelectedInstitutionName) {
+                            const items = document.querySelectorAll('#institutionList .list-group-item');
+                            items.forEach(item => {
+                                if (item.textContent === currentSelectedInstitutionName) {
+                                    item.click();
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    alert('Failed to generate and insert order.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+
+    function populatePoNumberSelect(institutionName, currentPoNumber) {
+        const poNumberSelect = document.getElementById('poNumberSelect');
+        poNumberSelect.innerHTML = ''; // Clear existing options
+        // Get order information from backend
+        fetch(`/getOrdersByInstitution/${institutionName}`)
+            .then(response => response.json())
+            .then(orders => {
+                orders.forEach(order => {
+                    const option = document.createElement('option');
+                    option.value = order.PO_number;
+                    option.textContent = order.PO_number;
+                    poNumberSelect.appendChild(option);
+                });
+                poNumberSelect.value = currentPoNumber;
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function deleteWavelength(type, exposure, wavelength) {
+        fetch('/delete-wavelength', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // Include datasetName in the request body
+            body: JSON.stringify({
+                datasetName: selectedDatasetName, // Using the global variable selectedDatasetName
+                type,
+                exposure,
+                wavelength
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                // 更新数据视图的逻辑可以放在这里
+                // 可能不想立即重载整个页面，而是更新显示的数据集列表
+                // window.location.reload(); // 为了提供更好的用户体验，考虑不使用此行
+                // updateDatasetDetails(selectedDatasetName); // 假设这是更新数据集详细信息的函数
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+
+        console.log(`Request sent to delete wavelength: ${wavelength} from type: ${type}, exposure: ${exposure}, for dataset: ${selectedDatasetName}`);
+    }
+
+    function updateOrderList(institutionName) {
+        fetch(`/getOrdersByInstitution/${institutionName}`)
+            .then(response => response.json())
+            .then(orders => {
+                const ordersContainer = document.querySelector('.orders-container'); // Change this selector to match your HTML
+                ordersContainer.innerHTML = ''; // Clear existing orders
+
+                // Assuming orders are displayed in a list
+                orders.forEach(order => {
+                    console.log(order)
+                    const orderElement = document.createElement('div');
+                    // orderElement.className = 'list-group-item list-group-item-action';
+                    orderElement.textContent = `PO Number: ${order.PO_number}, Date: ${order.date}`;
+                    ordersContainer.appendChild(orderElement);
+                });
+            })
+            .catch(error => console.error('Error updating orders:', error));
+    }
 
 
 

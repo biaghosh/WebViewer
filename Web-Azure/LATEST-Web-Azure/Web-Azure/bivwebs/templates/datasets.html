@@ -225,17 +225,20 @@
     <div class="row" style="margin-top: 70px;">
         <div class="col-7">
             <div class="card shadow">
-                <div class="card-header">Dataset</div>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Dataset</span>
+                    <select id="institutionFilter" class="form-control w-auto">
+                        <option value="all">All Institution</option>
+                        <!-- Dynamically add other institution -->
+                    </select>
+                </div>
                 <div class="card-body">
                     <div class="row">
                         <!-- Left content, fixed width -->
                         <div class="col-md-5">
                             <div class="mb-3">
                                 <div id="filterContainer">
-                                    <select id="institutionFilter" class="form-control w-auto">
-                                        <option value="all">All</option>
-                                        <!-- Dynamically add other institution -->
-                                    </select>
+                                    
                                 </div>
                                 <!-- <h5 class="card-title">Dataset List</h5> -->
                                 <div id="datasetList" class="table table-striped table-hover"></div>
@@ -276,27 +279,6 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-5">
-            <div class="card shadow">
-                <div class="card-header">Institution</div>
-                <div class="card-body">
-                    <div class="row">
-                        <!-- Organization list container -->
-                        <div class="col-3">
-                            <h5>Institution List</h5>
-                            <div id="institutionList" class="table table-striped table-hover"></div>
-                            <button id="newInstitutionBtn" class="btn btn-sm btn-primary btn-icon-only">New</button>
-                        </div>
-                        <!-- Organization details container -->
-                        <div class="col-9">
-                            <h5>Institution Details</h5>
-                            <div id="institutionDetails"></div>
-                        </div>
-
                     </div>
                 </div>
             </div>

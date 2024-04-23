@@ -477,7 +477,7 @@ def createUser():
     # Query whether a user already exists, return if it exists, create a new user if it does not exist
 
     if json['email'] in email_list:
-        return jsonify({"error": "Email already exists"}), 409
+        return jsonify({'status': 'error', 'message': 'User existed'})
     # userId = db.Counts.find_one_and_update({"name": "userIncrement"},{'$inc':{ "userId" :1 }},new=True)
     # generate user id
     # userId = users.find_one_and_update({},{ '$inc': {"id" : 1}})
@@ -485,8 +485,7 @@ def createUser():
     # Add new user
     users.insert_one({"institution":json['institution'],"email": json['email'], "level": json['level'],
                      "multiAvailable": True, "logins": 0, "lastLogin": '', 'datasets': []})
-    send = '{ "success": "cookie"}'
-    return make_response(send, 200)
+    return jsonify({'status': 'success', 'message': 'Create successfully'})
 
 @app.route("/deleteUser", methods=['POST'])
 def deleteUser():
@@ -1540,7 +1539,7 @@ def get_institutions():
             'type': institution.get('type', ''),
             'address': institution.get('address', ''),
             'phone': institution.get('phone',''),
-            'Email': institution.get('Email',''),
+            'email': institution.get('Email',''),
             'website': institution.get('website',''),
             'status': institution.get('status',''),
             'orders': orders  
@@ -1550,6 +1549,7 @@ def get_institutions():
 @app.route('/updateInstitution', methods=['POST'])
 def update_institution():
     data = request.json
+    print(data)
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     
@@ -1570,7 +1570,7 @@ def update_institution():
                 "address": data.get('address'),
                 "phone": data.get('phone'),
                 "website": data.get('website'),
-                "Email": data.get('Email'),
+                "Email": data.get('email'),
                 "status": data.get('status'),
             }}
         )
