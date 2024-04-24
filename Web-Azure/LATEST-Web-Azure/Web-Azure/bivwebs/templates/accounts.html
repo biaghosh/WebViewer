@@ -3,27 +3,22 @@
 
 <head>
     <style>
-        .selected-user {
+        .selected-user,
+        .selected-dataset {
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            background-color: #e6e6e6;
-            /* Set the background color of selected rows to gray */
-            color: #000;
-            /* Set the text color of selected lines to black to ensure readability */
+            background-color: #007bff;
+            /* 蓝色背景 */
+            color: white;
+            /* 白色文字 */
         }
 
         #datasetList,
         #assignedDatasets {
             max-height: 300px;
-            /* You can adjust this value as needed */
             overflow-y: auto;
-        }
-
-        .selected-dataset,
-        .selected-user {
-            background-color: #e6e6e6;
         }
 
         .selectable-user:hover,
@@ -34,80 +29,54 @@
 
         #datasetList {
             border: 1px solid #dee2e6;
-            /* Adds a subtle border around the list */
             border-radius: 5px;
-            /* Rounds the corners of the list */
             background: #fff;
-            /* Sets a white background for the list */
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            /* Adds a light shadow for depth */
             padding: 0;
-            /* Removes default padding */
             margin-top: 20px;
-            /* Adds some space above the list */
         }
 
         .list-group {
             list-style: none;
-            /* Removes default list styling */
             margin: 0;
-            /* Removes default margin */
             padding: 0;
-            /* Removes default padding */
         }
 
         .list-group-item {
             display: block;
-            /* Ensures list items take full width */
             padding: 10px 15px;
-            /* Adds padding for spacing within items */
             border-bottom: 1px solid #f0f0f0;
-            /* Adds a separator between items */
             cursor: pointer;
-            /* Changes the cursor to indicate interactivity */
             transition: background-color 0.2s ease-in-out;
-            /* Smooth transition for background color change */
         }
 
         .list-group-item:last-child {
             border-bottom: none;
-            /* Removes border from the last item */
         }
 
-        .list-group-item:hover,
-        .list-group-item.selected-dataset {
-            background-color: #e9ecef;
-            /* Changes background color on hover and when selected */
-        }
-
-        .list-group-item:not(.selected-dataset):hover {
+        .list-group-item:hover {
             background-color: #f8f9fa;
-            /* Lighter background color on hover for items not selected */
         }
 
-
-        .list-group-item.selected {
-            background-color: #007bff;
-            color: white;
-        }
-
+        .list-group-item.selected-user,
         .list-group-item.selected-dataset {
-            background-color: #d1e7fd;
-            /* Distinct background color for selected items */
-            color: #0056b3;
-            /* Changes text color to match the selection */
+            background-color: #007bff;
+            /* 蓝色背景 */
+            color: white;
+            /* 白色文字 */
             font-weight: bold;
-            /* Makes the text of selected items bold */
+            /* 加粗文字 */
+        }
+
+        .list-group-item.selected-user:hover,
+        .list-group-item.selected-dataset:hover {
+            background-color: #0056b3;
+            /* 悬浮时更暗的蓝色 */
         }
 
         @media (max-width: 768px) {
-            #datasetList {
-                /* Adjusts padding or margins as needed for smaller screens */
-            }
-
             .list-group-item {
                 padding: 8px 12px;
-                /* Slightly reduces padding on smaller screens */
             }
         }
 
@@ -115,10 +84,8 @@
             max-height: 170px;
             overflow-y: auto;
             margin-bottom: 20px;
-            /* Adjust as necessary */
         }
 
-        /* Ensure table width is 100% inside scrollable container */
         .scrollable-table table {
             width: 100%;
         }
@@ -141,15 +108,8 @@
             padding: 0.5rem;
         }
 
-        #newUserEmail,
-        #newUserLevel,
-        #newUserInstitution {
-            margin-bottom: 0;
-        }
-
         .overflow-auto {
             max-height: 170px;
-            /* Adjust this value based on your needs */
             overflow-y: auto;
         }
 
@@ -168,53 +128,30 @@
 
         .form-row>.col-md-4 {
             padding-right: 15px;
-            /* Adjust the right padding for spacing */
             padding-left: 15px;
-            /* Adjust the left padding for spacing */
         }
 
         .form-group {
             margin-bottom: 10px;
-            /* Reduce margin-bottom for a tighter layout */
         }
 
-        /* 特定于表头的样式 */
         .order-info-header {
             font-weight: bold;
-            /* 加粗字体 */
             color: #343a40;
-            /* 暗色字体 */
             background-color: #f8f9fa;
-            /* 浅灰色背景 */
             border-bottom: 2px solid #dee2e6;
-            /* 较厚的底部边框 */
             padding: 10px 15px;
-            /* 与.list-group-item保持一致的padding */
             cursor: default;
-            /* 确保鼠标不会显示为指针 */
         }
 
-        /* Styling for the order list */
-        /* .order-list,
-        .orders,
-        .order-details {
-            border: 1px solid #ccc;
-            padding: 10px;
-        } */
-
-        /* Flexbox layout for orders and their details */
         .orders-container {
             display: flex;
         }
 
         .order-list-container {
             max-height: 150px;
-            /* 可以根据需要调整这个高度 */
             overflow-y: auto;
-            /* 添加滚动条 */
         }
-
-        
     </style>
 </head>
 <div class="container-fluid">
@@ -239,7 +176,6 @@
                                 <th scope="col">Logins</th>
                                 <th scope="col">Institution</th>
                                 <th scope="col">Last Login</th>
-                                <th scope="col">Actions</th>
                             </tr>
                         </thead>
                     </table>
@@ -734,7 +670,7 @@
 
         institutions.forEach((institution, index) => {
             const item = document.createElement('div');
-            item.className = 'list-group-item list-group-item-action';
+            item.className = 'list-group-item list-group-item-action list-group';
             item.textContent = institution.name;
             item.onclick = () => {
                 // Remove 'selected' class from all items
@@ -798,59 +734,68 @@
         institutionDetails.innerHTML = `
         <form id="institutionForm">
             <div class="form-row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" class="form-control" name="name" id="name" value="${institution.name}">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="name">Abbr:</label>
+                        <input type="text" class="form-control" name="name" id="name" value="${institution.name}">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="name">Full Name:</label>
+                        <input type="text" class="form-control" name="name" id="name" value="${institution.name}">
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="type">Type:</label>
-                <select class="form-control" name="type" id="type">
-                    ${typeSelectHTML}
-                </select>
+
+            <div class="form-row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="type">Type:</label>
+                        <select class="form-control" name="type" id="type"> ${typeSelectHTML} </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="phone">Phone Number:</label>
+                        <input type="text" class="form-control" name="phone" id="phone" value="${institution.phone}">
+                    </div>
+                </div>
+
+                
             </div>
-        </div>
-    </div>
 
     <div class="form-row">
         <div class="col-md-6">
-            <div class="form-group">
-                <label for="phone">Phone Number:</label>
-                <input type="text" class="form-control" name="phone" id="phone" value="${institution.phone}">
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="text" class="form-control" name="email" id="email" value="${institution.email}">
-            </div>
-        </div>
-    </div>
-
-    <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="text" class="form-control" name="email" id="email" value="${institution.email}">
+                    </div>
+                </div>
         <div class="col-md-6">
             <div class="form-group">
                 <label for="address">Address:</label>
                 <input type="text" class="form-control" name="address" id="address" value="${institution.address}">
             </div>
         </div>
+    </div>
+
+    <div class="form-row">
         <div class="col-md-6">
             <div class="form-group">
                 <label for="website">Website:</label>
                 <input type="text" class="form-control" name="website" id="website" value="${institution.website}">
             </div>
         </div>
-    </div>
-
-            <div class="form-group">
-                <div class="flex-item title">Status:</div>
+        <div class="col-md-6">
+        <div class="flex-item title">Status:</div>
                 <select class="form-control" name="status">
                     ${statusSelectHTML}
                 </select>
             </div>
+    </div>
+
 
             <div class="form-group">
                 <div class="flex-item title">Orders:</div>
