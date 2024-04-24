@@ -195,18 +195,26 @@
         }
 
         /* Styling for the order list */
-        .order-list,
+        /* .order-list,
         .orders,
         .order-details {
             border: 1px solid #ccc;
             padding: 10px;
-            overflow-y: scroll;
-        }
+        } */
 
         /* Flexbox layout for orders and their details */
         .orders-container {
             display: flex;
         }
+
+        .order-list-container {
+            max-height: 150px;
+            /* 可以根据需要调整这个高度 */
+            overflow-y: auto;
+            /* 添加滚动条 */
+        }
+
+        
     </style>
 </head>
 <div class="container-fluid">
@@ -562,7 +570,6 @@
             <td>${user.logins}</td>
             <td>${user.institution}</td>
             <td>${date}</td>
-            <td><button onclick="editUser('${user.email}')" class="btn btn-sm btn-warning">Edit</button></td>
         </tr>`;
         });
 
@@ -771,15 +778,18 @@
     </div>
 `;
 
-        const ordersHTML = institution.orders.map(order => `
-    <div class="list-group-item list-group-item-action" onclick="showOrderDetails('${institution.name}', '${order.PO_number}')">
-        <div class="order-info">
-            <span class="po-number">${order.PO_number}</span>
-            <span class="order-date">${order.date}</span>
+        const ordersHTML = `
+<div class="order-list-container">
+    ${institution.orders.map(order => `
+        <div class="list-group-item list-group-item-action" onclick="showOrderDetails('${institution.name}', '${order.PO_number}')">
+            <div class="order-info">
+                <span class="po-number">${order.PO_number}</span>
+                <span class="order-date">${order.date}</span>
+                <button class="btn btn-danger btn-sm" onclick="deleteOrder('${institution.name}', '${order.PO_number}')">Delete</button>
+            </div>
         </div>
-    </div>
-`).join('');
-
+    `).join('')}
+</div>`;
 
         // Combine header and list items
         const ordersListHTML = ordersHeader + ordersHTML;
@@ -999,22 +1009,23 @@
             .then(orderDetails => {
                 // Create tables and headers
                 const tableHTML = `
-                <table class="table">
-                    <tbody>
-                        ${orderDetails.datasets.map(dataset => `
-                            <tr>
-                                <td>${dataset.name}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
+            <table class="table">
+                <tbody>
+                    ${orderDetails.datasets.map(dataset => `
+                        <tr>
+                            <td>${dataset.name}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
 
-                // Updated page to show order details and now displays the dataset in tabular form
+                // Update the page to show order details in a tabular form
                 document.getElementById('orderDetails').innerHTML = tableHTML;
             })
             .catch(error => console.error('Error fetching order details:', error));
     }
+
 
 
     function generateAndInsertOrder(institutionName) {
@@ -1120,7 +1131,6 @@
 
                 // Assuming orders are displayed in a list
                 orders.forEach(order => {
-                    console.log(order)
                     const orderElement = document.createElement('div');
                     // orderElement.className = 'list-group-item list-group-item-action';
                     orderElement.textContent = `PO Number: ${order.PO_number}, Date: ${order.date}`;
@@ -1130,6 +1140,32 @@
             .catch(error => console.error('Error updating orders:', error));
     }
 
+    function deleteOrder(institutionName, poNumber) {
+        console.log(institutionName, poNumber)
+        if (confirm(`Are you sure you want to delete order ${poNumber} from ${institutionName}?`)) {
+            // 实现与后端的API交互，删除订单
+            fetch(`/deleteOrder/${institutionName}/${poNumber}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Order deleted successfully!');
+                    currentSelectedInstitutionName = institutionName; // Save current selected institution name
+                    getInstitutions().then(institutions => {
+                        institutionsList = institutions;
+                        renderInstitutionList(institutions);
+                        // Restore the selected institution
+                        if (currentSelectedInstitutionName) {
+                            const items = document.querySelectorAll('#institutionList .list-group-item');
+                            items.forEach(item => {
+                                if (item.textContent === currentSelectedInstitutionName) {
+                                    item.click();
+                                }
+                            });
+                        }
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    }
 
 
 </script>

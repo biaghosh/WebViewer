@@ -1549,7 +1549,7 @@ def get_institutions():
 @app.route('/updateInstitution', methods=['POST'])
 def update_institution():
     data = request.json
-    print(data)
+    # print(data)
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     
@@ -1683,3 +1683,23 @@ def delete_wavelength():
         return jsonify({'status': 'success', 'message': 'Wavelength deleted successfully'}), 200
     else:
         return jsonify({'status': 'error', 'message': 'Failed to delete wavelength'}), 400
+    
+@app.route('/deleteOrder/<institutionName>/<poNumber>', methods=['POST'])
+def delete_order(institutionName,poNumber):
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV
+    collection = db.Institution
+
+    institution_name = institutionName
+    po_number = poNumber
+
+    # 在对应机构的订单列表中删除指定的订单
+    result = collection.update_one(
+        {'name': institution_name},
+        {'$pull': {'orders': {'PO_number': po_number}}}
+    )
+
+    if result.modified_count > 0:
+        return jsonify({'status': 'success', 'message': 'Order deleted successfully'})
+    else:
+        return jsonify({'status': 'error', 'message': 'Failed to delete order'})
