@@ -223,7 +223,7 @@
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <button id="createUserBtn" type="submit"
-                                                class="btn btn-primary">Create</button>
+                                                class="btn btn-sm btn-primary btn-icon-only">Create</button>
                                         </div>
                                     </div>
                                 </div>
@@ -351,10 +351,14 @@
 
 
     document.getElementById('createUserBtn').addEventListener('click', function () {
-        console.log("click User")
         const email = document.getElementById('email').value;
         const institution = document.getElementById('institutionSelect').value;
         const level = document.getElementById('levelSelect').value;
+
+        if (!email.trim()) {
+            alert('Please enter an email address.');  // 提示用户输入邮箱
+            return;  // 终止函数执行
+        }
 
         fetch('/createUser', {
             method: 'POST',
