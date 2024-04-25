@@ -838,7 +838,6 @@
         formData.forEach((value, key) => {
             updatedDetails[key] = value;
         });
-        console.log(updatedDetails)
         fetch('/updateInstitution', {
             method: 'POST',
             headers: {
@@ -848,7 +847,7 @@
         })
             .then(response => response.json())
             .then(data => {
-                // window.location.reload();
+                window.location.reload();
             })
             .catch((error) => {
                 console.error('Error:', error);

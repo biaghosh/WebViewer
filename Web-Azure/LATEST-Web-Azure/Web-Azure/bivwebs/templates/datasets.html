@@ -218,12 +218,18 @@
             font-size: 0.9em;
             margin-left: 5px;
         }
+
+        #datasetTableContainer {
+            max-height: 200px;
+            /* 可以根据需求调整高度 */
+            overflow-y: auto;
+        }
     </style>
 </head>
 
 <div class="container-fluid">
     <div class="row" style="margin-top: 70px;">
-        <div class="col-7">
+        <div class="col-8">
             <div class="card shadow">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>Dataset</span>
@@ -238,7 +244,7 @@
                         <div class="col-md-5">
                             <div class="mb-3">
                                 <div id="filterContainer">
-                                    
+
                                 </div>
                                 <!-- <h5 class="card-title">Dataset List</h5> -->
                                 <div id="datasetList" class="table table-striped table-hover"></div>

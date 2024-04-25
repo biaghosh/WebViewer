@@ -1549,7 +1549,7 @@ def get_institutions():
 @app.route('/updateInstitution', methods=['POST'])
 def update_institution():
     data = request.json
-    # print(data)
+    print(data)
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     

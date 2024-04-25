@@ -27,20 +27,15 @@ function renderDatasetList(datasets) {
     const datasetList = document.getElementById('datasetList');
     datasetList.innerHTML = ''; // Clear existing content
 
-    // Create table structure
-    const table = document.createElement('table');
-    table.classList.add('list-group');
-
-    // Create and add headers
+    // Create table header structure
+    const tableHeader = document.createElement('table');
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
 
     const institutionHeader = document.createElement('th');
     institutionHeader.textContent = 'Institution';
-
     const poNumHeader = document.createElement('th');
     poNumHeader.textContent = 'PO_#';
-
     const nameHeader = document.createElement('th');
     nameHeader.textContent = 'Name';
 
@@ -48,68 +43,59 @@ function renderDatasetList(datasets) {
     headerRow.appendChild(nameHeader);
     headerRow.appendChild(poNumHeader);
     thead.appendChild(headerRow);
-    table.appendChild(thead);
+    tableHeader.appendChild(thead);
 
-    // Create and populate the table body
+    // Create scrollable body container
+    const bodyContainer = document.createElement('div');
+    bodyContainer.style.maxHeight = '400px';
+    bodyContainer.style.overflowY = 'auto';
+
+    // Create table body structure
+    const tableBody = document.createElement('table');
     const tbody = document.createElement('tbody');
+
     datasets.forEach(dataset => {
         const row = document.createElement('tr');
-        row.dataset.name = dataset.name; // It is convenient to obtain the selected data set name later.
-        row.style.cursor = "pointer"; // Make rows appear clickable
+        row.dataset.name = dataset.name;
+        row.style.cursor = "pointer";
 
         const institutionCell = document.createElement('td');
         institutionCell.textContent = dataset.institution;
-
         const nameCell = document.createElement('td');
         nameCell.textContent = dataset.name;
-
         const poNumCell = document.createElement('td');
         poNumCell.textContent = dataset.ponum;
 
         row.appendChild(institutionCell);
         row.appendChild(nameCell);
         row.appendChild(poNumCell);
-
         tbody.appendChild(row);
     });
-    table.appendChild(tbody);
+    tableBody.appendChild(tbody);
+    bodyContainer.appendChild(tableBody);
 
-    datasetList.appendChild(table);
+    // Append header and body to the dataset list
+    datasetList.appendChild(tableHeader);
+    datasetList.appendChild(bodyContainer);
 
     tbody.addEventListener('click', (event) => {
         const selectedRow = event.target.closest('tr');
         if (selectedRow) {
             selectedDatasetName = selectedRow.dataset.name;
-
-            // Remove the selected-dataset class of previously selected rows
             const allRows = document.querySelectorAll('#datasetList tr');
-            allRows.forEach((row) => {
-                row.classList.remove('selected-dataset');
-            });
-
-            // Add the selected-dataset class to the currently selected row
+            allRows.forEach(row => row.classList.remove('selected-dataset'));
             selectedRow.classList.add('selected-dataset');
-
-            // Get selected data set information
             fetch('/getDatasetsData', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    'datasetName': selectedDatasetName,
-                }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 'datasetName': selectedDatasetName }),
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Updates to dataset details are handled here
                     updateDatasetList(data);
-                    // Populate the PO# dropdown based on the organization of the dataset
                     populatePoNumberSelect(data[0].institution, data[0].ponum);
                 })
-                .catch((error) => {
-                    console.error('Error:', error)
-                });
+                .catch(error => console.error('Error:', error));
         }
     });
 
@@ -118,6 +104,8 @@ function renderDatasetList(datasets) {
         firstRow.click();
     }
 }
+
+
 
 document.getElementById("downloadDatasetBtn").addEventListener("click", function () {
     if (selectedDatasetName) {
