@@ -421,7 +421,8 @@
 
                 <div id="annCard" class="card-body tab-pane">
                     <div class="row">
-                        <button id="createAnnBtn" type="button" class="btn btn-secondary col-11" disabled>Create Annotation</button>
+                        <button id="createAnnBtn" type="button" class="btn btn-secondary col-11" disabled>Create
+                            Annotation</button>
                     </div>
                     <div class="row">
                         <button id="toggleAnnBtn" type="button" class="btn btn-secondary col-11" disabled
@@ -623,6 +624,19 @@
                 <div class="d-flex justify-content-end">
                     <div id="UpMainDiv" class="d-none" style="width: 95%;">
                         <div class="card shadow">
+                            <div class="card-header">
+                                <ul class="nav nav-tabs flex-row">
+                                    <li class="nav-item">
+                                        <a id="orthoTab" class="nav-link active px-2" data-toggle="tab"
+                                            href="#orthoCard">Orthographic
+                                            Views</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a id="vrTab" class="nav-link px-2" data-toggle="tab" href="#vrCard">Volume
+                                            Rendering</a>
+                                    </li>
+                                </ul>
+                            </div>
                             <div class="card-header py-1 ">
                                 <div id="xyType" class="float-right form-inline">
                                     <!-- <button id="2dFullIconBtnXY" class="btn btn-primary" type="button" disabled><i
@@ -642,19 +656,6 @@
                 <div class="d-flex justify-content-end">
                     <div id="DownMainDiv" class="d-none" style="width: 95%;">
                         <div class="card shadow">
-                            <div class="card-header">
-                                <ul class="nav nav-tabs flex-row">
-                                    <li class="nav-item">
-                                        <a id="orthoTab" class="nav-link active px-2" data-toggle="tab"
-                                            href="#orthoCard">Orthographic
-                                            Views</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a id="vrTab" class="nav-link px-2" data-toggle="tab" href="#vrCard">Volume
-                                            Rendering</a>
-                                    </li>
-                                </ul>
-                            </div>
                             <div class="tab-content">
                                 <div id="orthoCard" class="card-body tab-pane active">
                                     <div style="display: flex;">

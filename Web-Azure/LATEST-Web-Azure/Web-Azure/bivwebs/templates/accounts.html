@@ -697,7 +697,7 @@
 
 
     function showInstitutionDetails(institution) {
-        console.log(institution)
+        // console.log(institution)
         const institutionDetails = document.getElementById('institutionDetails');
 
         // Assume the type and status options
@@ -738,17 +738,18 @@
         institutionDetails.innerHTML = `
         <form id="institutionForm">
             <div class="form-row">
+
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="name">Abbr:</label>
-                        <input type="text" class="form-control" name="name" id="name" value="${institution.name}">
+                        <label for="name">Full Name:</label>
+                        <input type="text" class="form-control" name="name" id="name" value="${institution.name}" readonly>
                     </div>
                 </div>
 
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="name">Full Name:</label>
-                        <input type="text" class="form-control" name="name" id="name" value="${institution.name}">
+                        <label for="abbr">Abbr:</label>
+                        <input type="text" class="form-control" name="abbr" id="abbr" value="${institution.abbr}">
                     </div>
                 </div>
             </div>
@@ -831,6 +832,31 @@
         });
     }
 
+    function CreateInstitution() {
+        const form = document.getElementById('NewinstitutionForm');
+        console.log(form)
+        const formData = new FormData(form);
+        const updatedDetails = {};
+        formData.forEach((value, key) => {
+            updatedDetails[key] = value;
+        });
+        fetch('/insertInstitution', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedDetails),
+        })
+            .then(response => response.json())
+            .then(data => {
+                window.location.reload();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                // Handle error conditions
+            });
+    }
+
     function updateInstitutionDetails() {
         const form = document.getElementById('institutionForm');
         const formData = new FormData(form);
@@ -864,10 +890,15 @@
 
         // Clear the details area and provide a blank form
         institutionDetails.innerHTML = `
-        <form id="institutionForm">
+        <form id="NewinstitutionForm">
             <div class="form-group">
                 <label>Name:</label>
-                <input type="text" class="form-control" name="name" value="">
+                <input type="text" class="form-control" name="name" value="" placeholder="Once created, cannot be modified">
+            </div>
+
+            <div class="form-group">
+                <label>Abbr:</label>
+                <input type="text" class="form-control" name="Abbr" value="">
             </div>
 
             <div class="form-group">
@@ -902,7 +933,7 @@
                     ${statusSelectHTML}
                 </select>
             </div>
-            <button type="button" class="btn btn-sm btn-primary btn-icon-only" onclick="submitInstitutionForm()">Update</button>
+            <button type="button" id="CreateInsititution"class="btn btn-sm btn-primary btn-icon-only" onclick="CreateInstitution()">Insert</button>
         </form>
     `;
     });

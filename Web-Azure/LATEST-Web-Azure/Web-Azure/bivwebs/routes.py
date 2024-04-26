@@ -1535,6 +1535,7 @@ def get_institutions():
     for institution in collection.find():
         orders = institution.get('orders', [])
         institutions.append({
+            'abbr' : institution.get('abbr',''),
             'name': institution.get('name', ''),
             'type': institution.get('type', ''),
             'address': institution.get('address', ''),
@@ -1545,6 +1546,37 @@ def get_institutions():
             'orders': orders  
         })
     return jsonify(institutions)
+
+
+
+@app.route('/insertInstitution',methods=['POST'])
+def create_institution():
+    data = request.json
+    print(data)
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV
+    
+    institution_name = data.get('name')
+    if not institution_name:
+        return jsonify({"error": "Missing institution name"}), 400
+
+    # Check if the organization exists
+    if db.Institution.find_one({"name": institution_name}):
+        return jsonify({"error": "institution already exists"}), 400
+    
+    db.Institution.insert_one({
+                "abbr":data.get('Abbr'),
+                "name": data.get('name'),
+                "type": data.get('type'),
+                "address": data.get('address'),
+                "phone": data.get('phone'),
+                "website": data.get('website'),
+                "Email": data.get('Email'),
+                "status": data.get('status'),
+        })
+    
+    return jsonify({"success": True, "message": "New institution added"}), 201
+
 
 @app.route('/updateInstitution', methods=['POST'])
 def update_institution():
@@ -1562,9 +1594,10 @@ def update_institution():
 
     if existing_institution:
         # Update if institution exists
-        update_result = db.Institution.update_one(
+        db.Institution.update_one(
             {"name": institution_name},
             {"$set": {
+                "abbr": data.get('abbr'),
                 "name": data.get('name'),
                 "type": data.get('type'),
                 "address": data.get('address'),
@@ -1574,25 +1607,9 @@ def update_institution():
                 "status": data.get('status'),
             }}
         )
-        if update_result.modified_count > 0:
-            return jsonify({"success": True}), 200
-        else:
-            return jsonify({"success": True}), 200
-    else:
-        # If the institution does not exist, insert new data
-        insert_result = db.Institution.insert_one({
-                "name": data.get('name'),
-                "type": data.get('type'),
-                "address": data.get('address'),
-                "phone": data.get('phone'),
-                "website": data.get('website'),
-                "Email": data.get('Email'),
-                "status": data.get('status'),
-        })
-        if insert_result.inserted_id:
-            return jsonify({"success": True, "message": "New institution added"}), 201
-        else:
-            return jsonify({"error": "Failed to add new institution"}), 500
+
+    return jsonify({"success": True}), 200
+
 
 @app.route('/deleteInstitution', methods=['POST'])
 def delete_institution():
