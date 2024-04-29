@@ -139,6 +139,7 @@ document.getElementById('loadDatasetBtn').addEventListener('click', () => {
 
     loadDynamic2D(dsChanged)
     if (window.isVrTabSelected) {
+        console.log("点击了")
         // Create a click event
         const clickEvent = new Event('click');
         // Get the vrTab element
@@ -858,9 +859,7 @@ function getSceneClicks(evt) {
     if (intersects.length > 0) {
         measureCoords[clicks.count] = intersects[0].point
         clicks.count = [clicks.count + 1, intersects[0].uv]
-
     }
-
 }
 
 function drawLine() {
@@ -2266,6 +2265,7 @@ xyInput.addEventListener("input", () => {
 })
 
 document.getElementById('vrTab').addEventListener('click', () => {
+    toggleCards(true);
     orthosActive = false
     //pause execution
     //Handling this now in the ortho animation loop because this failed
@@ -2279,8 +2279,11 @@ document.getElementById('vrTab').addEventListener('click', () => {
 
 
 document.getElementById('orthoTab').addEventListener('click', () => {
-    if (!orthosActive)
+    if (!orthosActive) {
         loadOrthos(false)
+        toggleCards(false)
+        loadDynamic2D(dsChanged)
+    }
     else
         orthos.forEach(ortho => {
             animateOrtho(oRenderers[ortho], oScenes[ortho], oCameras[ortho], oMaterials[ortho], oAnimate[ortho])
@@ -2298,7 +2301,6 @@ fileInput.addEventListener('change', function () {
 
 
 function loadFiles() {
-    // viewSelect.innerHTML = ""
     fetch('/getFiles', {
         method: 'POST',
         headers: {
@@ -2308,19 +2310,24 @@ function loadFiles() {
             'dataset': dsInfo["name"]
         }),
     })
-        .then(response => response.json())
-        .then(data => {
-            fileMTableBody.innerHTML = ""
-            for (let i = 0; i < data.length; i++) {
-                var newRow = fileMTableBody.insertRow()
-                newRow.insertCell(0).appendChild(document.createTextNode(data[i]['name']))
-                newRow.insertCell(1).appendChild(document.createTextNode(data[i]['format']))
-                // Create a div to hold all buttons
-                var buttonGroup = document.createElement("div");
+    .then(response => response.json())
+    .then(data => {
+        fileMTableBody.innerHTML = "";
+        for (let i = 0; i < data.length; i++) {
+            var newRow = fileMTableBody.insertRow();
+            newRow.insertCell(0).appendChild(document.createTextNode(data[i]['name']));
+            newRow.insertCell(1).appendChild(document.createTextNode(data[i]['format']));
 
+            var buttonGroup = document.createElement("div");
+
+            var filename = data[i]['name'];
+            var extension = filename.split('.').pop().toLowerCase();
+
+            // Only add a preview button for supported formats
+            if (extension === 'png' || extension === 'jpg' || extension === 'txt' || extension === 'mp4') {
                 var preview_button = document.createElement("button");
                 var preview_icon = document.createElement("i");
-                preview_icon.className = "fas fa-search";  // "fa-search" is the class for the magnifying glass icon
+                preview_icon.className = "fas fa-search";
                 preview_button.appendChild(preview_icon);
                 preview_button.classList.add("btn", "btn-primary");
                 preview_button.style.width = '30px';
@@ -2329,127 +2336,116 @@ function loadFiles() {
                 preview_button.style.fontSize = '12px';
                 buttonGroup.appendChild(preview_button);
 
-                // Download Button
-                var download_button = document.createElement("button");
-                var download_icon = document.createElement("i");
-                download_icon.className = "fas fa-download";
-                download_button.appendChild(download_icon);
-                download_button.classList.add("btn", "btn-primary");
-                download_button.style.width = '30px';
-                download_button.style.height = '30px';
-                download_button.style.padding = '2px';
-                download_button.style.fontSize = '12px';
-                buttonGroup.appendChild(download_button);
-                download_button.onclick = function () {
-                    var filename = data[i]['name'];
-                    // Send the filename to the server as a JSON object
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('POST', '/download');
-                    xhr.setRequestHeader('Content-Type', 'application/json');
-                    xhr.onreadystatechange = function () {
-                        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                            // console.log('File download request sent');
-                        } else if (xhr.readyState === XMLHttpRequest.DONE) {
-                            // console.log('An error occurred while downloading the file');
-                        }
-                    }
-                    xhr.send(JSON.stringify(filename));
-                    xhr.responseType = 'blob';
-                    xhr.onload = function () {
-                        if (xhr.status === 200) {
-                            const link = document.createElement('a');
-                            link.href = window.URL.createObjectURL(xhr.response);
-
-                            link.download = 'selected_file.zip';
-                            link.click();
-                            // console.log(link)
-                        }
-                    };
-                };
-
-                // Delete Button
-                var delete_button = document.createElement("button");
-                var delete_icon = document.createElement("i");
-                delete_icon.className = "fas fa-trash";
-                delete_button.appendChild(delete_icon);
-                delete_button.classList.add("btn", "btn-primary");
-                // set style directly
-                delete_button.style.width = '30px';
-                delete_button.style.height = '30px';
-                delete_button.style.padding = '2px';
-                delete_button.style.fontSize = '12px';
-                if (session['level'] == "user") {
-                    delete_button.disabled = true;
-                }
-                buttonGroup.appendChild(delete_button);
-                delete_button.onclick = function () {
-                    var filename = data[i]['name'];
-                    // Send the filename to the server as a JSON object
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('POST', '/delete');
-                    xhr.setRequestHeader('Content-Type', 'application/json');
-                    xhr.onreadystatechange = function () {
-                        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-
-                        } else if (xhr.readyState === XMLHttpRequest.DONE) {
-
-                        }
-                    }
-                    xhr.send(JSON.stringify(filename));
-                    xhr.onreadystatechange = function () {
-                        if (xhr.readyState == XMLHttpRequest.DONE) {
-                            if (xhr.status == 200) {
-                                alert("Files deleted successfully!");
-                                loadFiles()
-                            } else {
-                                alert("Error deleting files.");
-                            }
-                        }
-                    }
-                };
-                newRow.insertCell(2).appendChild(buttonGroup);
                 preview_button.onclick = function () {
                     var preview_filename = data[i]['name'];
-                    var extension = preview_filename.split('.')[preview_filename.split('.').length - 1];
+                    var extension = preview_filename.split('.').pop().toLowerCase();
 
                     if (extension === 'png' || extension === 'jpg') {
                         fetch('/files/' + encodeURIComponent(preview_filename))
-                            .then(response => response.json())
-                            .then(data => {
-                                var imageUrl = data['file_url']
-                                // console.log(imageUrl)
-                                var filename = preview_filename;
-                                openImagePreviewModal(imageUrl, filename);
+                            .then(response => response.blob())
+                            .then(blob => {
+                                var imageUrl = URL.createObjectURL(blob);
+                                openImagePreviewModal(imageUrl, preview_filename);
                             })
                             .catch(error => console.error(error));
                     }
                     else if (extension === 'txt') {
-                        // console.log("txt preview")
                         fetch('/files/' + encodeURIComponent(preview_filename))
-                            .then(response => response.json())
-                            .then(data => {
-                                var txtUrl = data['file_url']
-                                // console.log(txtUrl)
-                                var filename = preview_filename;
-                                openFilePreviewModal(txtUrl, filename);
+                            .then(response => response.text())
+                            .then(text => {
+                                openFilePreviewModal(text, preview_filename);
                             })
                             .catch(error => console.error(error));
                     }
                     else if (extension === 'mp4') {
                         fetch('/files/' + encodeURIComponent(preview_filename))
-                            .then(response => response.json())
-                            .then(data => {
-                                var videoUrl = data['file_url']
-                                // console.log(videoUrl)
-                                var filename = preview_filename;
-                                openVideoPreviewModal(videoUrl, filename);
+                            .then(response => response.blob())
+                            .then(blob => {
+                                var videoUrl = URL.createObjectURL(blob);
+                                openVideoPreviewModal(videoUrl, preview_filename);
                             })
                             .catch(error => console.error(error));
                     }
                 };
             }
-        });
+
+            // Continue adding other buttons
+            var download_button = createDownloadButton(data[i]);
+            buttonGroup.appendChild(download_button);
+
+            var delete_button = createDeleteButton(data[i]);
+            buttonGroup.appendChild(delete_button);
+
+            newRow.insertCell(2).appendChild(buttonGroup);
+        }
+    });
 }
+
+function createDownloadButton(fileData) {
+    var download_button = document.createElement("button");
+    var download_icon = document.createElement("i");
+    download_icon.className = "fas fa-download";
+    download_button.appendChild(download_icon);
+    download_button.classList.add("btn", "btn-primary");
+    download_button.style.width = '30px';
+    download_button.style.height = '30px';
+    download_button.style.padding = '2px';
+    download_button.style.fontSize = '12px';
+
+    download_button.onclick = function () {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/download');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.responseType = 'blob';
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(xhr.response);
+                link.download = fileData['name'];
+                link.click();
+            }
+        };
+        xhr.send(JSON.stringify({ filename: fileData['name'] }));
+    };
+
+    return download_button;
+}
+
+function createDeleteButton(fileData) {
+    var delete_button = document.createElement("button");
+    var delete_icon = document.createElement("i");
+    delete_icon.className = "fas fa-trash";
+    delete_button.appendChild(delete_icon);
+    delete_button.classList.add("btn", "btn-primary");
+    delete_button.style.width = '30px';
+    delete_button.style.height = '30px';
+    delete_button.style.padding = '2px';
+    delete_button.style.fontSize = '12px';
+
+    if (session['level'] === "user") {
+        delete_button.disabled = true;
+    }
+
+    delete_button.onclick = function () {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/delete');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    alert("File deleted successfully!");
+                    loadFiles(); // Reload files
+                } else {
+                    alert("Error deleting file.");
+                }
+            }
+        };
+        xhr.send(JSON.stringify({ filename: fileData['name'] }));
+    };
+
+    return delete_button;
+}
+
 
 function openFilePreviewModal(url, fileName) {
     var filePreviewModal = document.getElementById("filePreviewModal");
@@ -2533,6 +2529,21 @@ UploadFileBtn.addEventListener('click', async function () {
 });
 
 
+function toggleCards(showVR) {
+    var orthoCard = document.getElementById('xy-card-body');
+    var canvasC = document.getElementById('c');
+    var DownToolDiv = document.getElementById('DownToolDiv');
+
+    if (showVR) {
+        orthoCard.style.display = 'none';  // 隐藏 orthoCard
+        DownToolDiv.style.display = 'none'
+        canvasC.style.height = '70vh'
+    } else {
+        orthoCard.style.display = 'block';  // 隐藏 orthoCard
+        DownToolDiv.style.display = 'block'
+        canvasC.style.height = 'none';
+    }
+}
 
 
 

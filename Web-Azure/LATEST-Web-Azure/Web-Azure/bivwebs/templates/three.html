@@ -637,13 +637,7 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div class="card-header py-1 ">
-                                <div id="xyType" class="float-right form-inline">
-                                    <!-- <button id="2dFullIconBtnXY" class="btn btn-primary" type="button" disabled><i
-                                            class="fas fa-expand"></i>&nbsp Fullscreen&nbspXY</button> -->
-                                </div>
-                            </div>
-                            <div class="card-body">
+                            <div id="xy-card-body"class="card-body">
                                 <div id="xyDiv" style="cursor: crosshair;"></div>
                             </div>
                         </div>
@@ -680,7 +674,7 @@
                                     <div style="display: flex; justify-content: center; align-items: center;">
                                         <canvas id="c"></canvas>
                                     </div>
-                                    <div class="height: 160px">
+                                    <div id="toolbars" class="height: 160px">
                                         <form class="form-inline" onSubmit="return false;">
                                             <div class="form-group">
                                                 <label class="form-check-label mr-1" for="zLockCheckbox">Z Lock:
@@ -731,11 +725,11 @@
                                                 <label class="form-check-label ml-1" for="edgesCheckbox">Bounding
                                                     Box</label>
                                             </div>
-                                            <div class="form-group">
+                                            <!-- <div class="form-group">
                                                 <input class="form-check-input ml-1" type="checkbox" id="cellModalbox">
                                                 <label class="form-check-label ml-1" for="cellModalbox">Cell
                                                     Detection</label>
-                                            </div>
+                                            </div> -->
                                             <button id="3dFullIconBtn" class="btn btn-primary" type="button"
                                                 style="margin-left: 0.75rem;" disabled><i
                                                     class="fas fa-expand"></i>&nbsp

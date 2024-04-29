@@ -221,13 +221,10 @@ function init2(fullLoad) {
 
     // if (!zclip.value)
     zclip.value = Math.round(dsInfo["imageDims"]["z"] / 2)
-    console.log("zclip, ", zclip.value)
     // if (!yclip.value)
     yclip.value = Math.round(parseInt(dsInfo["imageDims"]["y"]) / 2 / 4) * 4
-    console.log("yclip, ", yclip.value)
     // if (!xclip.value)
     xclip.value = Math.round(parseInt(dsInfo["imageDims"]["x"]) / 2 / 4) * 4
-    console.log("xclip111, ", xclip.value)
     if (fullLoad) {
         //These should be set to what the 2D scene values are
         //zclip.value = Math.round(dsInfo["imageDims"]["z"] / 2) 
@@ -285,7 +282,7 @@ function init2(fullLoad) {
         ) //to center the mesh in the geometry
 
     }
-    console.log('dims3_x' + dsInfo['dims3']['x'] + 'dims3_y' + dsInfo['dims3']['y'] + 'dims3_z' + dsInfo['dims3']['z'])
+    // console.log('dims3_x' + dsInfo['dims3']['x'] + 'dims3_y' + dsInfo['dims3']['y'] + 'dims3_z' + dsInfo['dims3']['z'])
     var dataSize = dsInfo['dims3']['x'] * dsInfo['dims3']['y'] * (dsInfo['dims3']['z'] + 1) * 4 //1 == 0offset,4 == RGBA
     var dataSliceSize = dsInfo['dims3']['x'] * dsInfo['dims3']['y'] * 4
 
@@ -347,7 +344,7 @@ function init2(fullLoad) {
     let progBar = document.getElementById("3dProgress")
     //progDiv.classList.remove("d-none")
     //progBar.setAttribute('aria-valuemax', dsInfo["dims3"]["z"])
-    console.log("modSelect.value", modSelect.value, "exposureSelect.value", exposureSelect.value)
+    // console.log("modSelect.value", modSelect.value, "exposureSelect.value", exposureSelect.value)
     // URL = "https://bivlargefiles.blob.core.windows.net/zipfiles/WM_Brightfield-1-430.zip"
 
     new JSZip.external.Promise(function (resolve, reject) {
@@ -374,7 +371,7 @@ function init2(fullLoad) {
                             // console.log(fn)
                             let c = document.createElement('canvas')
                             c.width = dsInfo['dims3']['x']
-                            c.height = dsInfo['dims3']['y']
+                            c.height = dsInfo['dims3']['y'] * 4
                             let ctx = c.getContext('2d')
                             ctx.drawImage(this, 0, 0, dsInfo['dims3']['x'], dsInfo['dims3']['y'])
                             let index = Number(fn.split('.')[0])

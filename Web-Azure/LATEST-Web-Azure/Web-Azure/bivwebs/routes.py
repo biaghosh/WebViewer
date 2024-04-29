@@ -905,8 +905,12 @@ def store_image():
     content_types = {
         "mp4": ("videos", 'video/mp4'),
         "png": ("images", 'image/png'),
-        "jpg": ("images", 'image/jpeg'),
-        "txt": ("txt", 'text/plain'),
+        "jpg": ("images", 'image/jpg'),
+        "txt": ("text", 'text/plain'),
+        "ppt": ("presentations", 'application/vnd.ms-powerpoint'),
+        "pptx": ("presentations", 'application/vnd.openxmlformats-officedocument.presentationml.presentation'),
+        "doc": ("documents", 'application/msword'),
+        "docx": ("documents", 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
     }
 
     if format not in content_types:
