@@ -549,7 +549,6 @@ function drawMask() {
                 positions[maskIndex++] = vertsHolder[i].verts[index]
                 positions[maskIndex++] = vertsHolder[i].verts[index + 1]
                 positions[maskIndex++] = 1
-
             }
             maskMaterial = new THREE.LineBasicMaterial({
                 color: 0x0000ff,
@@ -742,8 +741,6 @@ finishedMaskBtn.addEventListener('click', () => {
                     vertsHolder.push({ slice: data[s].slice, verts: verts })
                     verts = []
                 }
-
-
             }
             drawMask()
             loadMasks()
@@ -776,13 +773,11 @@ function loadMasks() {
             for (let i = 0; i < data.length; i++) {
                 loadMaskBtn.disabled = false
                 var newRow = maskTableBody.insertRow()
-
                 let dt = new Date(data[i]['datetime'])
                 newRow.insertCell(0).appendChild(document.createTextNode(data[i]['name']))
                 newRow.insertCell(1).appendChild(document.createTextNode(data[i]['interpolated']))
                 newRow.insertCell(2).appendChild(document.createTextNode(dt.toDateString()))
                 newRow.insertCell(3).appendChild(document.createTextNode(data[i]['user'].split("@")[0]))
-
             }
         })
         .catch((error) => {
