@@ -139,7 +139,6 @@ document.getElementById('loadDatasetBtn').addEventListener('click', () => {
 
     loadDynamic2D(dsChanged)
     if (window.isVrTabSelected) {
-        console.log("点击了")
         // Create a click event
         const clickEvent = new Event('click');
         // Get the vrTab element
