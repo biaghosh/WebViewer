@@ -1280,7 +1280,7 @@ def driver():
     # Reset progress at the start of a new job
     data = request.form
     dataset_name = data.get('dataset-name')
-    insitution_name = data.get('institution-name')
+    insitution_name = data.get('institutionName')
     pixelLengthUM = data.get('pixelLengthUM')
     zskip = data.get('zskip')
     specimen = data.get('spcimenName')
