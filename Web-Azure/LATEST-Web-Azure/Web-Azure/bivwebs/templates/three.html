@@ -226,8 +226,21 @@
     }
 
     .my-container {
-        margin-top: 70px;
+        /* margin-left: 320px; */
+        /* 留出足够的空间给左侧的 toolsCol */
+        overflow-y: auto;
+        /* 允许在需要时垂直滚动 */
+        height: calc(100vh - 50px);
+        /* 减去导航栏的高度，如果你希望 my-container 高度撑满剩余的视口 */
+        padding: 20px;
+        /* 给内容区域一些内边距 */
+        top: 50px;
+        /* 设定顶部开始的位置，对齐导航栏的底部 */
+        position: relative;
+        /* 如果需要的话，可以设置为绝对定位 (absolute) 或固定定位 (fixed)，根据布局需求调整 */
     }
+
+
 
     /* Custmize style button */
     .btn-custom {
@@ -617,7 +630,6 @@
             </div>
         </div>
     </div>
-
     <div class="my-container">
         <div class="row">
             <div class="col-lg-12 col-md-6 ml-auto" style="height: 50%;">
@@ -637,7 +649,7 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div id="xy-card-body"class="card-body">
+                            <div id="xy-card-body" class="card-body">
                                 <div id="xyDiv" style="cursor: crosshair;"></div>
                             </div>
                         </div>
