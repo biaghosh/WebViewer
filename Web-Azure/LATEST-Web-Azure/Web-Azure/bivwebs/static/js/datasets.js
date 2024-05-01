@@ -157,7 +157,7 @@ document.getElementById("deleteDatasetBtn").addEventListener("click", function (
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        renderDatasetList();
+                        window.location.reload();
                     } else {
                         alert(data.message);
                     }
@@ -236,24 +236,25 @@ function updateDatasetList(datasets) {
 
         <div class="xyz-container">
             <div class="flex-item title">Dims3:</div>
-            <div class="flex-item">X: <input type="number" class="form-control" name="dims3[x]" value="${dataset.dims3.x}" /></div>
-            <div class="flex-item">Y: <input type="number" class="form-control" name="dims3[y]" value="${dataset.dims3.y}" /></div>
-            <div class="flex-item">Z: <input type="number" class="form-control" name="dims3[z]" value="${dataset.dims3.z}" /></div>
+            <div class="flex-item">X: <input type="number" class="form-control" name="dims3[x]" value="${dataset.dims3.x}" readonly /></div>
+            <div class="flex-item">Y: <input type="number" class="form-control" name="dims3[y]" value="${dataset.dims3.y}" readonly /></div>
+            <div class="flex-item">Z: <input type="number" class="form-control" name="dims3[z]" value="${dataset.dims3.z}" readonly /></div>
         </div>
 
-        <div class="xyz-container">
-            <div class="flex-item title">Dims2:</div>
-            <div class="flex-item">X: <input type="number" class="form-control" name="dims2[x]" value="${dataset.dims2.x}" /></div>
-            <div class="flex-item">Y: <input type="number" class="form-control" name="dims2[y]" value="${dataset.dims2.y}" /></div>
-            <div class="flex-item">Z: <input type="number" class="form-control" name="dims2[z]" value="${dataset.dims2.z}" /></div>
-        </div>
-        
-        <div class="xyz-container">
-            <div class="flex-item title">Image Dims:</div>
-            <div class="flex-item">X: <input type="number" class="form-control" name="imageDims[x]" value="${dataset.imageDims.x}" /></div>
-            <div class="flex-item">Y: <input type="number" class="form-control" name="imageDims[y]" value="${dataset.imageDims.y}" /></div>
-            <div class="flex-item">Z: <input type="number" class="form-control" name="imageDims[z]" value="${dataset.imageDims.z}" /></div>
-        </div>  
+<div class="xyz-container">
+    <div class="flex-item title">Dims2:</div>
+    <div class="flex-item">X: <input type="number" class="form-control" name="dims2[x]" value="${dataset.dims2.x}" readonly /></div>
+    <div class="flex-item">Y: <input type="number" class="form-control" name="dims2[y]" value="${dataset.dims2.y}" readonly /></div>
+    <div class="flex-item">Z: <input type="number" class="form-control" name="dims2[z]" value="${dataset.dims2.z}" readonly /></div>
+</div>
+
+<div class="xyz-container">
+    <div class="flex-item title">Image Dims:</div>
+    <div class="flex-item">X: <input type="number" class="form-control" name="imageDims[x]" value="${dataset.imageDims.x}" readonly /></div>
+    <div class="flex-item">Y: <input type="number" class="form-control" name="imageDims[y]" value="${dataset.imageDims.y}" readonly /></div>
+    <div class="flex-item">Z: <input type="number" class="form-control" name="imageDims[z]" value="${dataset.imageDims.z}" readonly /></div>
+</div>
+  
 
         <div class="xyz-container">
             <div class="flex-item title">Info:</div>
@@ -545,7 +546,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     const Wavelength = filename.split('#')[4]
     const formData = new FormData();
     formData.append('abbr', abbr);
-    formData.append('institutionName',institutionName);
+    formData.append('institutionName', institutionName);
     formData.append('dataset-name', datasetName);
     formData.append('modality', Modality);
     formData.append('exposure', Exposure);

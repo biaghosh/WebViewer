@@ -316,6 +316,7 @@ function loadDynamic2D(fullLoad) {
         mesh.name = 'mouseSlice'
         mesh.translateX(parseInt((dsInfo["dims2"]["x"]) - parseInt(dsInfo["imageDims"]["x"])) / 2)
         mesh.translateY(parseInt((dsInfo["dims2"]["y"]) - parseInt(dsInfo["imageDims"]["y"])) / 2)
+        console.log(parseInt((dsInfo["dims2"]["x"]) - parseInt(dsInfo["imageDims"]["x"])) / 2, ((dsInfo["dims2"]["y"]) - parseInt(dsInfo["imageDims"]["y"])) / 2);
         mesh.translateZ(-1)
         sceneXY.add(mesh)
         sceneXY.add(lineTextGroup, annTextGroup, brushGroup)
@@ -2304,75 +2305,75 @@ function loadFiles() {
             'dataset': dsInfo["name"]
         }),
     })
-    .then(response => response.json())
-    .then(data => {
-        fileMTableBody.innerHTML = "";
-        for (let i = 0; i < data.length; i++) {
-            var newRow = fileMTableBody.insertRow();
-            newRow.insertCell(0).appendChild(document.createTextNode(data[i]['name']));
-            newRow.insertCell(1).appendChild(document.createTextNode(data[i]['format']));
+        .then(response => response.json())
+        .then(data => {
+            fileMTableBody.innerHTML = "";
+            for (let i = 0; i < data.length; i++) {
+                var newRow = fileMTableBody.insertRow();
+                newRow.insertCell(0).appendChild(document.createTextNode(data[i]['name']));
+                newRow.insertCell(1).appendChild(document.createTextNode(data[i]['format']));
 
-            var buttonGroup = document.createElement("div");
+                var buttonGroup = document.createElement("div");
 
-            var filename = data[i]['name'];
-            var extension = filename.split('.').pop().toLowerCase();
+                var filename = data[i]['name'];
+                var extension = filename.split('.').pop().toLowerCase();
 
-            // Only add a preview button for supported formats
-            if (extension === 'png' || extension === 'jpg' || extension === 'txt' || extension === 'mp4') {
-                var preview_button = document.createElement("button");
-                var preview_icon = document.createElement("i");
-                preview_icon.className = "fas fa-search";
-                preview_button.appendChild(preview_icon);
-                preview_button.classList.add("btn", "btn-primary");
-                preview_button.style.width = '30px';
-                preview_button.style.height = '30px';
-                preview_button.style.padding = '2px';
-                preview_button.style.fontSize = '12px';
-                buttonGroup.appendChild(preview_button);
+                // Only add a preview button for supported formats
+                if (extension === 'png' || extension === 'jpg' || extension === 'txt' || extension === 'mp4') {
+                    var preview_button = document.createElement("button");
+                    var preview_icon = document.createElement("i");
+                    preview_icon.className = "fas fa-search";
+                    preview_button.appendChild(preview_icon);
+                    preview_button.classList.add("btn", "btn-primary");
+                    preview_button.style.width = '30px';
+                    preview_button.style.height = '30px';
+                    preview_button.style.padding = '2px';
+                    preview_button.style.fontSize = '12px';
+                    buttonGroup.appendChild(preview_button);
 
-                preview_button.onclick = function () {
-                    var preview_filename = data[i]['name'];
-                    var extension = preview_filename.split('.').pop().toLowerCase();
+                    preview_button.onclick = function () {
+                        var preview_filename = data[i]['name'];
+                        var extension = preview_filename.split('.').pop().toLowerCase();
 
-                    if (extension === 'png' || extension === 'jpg') {
-                        fetch('/files/' + encodeURIComponent(preview_filename))
-                            .then(response => response.blob())
-                            .then(blob => {
-                                var imageUrl = URL.createObjectURL(blob);
-                                openImagePreviewModal(imageUrl, preview_filename);
-                            })
-                            .catch(error => console.error(error));
-                    }
-                    else if (extension === 'txt') {
-                        fetch('/files/' + encodeURIComponent(preview_filename))
-                            .then(response => response.text())
-                            .then(text => {
-                                openFilePreviewModal(text, preview_filename);
-                            })
-                            .catch(error => console.error(error));
-                    }
-                    else if (extension === 'mp4') {
-                        fetch('/files/' + encodeURIComponent(preview_filename))
-                            .then(response => response.blob())
-                            .then(blob => {
-                                var videoUrl = URL.createObjectURL(blob);
-                                openVideoPreviewModal(videoUrl, preview_filename);
-                            })
-                            .catch(error => console.error(error));
-                    }
-                };
+                        if (extension === 'png' || extension === 'jpg') {
+                            fetch('/files/' + encodeURIComponent(preview_filename))
+                                .then(response => response.blob())
+                                .then(blob => {
+                                    var imageUrl = URL.createObjectURL(blob);
+                                    openImagePreviewModal(imageUrl, preview_filename);
+                                })
+                                .catch(error => console.error(error));
+                        }
+                        else if (extension === 'txt') {
+                            fetch('/files/' + encodeURIComponent(preview_filename))
+                                .then(response => response.text())
+                                .then(text => {
+                                    openFilePreviewModal(text, preview_filename);
+                                })
+                                .catch(error => console.error(error));
+                        }
+                        else if (extension === 'mp4') {
+                            fetch('/files/' + encodeURIComponent(preview_filename))
+                                .then(response => response.blob())
+                                .then(blob => {
+                                    var videoUrl = URL.createObjectURL(blob);
+                                    openVideoPreviewModal(videoUrl, preview_filename);
+                                })
+                                .catch(error => console.error(error));
+                        }
+                    };
+                }
+
+                // Continue adding other buttons
+                var download_button = createDownloadButton(data[i]);
+                buttonGroup.appendChild(download_button);
+
+                var delete_button = createDeleteButton(data[i]);
+                buttonGroup.appendChild(delete_button);
+
+                newRow.insertCell(2).appendChild(buttonGroup);
             }
-
-            // Continue adding other buttons
-            var download_button = createDownloadButton(data[i]);
-            buttonGroup.appendChild(download_button);
-
-            var delete_button = createDeleteButton(data[i]);
-            buttonGroup.appendChild(delete_button);
-
-            newRow.insertCell(2).appendChild(buttonGroup);
-        }
-    });
+        });
 }
 
 function createDownloadButton(fileData) {

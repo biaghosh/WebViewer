@@ -1335,7 +1335,7 @@ def driver():
                             }
                     },
             'voxels':{'x':1,'y':1,'z':2.048},
-            'dims2':{'x':int(mongoRecord[str(job[0])]['imageDims']['x'] * 2),'y': int(mongoRecord[str(job[0])]['imageDims']['y'] * 2),'z': int(mongoRecord[str(job[0])]['imageDims']['z'] * 2)},
+            'dims2':{'x':int(2 ** math.ceil(math.log(int(mongoRecord[str(job[0])]['imageDims']['x']), 2))),'y': int(2 ** math.ceil(math.log(int(mongoRecord[str(job[0])]['imageDims']['y']), 2))),'z': int(2 ** math.ceil(math.log(int(mongoRecord[str(job[0])]['imageDims']['z']), 2)))},
             'dims3':{'x':int(mongoRecord[str(job[0])]['imageDims']['x']),'y': int(mongoRecord[str(job[0])]['imageDims']['y']),'z': int(mongoRecord[str(job[0])]['imageDims']['z'])},
             'pixelLengthUM':"100.5",
             'imageDims':{'x':mongoRecord[str(job[0])]['imageDims']['x'],'y':mongoRecord[str(job[0])]['imageDims']['y'],'z':mongoRecord[str(job[0])]['imageDims']['z']},
