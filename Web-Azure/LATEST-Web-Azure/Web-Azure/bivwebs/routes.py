@@ -1405,14 +1405,18 @@ def driver():
     compressed_file_path = dataset_name +"-" + Modality + "-" + exposure + "-" + wavelength + ".zip"
     shutil.make_archive(compressed_file_path[:-4], 'zip', temp_dir)
     blob_name = os.path.basename(compressed_file_path)
-
     AZURE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=bivlargefiles;AccountKey=PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw==;EndpointSuffix=core.windows.net"
     CONTAINER_NAME = "zipfiles"
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
     container_client = blob_service_client.get_container_client(CONTAINER_NAME)
     blob_client = container_client.get_blob_client(blob_name)
+
     with open(compressed_file_path, "rb") as f:
         blob_client.upload_blob(f)
+
+    # Cleanup: Remove the compressed file after uploading
+    os.remove(compressed_file_path)
+    
     return jsonify({"message": "File Uploaded Successfully"}), 200
 
 @app.route('/progress', methods=['GET'])

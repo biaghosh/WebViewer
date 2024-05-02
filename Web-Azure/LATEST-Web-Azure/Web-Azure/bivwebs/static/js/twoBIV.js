@@ -164,7 +164,7 @@ document.getElementById('loadDatasetBtn').addEventListener('click', () => {
 })
 
 //HTML ELEMENTS
-let canvasXY, exportWidthSelect, exportHeightInput, fullScreenInput
+let canvasXY, canvasYZ, exportWidthSelect, exportHeightInput, fullScreenInput
 let forwardBtn = document.getElementById("forwardBtn"),
     backBtn = document.getElementById("backBtn"),
     backStepBtn = document.getElementById("stepBackBtn"),
@@ -259,6 +259,7 @@ function loadDynamic2D(fullLoad) {
         rendererXY.outputEncoding = THREE.sRGBEncoding
         xyDiv.appendChild(rendererXY.domElement);
         canvasXY = rendererXY.domElement
+        // canvasYZ = rendererXY.domElement
         rendererXY.domElement.id = 'xyBasis'
     }
     //if ( param from wv)
@@ -478,7 +479,9 @@ let clickHandler = {
             if (value[0] > 1) {
                 value[0] = 0
                 canvasXY.removeEventListener("click", getSceneClicks)
+
                 canvasXY.addEventListener("click", orthoClick)
+
                 document.getElementById("measureBtn").disabled = false
                 //document.getElementById("createMaskBtn").disabled = false
                 document.getElementById("measureClearBtn").disabled = false
@@ -844,6 +847,7 @@ maskLoadInput = document.getElementById("maskLoadInput"),
 /*** END SECTION */
 
 function getSceneClicks(evt) {
+    console.log("get!")
     let rect = canvasXY.getBoundingClientRect()
     mouse.x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1;
     mouse.y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1;
@@ -1109,6 +1113,7 @@ function populateInfoTable() {
 }
 
 function processNewAnn(evt) {
+    console.log("processNewAnn")
     let rect = canvasXY.getBoundingClientRect()
     mouse.x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1;
     mouse.y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1;
@@ -1225,14 +1230,22 @@ function addAnnotationEvents() {
 
     // 动态创建注释的事件处理
     if (!createAnnBtn.hasAttribute('data-listener')) {
+        console.log("ssss")
         createAnnBtn.addEventListener("click", dynamicCreateAnn);
         createAnnBtn.setAttribute('data-listener', 'true'); // 标记已添加监听器
     }
 
     function dynamicCreateAnn() {
         createAnnBtn.disabled = true;
+
         canvasXY.removeEventListener("click", orthoClick);
+        // canvasYZ.removeEventListener("click", orthoClick);
+        // canvasXZ.removeEventListener("click", orthoClick);
+
+
         canvasXY.addEventListener("click", processNewAnn);
+        canvasYZ.addEventListener("click", processNewAnnYZ); // 针对 YZ 平面的处理函数
+        // canvasXZ.addEventListener("click", processNewAnn); // 针对 XZ 平面的处理函数
     }
 
     // 切换注释显示状态的事件处理
@@ -1264,6 +1277,104 @@ function addAnnotationEvents() {
         console.log("移动注释");
     }
 }
+
+function processNewAnnYZ(evt) {
+    console.log("processNewAnnYZ");
+    let rect = canvasYZ.getBoundingClientRect();
+    mouse.x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1;
+    mouse.y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1;
+
+    rayCaster.setFromCamera(mouse, oCameras['yz']);
+    var intersects = [];
+    oMeshes['yz'].raycast(rayCaster, intersects);  // 确保你已经定义了对应的mesh
+    if (intersects.length > 0) {
+        canvasYZ.removeEventListener("click", processNewAnnYZ);
+        let txtBox = document.createElement("input");
+        txtBox.id = 'annTextBoxYZ';
+        txtBox.type = "text";
+        txtBox.width = 80;
+        txtBox.height = 20;
+        txtBox.maxLength = 30;
+        txtBox.style.position = "absolute";
+        yzDiv.appendChild(txtBox);  // 确保你有一个与 canvasYZ 对应的 div
+        txtBox.style.zIndex = "10";
+        txtBox.style.left = evt.offsetX + canvasYZ.offsetLeft + "px";
+        txtBox.style.top = evt.offsetY + canvasYZ.offsetTop + "px";
+        txtBox.focus();
+
+        document.addEventListener('focus', function focusEvent() {
+            if (txtBox) {
+                txtBox.parentNode.removeChild(txtBox);
+                txtBox = null;
+                canvasYZ.addEventListener("click", orthoClick);
+                createAnnBtn.disabled = false;
+            }
+        }, true);
+
+        txtBox.addEventListener("keyup", function (e) {
+            txtBox.value = txtBox.value.replace(/[-]/g, '');
+            if (e.keyCode === 13 && txtBox.value != '') {
+                fetch('/saveAnnotationYZ', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        'slice': oClip['yz'].value,  // 确保你有相应的sliderYZ
+                        'dataset': dsInfo["name"],
+                        'moduality': modSelect.value,
+                        'exposure': exposureSelect.value,
+                        'wavelength': wavelengthSelect.value,
+                        'text': txtBox.value,
+                        'x': intersects[0].point.x,
+                        'y': intersects[0].point.y,
+                        'datetime': Date.now()
+                    }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        let annTxt = data['text'];
+                        if (data['instance']) {
+                            annTxt += '-' + data['instance'];
+                        }
+                        drawAnnotationYZ(annTxt, data['x'], data['y']);  // 确保你有一个drawAnnotationYZ函数
+
+                        var newRow = annTableBodyYZ.insertRow();  // 确保你有对应的表格
+
+                        let dt = new Date(data['datetime']);
+
+                        newRow.insertCell(0).appendChild(document.createTextNode(data['text']));
+                        newRow.insertCell(1).appendChild(document.createTextNode(data['instance'] ? data['instance'] : '0'));
+                        newRow.insertCell(2).appendChild(document.createTextNode(dt.toDateString()));
+                        newRow.insertCell(3).appendChild(document.createTextNode(data['user'].split("@")[0]));
+
+                        var btn = document.createElement('input');
+                        btn.type = "button";
+                        btn.className = "btn btn-warning";
+                        btn.value = 'Edit';
+                        btn.setAttribute('data-toggle', 'modal');
+                        btn.setAttribute('data-target', '#annotationModal');
+                        btn.setAttribute('data-text', data['text']);
+                        btn.setAttribute('data-instance', data['instance'] ? data['instance'] : '0');
+                        btn.setAttribute('data-comments', data['comments'] ? data['comments'] : '');
+
+                        newRow.insertCell(4).appendChild(btn);
+
+                        createAnnBtn.disabled = false;
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+
+                yzDiv.removeChild(txtBox);
+                txtBox = null;
+                canvasYZ.addEventListener("click", orthoClick);
+                createAnnBtn.disabled = false;
+            }
+        });
+    }
+}
+
 
 
 function loadAnnotationsFast() {
@@ -1759,6 +1870,7 @@ yzVertLineGeom = new THREE.BufferGeometry()
 yzHorzLineGeom = new THREE.BufferGeometry()
 
 function loadOrthos(fullLoad = true) {
+    console.log("loadOrthos")
     orthosActive = true
     sceneXY.add(xLine)
     sceneXY.add(yLine)
@@ -1769,6 +1881,7 @@ function loadOrthos(fullLoad = true) {
     })*/
     if (fullLoad) {
         canvasXY.addEventListener("click", orthoClick)
+        // canvasYZ.addEventListener("click",orthoClick)
         //clipCoords.x = Math.round(parseInt(dsInfo["imageDims"]["x"]) / 2 / 4 ) * 4
         //clipCoords.y = Math.round(parseInt(dsInfo["imageDims"]["y"]) / 2 / 4 ) * 4
         var points = [];
@@ -1825,10 +1938,12 @@ function loadOrthos(fullLoad = true) {
     showLoading('ortho')
     orthos.forEach(ortho => {
         if (typeof oRenderers[ortho] !== 'object') {
+
             oRenderers[ortho] = new THREE.WebGLRenderer()
-            oRenderers[ortho].setSize($(oDivs[ortho]).width(), 260)
+            oRenderers[ortho].setSize($(oDivs[ortho]).width(), 300)
             oRenderers[ortho].outputEncoding = THREE.sRGBEncoding;
             oDivs[ortho].appendChild(oRenderers[ortho].domElement)
+
             oScenes[ortho].remove(oMeshes[ortho])
 
             oCameras[ortho] = new THREE.PerspectiveCamera(30, $(oDivs[ortho]).width() / 400, 1, 5000)
@@ -1863,6 +1978,7 @@ function loadOrthos(fullLoad = true) {
             oMaterials[ortho] = yzShader
         }
 
+
         animateOrtho(oRenderers[ortho], oScenes[ortho], oCameras[ortho], oMaterials[ortho], oAnimate[ortho])
         let sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis?${SAS}`;
 
@@ -1889,6 +2005,11 @@ function loadOrthos(fullLoad = true) {
 
     oRenderers['xz'].domElement.addEventListener("click", xzClick)
     oRenderers['yz'].domElement.addEventListener("click", yzClick)
+
+    canvasYZ = oRenderers['yz'].domElement
+    // canvasYZ = oRenderers['yz'].domElement
+    canvasYZ.addEventListener("click", yzClick)
+    console.log("hhhh1")
 
     controlsXY.addEventListener("change", () => {
         //could add settings flag here
@@ -2031,6 +2152,7 @@ function updateMeshes() {
 }
 //update
 function orthoClick(evt) {
+    console.log("点击了")
     if (draggedAnn) {
         draggedAnn = false
         return
@@ -2107,10 +2229,11 @@ function initMainOrthoLines() {
 }
 
 function updateOrthoMeshes() {
+    console.log("update")
     showLoading('ortho')
     xclip.value = clipCoords[oClip['yz']]
     yclip.value = clipCoords[oClip['xz']]
-    // console.log("xclip,yclip",xclip.value,yclip.value)
+    console.log("xclip,yclip",xclip.value,yclip.value)
     orthos.forEach(ortho => {
         loader.load(`https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis?${SAS}`, function (texture) {
             texture.encoding = THREE.sRGBEncoding
