@@ -407,7 +407,7 @@ function init2(fullLoad) {
 
     })
 
-    loadCellData()
+    // loadCellData()
     mesh.visible = false
     mesh.renderOrder = 1.0 //draws lowest first 
     scene.add(mesh)
