@@ -164,7 +164,7 @@ document.getElementById('loadDatasetBtn').addEventListener('click', () => {
 })
 
 //HTML ELEMENTS
-let canvasXY, exportWidthSelect, exportHeightInput, fullScreenInput
+let canvasXY, canvasYZ, exportWidthSelect, exportHeightInput, fullScreenInput
 let forwardBtn = document.getElementById("forwardBtn"),
     backBtn = document.getElementById("backBtn"),
     backStepBtn = document.getElementById("stepBackBtn"),
@@ -259,6 +259,7 @@ function loadDynamic2D(fullLoad) {
         rendererXY.outputEncoding = THREE.sRGBEncoding
         xyDiv.appendChild(rendererXY.domElement);
         canvasXY = rendererXY.domElement
+        // canvasYZ = rendererXY.domElement
         rendererXY.domElement.id = 'xyBasis'
     }
     //if ( param from wv)
@@ -316,6 +317,7 @@ function loadDynamic2D(fullLoad) {
         mesh.name = 'mouseSlice'
         mesh.translateX(parseInt((dsInfo["dims2"]["x"]) - parseInt(dsInfo["imageDims"]["x"])) / 2)
         mesh.translateY(parseInt((dsInfo["dims2"]["y"]) - parseInt(dsInfo["imageDims"]["y"])) / 2)
+        console.log(parseInt((dsInfo["dims2"]["x"]) - parseInt(dsInfo["imageDims"]["x"])) / 2, ((dsInfo["dims2"]["y"]) - parseInt(dsInfo["imageDims"]["y"])) / 2);
         mesh.translateZ(-1)
         sceneXY.add(mesh)
         sceneXY.add(lineTextGroup, annTextGroup, brushGroup)
@@ -477,7 +479,9 @@ let clickHandler = {
             if (value[0] > 1) {
                 value[0] = 0
                 canvasXY.removeEventListener("click", getSceneClicks)
+
                 canvasXY.addEventListener("click", orthoClick)
+
                 document.getElementById("measureBtn").disabled = false
                 //document.getElementById("createMaskBtn").disabled = false
                 document.getElementById("measureClearBtn").disabled = false
@@ -548,7 +552,6 @@ function drawMask() {
                 positions[maskIndex++] = vertsHolder[i].verts[index]
                 positions[maskIndex++] = vertsHolder[i].verts[index + 1]
                 positions[maskIndex++] = 1
-
             }
             maskMaterial = new THREE.LineBasicMaterial({
                 color: 0x0000ff,
@@ -741,8 +744,6 @@ finishedMaskBtn.addEventListener('click', () => {
                     vertsHolder.push({ slice: data[s].slice, verts: verts })
                     verts = []
                 }
-
-
             }
             drawMask()
             loadMasks()
@@ -775,13 +776,11 @@ function loadMasks() {
             for (let i = 0; i < data.length; i++) {
                 loadMaskBtn.disabled = false
                 var newRow = maskTableBody.insertRow()
-
                 let dt = new Date(data[i]['datetime'])
                 newRow.insertCell(0).appendChild(document.createTextNode(data[i]['name']))
                 newRow.insertCell(1).appendChild(document.createTextNode(data[i]['interpolated']))
                 newRow.insertCell(2).appendChild(document.createTextNode(dt.toDateString()))
                 newRow.insertCell(3).appendChild(document.createTextNode(data[i]['user'].split("@")[0]))
-
             }
         })
         .catch((error) => {
@@ -848,6 +847,7 @@ maskLoadInput = document.getElementById("maskLoadInput"),
 /*** END SECTION */
 
 function getSceneClicks(evt) {
+    console.log("get!")
     let rect = canvasXY.getBoundingClientRect()
     mouse.x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1;
     mouse.y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1;
@@ -858,9 +858,7 @@ function getSceneClicks(evt) {
     if (intersects.length > 0) {
         measureCoords[clicks.count] = intersects[0].point
         clicks.count = [clicks.count + 1, intersects[0].uv]
-
     }
-
 }
 
 function drawLine() {
@@ -1115,6 +1113,7 @@ function populateInfoTable() {
 }
 
 function processNewAnn(evt) {
+    console.log("processNewAnn")
     let rect = canvasXY.getBoundingClientRect()
     mouse.x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1;
     mouse.y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1;
@@ -1231,14 +1230,22 @@ function addAnnotationEvents() {
 
     // 动态创建注释的事件处理
     if (!createAnnBtn.hasAttribute('data-listener')) {
+        console.log("ssss")
         createAnnBtn.addEventListener("click", dynamicCreateAnn);
         createAnnBtn.setAttribute('data-listener', 'true'); // 标记已添加监听器
     }
 
     function dynamicCreateAnn() {
         createAnnBtn.disabled = true;
+
         canvasXY.removeEventListener("click", orthoClick);
+        // canvasYZ.removeEventListener("click", orthoClick);
+        // canvasXZ.removeEventListener("click", orthoClick);
+
+
         canvasXY.addEventListener("click", processNewAnn);
+        canvasYZ.addEventListener("click", processNewAnnYZ); // 针对 YZ 平面的处理函数
+        // canvasXZ.addEventListener("click", processNewAnn); // 针对 XZ 平面的处理函数
     }
 
     // 切换注释显示状态的事件处理
@@ -1270,6 +1277,104 @@ function addAnnotationEvents() {
         console.log("移动注释");
     }
 }
+
+function processNewAnnYZ(evt) {
+    console.log("processNewAnnYZ");
+    let rect = canvasYZ.getBoundingClientRect();
+    mouse.x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1;
+    mouse.y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1;
+
+    rayCaster.setFromCamera(mouse, oCameras['yz']);
+    var intersects = [];
+    oMeshes['yz'].raycast(rayCaster, intersects);  // 确保你已经定义了对应的mesh
+    if (intersects.length > 0) {
+        canvasYZ.removeEventListener("click", processNewAnnYZ);
+        let txtBox = document.createElement("input");
+        txtBox.id = 'annTextBoxYZ';
+        txtBox.type = "text";
+        txtBox.width = 80;
+        txtBox.height = 20;
+        txtBox.maxLength = 30;
+        txtBox.style.position = "absolute";
+        yzDiv.appendChild(txtBox);  // 确保你有一个与 canvasYZ 对应的 div
+        txtBox.style.zIndex = "10";
+        txtBox.style.left = evt.offsetX + canvasYZ.offsetLeft + "px";
+        txtBox.style.top = evt.offsetY + canvasYZ.offsetTop + "px";
+        txtBox.focus();
+
+        document.addEventListener('focus', function focusEvent() {
+            if (txtBox) {
+                txtBox.parentNode.removeChild(txtBox);
+                txtBox = null;
+                canvasYZ.addEventListener("click", orthoClick);
+                createAnnBtn.disabled = false;
+            }
+        }, true);
+
+        txtBox.addEventListener("keyup", function (e) {
+            txtBox.value = txtBox.value.replace(/[-]/g, '');
+            if (e.keyCode === 13 && txtBox.value != '') {
+                fetch('/saveAnnotationYZ', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        'slice': oClip['yz'].value,  // 确保你有相应的sliderYZ
+                        'dataset': dsInfo["name"],
+                        'moduality': modSelect.value,
+                        'exposure': exposureSelect.value,
+                        'wavelength': wavelengthSelect.value,
+                        'text': txtBox.value,
+                        'x': intersects[0].point.x,
+                        'y': intersects[0].point.y,
+                        'datetime': Date.now()
+                    }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        let annTxt = data['text'];
+                        if (data['instance']) {
+                            annTxt += '-' + data['instance'];
+                        }
+                        drawAnnotationYZ(annTxt, data['x'], data['y']);  // 确保你有一个drawAnnotationYZ函数
+
+                        var newRow = annTableBodyYZ.insertRow();  // 确保你有对应的表格
+
+                        let dt = new Date(data['datetime']);
+
+                        newRow.insertCell(0).appendChild(document.createTextNode(data['text']));
+                        newRow.insertCell(1).appendChild(document.createTextNode(data['instance'] ? data['instance'] : '0'));
+                        newRow.insertCell(2).appendChild(document.createTextNode(dt.toDateString()));
+                        newRow.insertCell(3).appendChild(document.createTextNode(data['user'].split("@")[0]));
+
+                        var btn = document.createElement('input');
+                        btn.type = "button";
+                        btn.className = "btn btn-warning";
+                        btn.value = 'Edit';
+                        btn.setAttribute('data-toggle', 'modal');
+                        btn.setAttribute('data-target', '#annotationModal');
+                        btn.setAttribute('data-text', data['text']);
+                        btn.setAttribute('data-instance', data['instance'] ? data['instance'] : '0');
+                        btn.setAttribute('data-comments', data['comments'] ? data['comments'] : '');
+
+                        newRow.insertCell(4).appendChild(btn);
+
+                        createAnnBtn.disabled = false;
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+
+                yzDiv.removeChild(txtBox);
+                txtBox = null;
+                canvasYZ.addEventListener("click", orthoClick);
+                createAnnBtn.disabled = false;
+            }
+        });
+    }
+}
+
 
 
 function loadAnnotationsFast() {
@@ -1765,6 +1870,7 @@ yzVertLineGeom = new THREE.BufferGeometry()
 yzHorzLineGeom = new THREE.BufferGeometry()
 
 function loadOrthos(fullLoad = true) {
+    console.log("loadOrthos")
     orthosActive = true
     sceneXY.add(xLine)
     sceneXY.add(yLine)
@@ -1775,6 +1881,7 @@ function loadOrthos(fullLoad = true) {
     })*/
     if (fullLoad) {
         canvasXY.addEventListener("click", orthoClick)
+        // canvasYZ.addEventListener("click",orthoClick)
         //clipCoords.x = Math.round(parseInt(dsInfo["imageDims"]["x"]) / 2 / 4 ) * 4
         //clipCoords.y = Math.round(parseInt(dsInfo["imageDims"]["y"]) / 2 / 4 ) * 4
         var points = [];
@@ -1831,10 +1938,12 @@ function loadOrthos(fullLoad = true) {
     showLoading('ortho')
     orthos.forEach(ortho => {
         if (typeof oRenderers[ortho] !== 'object') {
+
             oRenderers[ortho] = new THREE.WebGLRenderer()
-            oRenderers[ortho].setSize($(oDivs[ortho]).width(), 260)
+            oRenderers[ortho].setSize($(oDivs[ortho]).width(), 300)
             oRenderers[ortho].outputEncoding = THREE.sRGBEncoding;
             oDivs[ortho].appendChild(oRenderers[ortho].domElement)
+
             oScenes[ortho].remove(oMeshes[ortho])
 
             oCameras[ortho] = new THREE.PerspectiveCamera(30, $(oDivs[ortho]).width() / 400, 1, 5000)
@@ -1869,6 +1978,7 @@ function loadOrthos(fullLoad = true) {
             oMaterials[ortho] = yzShader
         }
 
+
         animateOrtho(oRenderers[ortho], oScenes[ortho], oCameras[ortho], oMaterials[ortho], oAnimate[ortho])
         let sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis?${SAS}`;
 
@@ -1895,6 +2005,11 @@ function loadOrthos(fullLoad = true) {
 
     oRenderers['xz'].domElement.addEventListener("click", xzClick)
     oRenderers['yz'].domElement.addEventListener("click", yzClick)
+
+    canvasYZ = oRenderers['yz'].domElement
+    // canvasYZ = oRenderers['yz'].domElement
+    canvasYZ.addEventListener("click", yzClick)
+    console.log("hhhh1")
 
     controlsXY.addEventListener("change", () => {
         //could add settings flag here
@@ -2037,6 +2152,7 @@ function updateMeshes() {
 }
 //update
 function orthoClick(evt) {
+    console.log("点击了")
     if (draggedAnn) {
         draggedAnn = false
         return
@@ -2113,10 +2229,11 @@ function initMainOrthoLines() {
 }
 
 function updateOrthoMeshes() {
+    console.log("update")
     showLoading('ortho')
     xclip.value = clipCoords[oClip['yz']]
     yclip.value = clipCoords[oClip['xz']]
-    // console.log("xclip,yclip",xclip.value,yclip.value)
+    console.log("xclip,yclip",xclip.value,yclip.value)
     orthos.forEach(ortho => {
         loader.load(`https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis?${SAS}`, function (texture) {
             texture.encoding = THREE.sRGBEncoding
@@ -2266,6 +2383,7 @@ xyInput.addEventListener("input", () => {
 })
 
 document.getElementById('vrTab').addEventListener('click', () => {
+    toggleCards(true);
     orthosActive = false
     //pause execution
     //Handling this now in the ortho animation loop because this failed
@@ -2279,8 +2397,11 @@ document.getElementById('vrTab').addEventListener('click', () => {
 
 
 document.getElementById('orthoTab').addEventListener('click', () => {
-    if (!orthosActive)
+    if (!orthosActive) {
         loadOrthos(false)
+        toggleCards(false)
+        loadDynamic2D(dsChanged)
+    }
     else
         orthos.forEach(ortho => {
             animateOrtho(oRenderers[ortho], oScenes[ortho], oCameras[ortho], oMaterials[ortho], oAnimate[ortho])
@@ -2298,7 +2419,6 @@ fileInput.addEventListener('change', function () {
 
 
 function loadFiles() {
-    // viewSelect.innerHTML = ""
     fetch('/getFiles', {
         method: 'POST',
         headers: {
@@ -2310,146 +2430,140 @@ function loadFiles() {
     })
         .then(response => response.json())
         .then(data => {
-            fileMTableBody.innerHTML = ""
+            fileMTableBody.innerHTML = "";
             for (let i = 0; i < data.length; i++) {
-                var newRow = fileMTableBody.insertRow()
-                newRow.insertCell(0).appendChild(document.createTextNode(data[i]['name']))
-                newRow.insertCell(1).appendChild(document.createTextNode(data[i]['format']))
-                // Create a div to hold all buttons
+                var newRow = fileMTableBody.insertRow();
+                newRow.insertCell(0).appendChild(document.createTextNode(data[i]['name']));
+                newRow.insertCell(1).appendChild(document.createTextNode(data[i]['format']));
+
                 var buttonGroup = document.createElement("div");
 
-                var preview_button = document.createElement("button");
-                var preview_icon = document.createElement("i");
-                preview_icon.className = "fas fa-search";  // "fa-search" is the class for the magnifying glass icon
-                preview_button.appendChild(preview_icon);
-                preview_button.classList.add("btn", "btn-primary");
-                preview_button.style.width = '30px';
-                preview_button.style.height = '30px';
-                preview_button.style.padding = '2px';
-                preview_button.style.fontSize = '12px';
-                buttonGroup.appendChild(preview_button);
+                var filename = data[i]['name'];
+                var extension = filename.split('.').pop().toLowerCase();
 
-                // Download Button
-                var download_button = document.createElement("button");
-                var download_icon = document.createElement("i");
-                download_icon.className = "fas fa-download";
-                download_button.appendChild(download_icon);
-                download_button.classList.add("btn", "btn-primary");
-                download_button.style.width = '30px';
-                download_button.style.height = '30px';
-                download_button.style.padding = '2px';
-                download_button.style.fontSize = '12px';
-                buttonGroup.appendChild(download_button);
-                download_button.onclick = function () {
-                    var filename = data[i]['name'];
-                    // Send the filename to the server as a JSON object
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('POST', '/download');
-                    xhr.setRequestHeader('Content-Type', 'application/json');
-                    xhr.onreadystatechange = function () {
-                        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                            // console.log('File download request sent');
-                        } else if (xhr.readyState === XMLHttpRequest.DONE) {
-                            // console.log('An error occurred while downloading the file');
+                // Only add a preview button for supported formats
+                if (extension === 'png' || extension === 'jpg' || extension === 'txt' || extension === 'mp4') {
+                    var preview_button = document.createElement("button");
+                    var preview_icon = document.createElement("i");
+                    preview_icon.className = "fas fa-search";
+                    preview_button.appendChild(preview_icon);
+                    preview_button.classList.add("btn", "btn-primary");
+                    preview_button.style.width = '30px';
+                    preview_button.style.height = '30px';
+                    preview_button.style.padding = '2px';
+                    preview_button.style.fontSize = '12px';
+                    buttonGroup.appendChild(preview_button);
+
+                    preview_button.onclick = function () {
+                        var preview_filename = data[i]['name'];
+                        var extension = preview_filename.split('.').pop().toLowerCase();
+
+                        if (extension === 'png' || extension === 'jpg') {
+                            fetch('/files/' + encodeURIComponent(preview_filename))
+                                .then(response => response.blob())
+                                .then(blob => {
+                                    var imageUrl = URL.createObjectURL(blob);
+                                    openImagePreviewModal(imageUrl, preview_filename);
+                                })
+                                .catch(error => console.error(error));
                         }
-                    }
-                    xhr.send(JSON.stringify(filename));
-                    xhr.responseType = 'blob';
-                    xhr.onload = function () {
-                        if (xhr.status === 200) {
-                            const link = document.createElement('a');
-                            link.href = window.URL.createObjectURL(xhr.response);
-
-                            link.download = 'selected_file.zip';
-                            link.click();
-                            // console.log(link)
+                        else if (extension === 'txt') {
+                            fetch('/files/' + encodeURIComponent(preview_filename))
+                                .then(response => response.text())
+                                .then(text => {
+                                    openFilePreviewModal(text, preview_filename);
+                                })
+                                .catch(error => console.error(error));
+                        }
+                        else if (extension === 'mp4') {
+                            fetch('/files/' + encodeURIComponent(preview_filename))
+                                .then(response => response.blob())
+                                .then(blob => {
+                                    var videoUrl = URL.createObjectURL(blob);
+                                    openVideoPreviewModal(videoUrl, preview_filename);
+                                })
+                                .catch(error => console.error(error));
                         }
                     };
-                };
-
-                // Delete Button
-                var delete_button = document.createElement("button");
-                var delete_icon = document.createElement("i");
-                delete_icon.className = "fas fa-trash";
-                delete_button.appendChild(delete_icon);
-                delete_button.classList.add("btn", "btn-primary");
-                // set style directly
-                delete_button.style.width = '30px';
-                delete_button.style.height = '30px';
-                delete_button.style.padding = '2px';
-                delete_button.style.fontSize = '12px';
-                if (session['level'] == "user") {
-                    delete_button.disabled = true;
                 }
+
+                // Continue adding other buttons
+                var download_button = createDownloadButton(data[i]);
+                buttonGroup.appendChild(download_button);
+
+                var delete_button = createDeleteButton(data[i]);
                 buttonGroup.appendChild(delete_button);
-                delete_button.onclick = function () {
-                    var filename = data[i]['name'];
-                    // Send the filename to the server as a JSON object
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('POST', '/delete');
-                    xhr.setRequestHeader('Content-Type', 'application/json');
-                    xhr.onreadystatechange = function () {
-                        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
 
-                        } else if (xhr.readyState === XMLHttpRequest.DONE) {
-
-                        }
-                    }
-                    xhr.send(JSON.stringify(filename));
-                    xhr.onreadystatechange = function () {
-                        if (xhr.readyState == XMLHttpRequest.DONE) {
-                            if (xhr.status == 200) {
-                                alert("Files deleted successfully!");
-                                loadFiles()
-                            } else {
-                                alert("Error deleting files.");
-                            }
-                        }
-                    }
-                };
                 newRow.insertCell(2).appendChild(buttonGroup);
-                preview_button.onclick = function () {
-                    var preview_filename = data[i]['name'];
-                    var extension = preview_filename.split('.')[preview_filename.split('.').length - 1];
-
-                    if (extension === 'png' || extension === 'jpg') {
-                        fetch('/files/' + encodeURIComponent(preview_filename))
-                            .then(response => response.json())
-                            .then(data => {
-                                var imageUrl = data['file_url']
-                                // console.log(imageUrl)
-                                var filename = preview_filename;
-                                openImagePreviewModal(imageUrl, filename);
-                            })
-                            .catch(error => console.error(error));
-                    }
-                    else if (extension === 'txt') {
-                        // console.log("txt preview")
-                        fetch('/files/' + encodeURIComponent(preview_filename))
-                            .then(response => response.json())
-                            .then(data => {
-                                var txtUrl = data['file_url']
-                                // console.log(txtUrl)
-                                var filename = preview_filename;
-                                openFilePreviewModal(txtUrl, filename);
-                            })
-                            .catch(error => console.error(error));
-                    }
-                    else if (extension === 'mp4') {
-                        fetch('/files/' + encodeURIComponent(preview_filename))
-                            .then(response => response.json())
-                            .then(data => {
-                                var videoUrl = data['file_url']
-                                // console.log(videoUrl)
-                                var filename = preview_filename;
-                                openVideoPreviewModal(videoUrl, filename);
-                            })
-                            .catch(error => console.error(error));
-                    }
-                };
             }
         });
 }
+
+function createDownloadButton(fileData) {
+    var download_button = document.createElement("button");
+    var download_icon = document.createElement("i");
+    download_icon.className = "fas fa-download";
+    download_button.appendChild(download_icon);
+    download_button.classList.add("btn", "btn-primary");
+    download_button.style.width = '30px';
+    download_button.style.height = '30px';
+    download_button.style.padding = '2px';
+    download_button.style.fontSize = '12px';
+
+    download_button.onclick = function () {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/download');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.responseType = 'blob';
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(xhr.response);
+                link.download = fileData['name'];
+                link.click();
+            }
+        };
+        xhr.send(JSON.stringify({ filename: fileData['name'] }));
+    };
+
+    return download_button;
+}
+
+function createDeleteButton(fileData) {
+    var delete_button = document.createElement("button");
+    var delete_icon = document.createElement("i");
+    delete_icon.className = "fas fa-trash";
+    delete_button.appendChild(delete_icon);
+    delete_button.classList.add("btn", "btn-primary");
+    delete_button.style.width = '30px';
+    delete_button.style.height = '30px';
+    delete_button.style.padding = '2px';
+    delete_button.style.fontSize = '12px';
+
+    if (session['level'] === "user") {
+        delete_button.disabled = true;
+    }
+
+    delete_button.onclick = function () {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/delete');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    alert("File deleted successfully!");
+                    loadFiles(); // Reload files
+                } else {
+                    alert("Error deleting file.");
+                }
+            }
+        };
+        xhr.send(JSON.stringify({ filename: fileData['name'] }));
+    };
+
+    return delete_button;
+}
+
 
 function openFilePreviewModal(url, fileName) {
     var filePreviewModal = document.getElementById("filePreviewModal");
@@ -2533,6 +2647,21 @@ UploadFileBtn.addEventListener('click', async function () {
 });
 
 
+function toggleCards(showVR) {
+    var orthoCard = document.getElementById('xy-card-body');
+    var canvasC = document.getElementById('c');
+    var DownToolDiv = document.getElementById('DownToolDiv');
+
+    if (showVR) {
+        orthoCard.style.display = 'none';  // 隐藏 orthoCard
+        DownToolDiv.style.display = 'none'
+        canvasC.style.height = '70vh'
+    } else {
+        orthoCard.style.display = 'block';  // 隐藏 orthoCard
+        DownToolDiv.style.display = 'block'
+        canvasC.style.height = 'none';
+    }
+}
 
 
 

@@ -905,8 +905,12 @@ def store_image():
     content_types = {
         "mp4": ("videos", 'video/mp4'),
         "png": ("images", 'image/png'),
-        "jpg": ("images", 'image/jpeg'),
-        "txt": ("txt", 'text/plain'),
+        "jpg": ("images", 'image/jpg'),
+        "txt": ("text", 'text/plain'),
+        "ppt": ("presentations", 'application/vnd.ms-powerpoint'),
+        "pptx": ("presentations", 'application/vnd.openxmlformats-officedocument.presentationml.presentation'),
+        "doc": ("documents", 'application/msword'),
+        "docx": ("documents", 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
     }
 
     if format not in content_types:
@@ -1276,7 +1280,7 @@ def driver():
     # Reset progress at the start of a new job
     data = request.form
     dataset_name = data.get('dataset-name')
-    insitution_name = data.get('institution-name')
+    insitution_name = data.get('institutionName')
     pixelLengthUM = data.get('pixelLengthUM')
     zskip = data.get('zskip')
     specimen = data.get('spcimenName')
@@ -1331,7 +1335,7 @@ def driver():
                             }
                     },
             'voxels':{'x':1,'y':1,'z':2.048},
-            'dims2':{'x':int(mongoRecord[str(job[0])]['imageDims']['x'] * 2),'y': int(mongoRecord[str(job[0])]['imageDims']['y'] * 2),'z': int(mongoRecord[str(job[0])]['imageDims']['z'] * 2)},
+            'dims2':{'x':int(2 ** math.ceil(math.log(int(mongoRecord[str(job[0])]['imageDims']['x']), 2))),'y': int(2 ** math.ceil(math.log(int(mongoRecord[str(job[0])]['imageDims']['y']), 2))),'z': int(2 ** math.ceil(math.log(int(mongoRecord[str(job[0])]['imageDims']['z']), 2)))},
             'dims3':{'x':int(mongoRecord[str(job[0])]['imageDims']['x']),'y': int(mongoRecord[str(job[0])]['imageDims']['y']),'z': int(mongoRecord[str(job[0])]['imageDims']['z'])},
             'pixelLengthUM':"100.5",
             'imageDims':{'x':mongoRecord[str(job[0])]['imageDims']['x'],'y':mongoRecord[str(job[0])]['imageDims']['y'],'z':mongoRecord[str(job[0])]['imageDims']['z']},
@@ -1401,14 +1405,18 @@ def driver():
     compressed_file_path = dataset_name +"-" + Modality + "-" + exposure + "-" + wavelength + ".zip"
     shutil.make_archive(compressed_file_path[:-4], 'zip', temp_dir)
     blob_name = os.path.basename(compressed_file_path)
-
     AZURE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=bivlargefiles;AccountKey=PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw==;EndpointSuffix=core.windows.net"
     CONTAINER_NAME = "zipfiles"
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
     container_client = blob_service_client.get_container_client(CONTAINER_NAME)
     blob_client = container_client.get_blob_client(blob_name)
+
     with open(compressed_file_path, "rb") as f:
         blob_client.upload_blob(f)
+
+    # Cleanup: Remove the compressed file after uploading
+    os.remove(compressed_file_path)
+    
     return jsonify({"message": "File Uploaded Successfully"}), 200
 
 @app.route('/progress', methods=['GET'])
