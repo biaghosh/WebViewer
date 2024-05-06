@@ -174,6 +174,7 @@ def saveAnnotation():
 
     ds.insert_one({
         "dataset": json["dataset"],
+        "plane":json["plane"],
         "slice": json["slice"],
         "user": session['email'],
         "moduality": json["moduality"],
@@ -372,6 +373,7 @@ def getDatasetInfo():
                 "zskip": 1,
                 "institution": 1,
                 "info": 1,
+                "ann.plane": 1,
                 "ann.slice": 1,
                 "ann.user": 1,
                 "ann.moduality": 1,
