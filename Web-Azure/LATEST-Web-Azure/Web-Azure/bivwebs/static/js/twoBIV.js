@@ -21,8 +21,28 @@ let measureData = {
 
 
 dsSelect.addEventListener("change", () => {
-    if (!dsSelect.value)
-        return
+    console.log()
+    if (!dsSelect.value) return;
+
+    // 检查按钮是否已启用
+    const loadButton = document.getElementById('loadDatasetBtn');
+    const isLoadButtonEnabled = !loadButton.disabled;
+
+    // 如果按钮启用，延迟 1 秒启用
+    if (isLoadButtonEnabled) {
+        console.log("sss")
+        loadButton.disabled = true;
+        setTimeout(() => {
+            loadButton.disabled = false;
+        }, 1000);
+    }
+    else{
+        console.log("21321")
+        setTimeout(() => {
+            loadButton.disabled = false;
+        }, 1000);
+    }
+
     fetch('/getDatasetInfo', {
         method: 'POST',
         headers: {
@@ -32,42 +52,49 @@ dsSelect.addEventListener("change", () => {
     })
         .then(response => response.json())
         .then(data => {
-            document.getElementById('loadDatasetBtn').disabled = false
-            session = data['session']
-            dsName = data['dataset_info'][0]['name']
-            dsInfo = data['dataset_info'][0]
-            annSlices = data['dataset_info'][0]['ann']
-            files = data['dataset_info'][0]['file']
-            dsChanged = true
-            modSelect.disabled = false
-            let modCounter = 0, expCounter = 0, waveCounter = 0
-            modSelect.innerHTML = ``
-            exposureSelect.innerHTML = ``
-            wavelengthSelect.innerHTML = ``
-            if (lineTextGroup) {
 
-                lineTextGroup.remove(...lineTextGroup.children)
+            // 继续处理数据
+            session = data['session'];
+            dsName = data['dataset_info'][0]['name'];
+            dsInfo = data['dataset_info'][0];
+            annSlices = data['dataset_info'][0]['ann'];
+            files = data['dataset_info'][0]['file'];
+            dsChanged = true;
+            modSelect.disabled = false;
+
+            let modCounter = 0, expCounter = 0, waveCounter = 0;
+            modSelect.innerHTML = ``;
+            exposureSelect.innerHTML = ``;
+            wavelengthSelect.innerHTML = ``;
+            if (lineTextGroup) {
+                lineTextGroup.remove(...lineTextGroup.children);
             }
 
+            // 填充选择框
             for (const mod in dsInfo.types) {
-                let opt = document.createElement('option')
-                opt.appendChild(document.createTextNode(mod))
-                opt.value = mod
-                modSelect.appendChild(opt)
-                modCounter++
+                let opt = document.createElement('option');
+                opt.appendChild(document.createTextNode(mod));
+                opt.value = mod;
+                modSelect.appendChild(opt);
+                modCounter++;
                 for (const exp in dsInfo.types[mod]) {
-                    expCounter++
+                    expCounter++;
                     for (const wave in dsInfo.types[mod][exp]) {
-                        waveCounter++
+                        waveCounter++;
                     }
                 }
             }
-            modSelect.selectedIndex = 0
-            var event = new Event('change')
-            modSelect.dispatchEvent(event)
+
+            // 默认选择第一个模式，并触发事件
+            modSelect.selectedIndex = 0;
+            var event = new Event('change');
+            modSelect.dispatchEvent(event);
         })
-        .catch((error) => { console.error('Error:', error) })
-})
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+});
+
 
 
 modSelect.addEventListener("change", changeMod)
