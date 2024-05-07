@@ -442,6 +442,40 @@ function animate2() {
         }
     })
 
+    XZannTextGroup.traverse(function (child) {
+        // console.log("这里有吗")
+        if (child.type == 'Mesh') {
+            if (oCameras['xz'].position.z <= 250) {
+                var scaleFactor = 500 * (1 / dsInfo['voxels']['z'] / (annFontNumber.value))
+                var scale = scaleVector.subVectors(child.position, oCameras['xz'].position).length() / scaleFactor
+                child.scale.set(scale, scale, 1)
+            } else {
+                //flip the transformation
+                var scaleFactor = 500 * (1 / dsInfo['voxels']['z'] / annFontNumber.value) * 1.25
+                var scale = scaleVector.subVectors(child.position, oCameras['xz'].position).length() / scaleFactor
+                child.scale.set(scale, scale, 1)
+            }
+
+        }
+    })
+
+    YZannTextGroup.traverse(function (child) {
+        // console.log("这里有吗")
+        if (child.type == 'Mesh') {
+            if (oCameras['yz'].position.z <= 250) {
+                var scaleFactor = 500 * (1 / dsInfo['voxels']['z'] / (annFontNumber.value))
+                var scale = scaleVector.subVectors(child.position, oCameras['yz'].position).length() / scaleFactor
+                child.scale.set(scale, scale, 1)
+            } else {
+                //flip the transformation
+                var scaleFactor = 500 * (1 / dsInfo['voxels']['z'] / annFontNumber.value) * 1.25
+                var scale = scaleVector.subVectors(child.position, oCameras['yz'].position).length() / scaleFactor
+                child.scale.set(scale, scale, 1)
+            }
+
+        }
+    })
+
     xyShader.uniforms.u_threshold.value = threshold2D.value / 10
     rendererXY.render(sceneXY, cameraXY)
 
@@ -952,8 +986,14 @@ function drawAnnotation(p, t, x, y) {
     else if (p == "YZ") {
         YZannTextGroup.add(text)
     }
+    else if (p == "XZ") {
+        XZannTextGroup.add(text)
+    }
 
     YZannTextGroup.children.forEach(child => {
+        child.position.z = 0.1;  // 调整z轴坐标使注释位于图像平面之前
+    });
+    XZannTextGroup.children.forEach(child => {
         child.position.z = 0.1;  // 调整z轴坐标使注释位于图像平面之前
     });
 }
@@ -1257,8 +1297,8 @@ function addAnnotationEvents() {
         createAnnBtn.disabled = true;
 
         canvasXY.removeEventListener("click", orthoClick);
-        canvasYZ.removeEventListener("click", orthoClick);
-        canvasXZ.removeEventListener("click", orthoClick);
+        canvasYZ.removeEventListener("click", yzClick);
+        canvasXZ.removeEventListener("click", xzClick);
 
 
         canvasXY.addEventListener("click", processNewAnn);
@@ -1277,11 +1317,13 @@ function addAnnotationEvents() {
         if (toggleAnnBtn.innerHTML == 'Hide Annotations') {
             XYannTextGroup.visible = false;
             YZannTextGroup.visible = false;
+            XZannTextGroup.visible = false;
             createAnnBtn.disabled = true;
             toggleAnnBtn.innerHTML = 'Show Annotations';
         } else {
             XYannTextGroup.visible = true;
             YZannTextGroup.visible = true;
+            XZannTextGroup.visible = true;
             createAnnBtn.disabled = false;
             toggleAnnBtn.innerHTML = 'Hide Annotations';
         }
@@ -1341,7 +1383,7 @@ function processNewAnnYZ(evt) {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        'slice': oClip['yz'].value,  // 确保你有相应的sliderYZ
+                        'slice': clipCoords[oClip['yz']],  // 确保你有相应的sliderYZ
                         'plane': 'YZ',
                         'dataset': dsInfo["name"],
                         'moduality': modSelect.value,
@@ -1359,18 +1401,18 @@ function processNewAnnYZ(evt) {
                         if (data['instance']) {
                             annTxt += '-' + data['instance'];
                         }
-                        drawAnnotationYZ(annTxt, data['x'], data['y']);  // 确保你有一个drawAnnotationYZ函数
+                        drawAnnotation('YZ', annTxt, data['x'], data['y']);  // 确保你有一个drawAnnotationYZ函数
 
-                        var newRow = annTableBodyYZ.insertRow();  // 确保你有对应的表格
+                        var newRow = annTableBody.insertRow();  // 确保你有对应的表格
 
                         let dt = new Date(data['datetime']);
 
-                        newRow.insertCell(0).appendChild(document.createTextNode(data[i]['text']))
-                        newRow.insertCell(1).appendChild(document.createTextNode(data[i]['plane']))
-                        newRow.insertCell(2).appendChild(document.createTextNode(data[i]['slice']))
-                        newRow.insertCell(3).appendChild(document.createTextNode(data[i]['instance'] ? data[i]['instance'] : '0'))
+                        newRow.insertCell(0).appendChild(document.createTextNode(data['text']))
+                        newRow.insertCell(1).appendChild(document.createTextNode(data['plane']))
+                        newRow.insertCell(2).appendChild(document.createTextNode(data['slice']))
+                        newRow.insertCell(3).appendChild(document.createTextNode(data['instance'] ? data['instance'] : '0'))
                         newRow.insertCell(4).appendChild(document.createTextNode(dt.toDateString()))
-                        newRow.insertCell(5).appendChild(document.createTextNode(data[i]['user'].split("@")[0]))
+                        newRow.insertCell(5).appendChild(document.createTextNode(data['user'].split("@")[0]))
 
                         var btn = document.createElement('input');
                         btn.type = "button";
@@ -1382,7 +1424,7 @@ function processNewAnnYZ(evt) {
                         btn.setAttribute('data-instance', data['instance'] ? data['instance'] : '0');
                         btn.setAttribute('data-comments', data['comments'] ? data['comments'] : '');
 
-                        newRow.insertCell(4).appendChild(btn);
+                        newRow.insertCell(6).appendChild(btn);
 
                         createAnnBtn.disabled = false;
                     })
@@ -1392,7 +1434,7 @@ function processNewAnnYZ(evt) {
 
                 yzDiv.removeChild(txtBox);
                 txtBox = null;
-                canvasYZ.addEventListener("click", orthoClick);
+                canvasYZ.addEventListener("click", yzClick);
                 createAnnBtn.disabled = false;
             }
         });
@@ -1417,7 +1459,7 @@ function processNewAnnXZ(evt) {
         txtBox.height = 20;
         txtBox.maxLength = 30;
         txtBox.style.position = "absolute";
-        yzDiv.appendChild(txtBox);  // 确保你有一个与 canvasYZ 对应的 div
+        xzDiv.appendChild(txtBox);  // 确保你有一个与 canvasYZ 对应的 div
         txtBox.style.zIndex = "10";
         txtBox.style.left = evt.offsetX + canvasXZ.offsetLeft + "px";
         txtBox.style.top = evt.offsetY + canvasXZ.offsetTop + "px";
@@ -1433,6 +1475,7 @@ function processNewAnnXZ(evt) {
         }, true);
 
         txtBox.addEventListener("keyup", function (e) {
+            console.log(clipCoords[oClip['xz']])
             txtBox.value = txtBox.value.replace(/[-]/g, '');
             if (e.keyCode === 13 && txtBox.value != '') {
                 fetch('/saveAnnotation', {
@@ -1441,7 +1484,7 @@ function processNewAnnXZ(evt) {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        'slice': oClip['xz'].value,  // 确保你有相应的sliderYZ
+                        'slice': clipCoords[oClip['xz']],  // 确保你有相应的sliderYZ
                         'plane': 'XZ',
                         'dataset': dsInfo["name"],
                         'moduality': modSelect.value,
@@ -1455,22 +1498,23 @@ function processNewAnnXZ(evt) {
                 })
                     .then(response => response.json())
                     .then(data => {
+                        console.log(data)
                         let annTxt = data['text'];
                         if (data['instance']) {
                             annTxt += '-' + data['instance'];
                         }
-                        drawAnnotationYZ(annTxt, data['x'], data['y']);  // 确保你有一个drawAnnotationYZ函数
+                        drawAnnotation('XZ', annTxt, data['x'], data['y']);  // 确保你有一个drawAnnotationYZ函数
 
-                        var newRow = annTableBodyYZ.insertRow();  // 确保你有对应的表格
+                        var newRow = annTableBody.insertRow();  // 确保你有对应的表格
 
                         let dt = new Date(data['datetime']);
 
-                        newRow.insertCell(0).appendChild(document.createTextNode(data[i]['text']))
-                        newRow.insertCell(1).appendChild(document.createTextNode(data[i]['plane']))
-                        newRow.insertCell(2).appendChild(document.createTextNode(data[i]['slice']))
-                        newRow.insertCell(3).appendChild(document.createTextNode(data[i]['instance'] ? data[i]['instance'] : '0'))
+                        newRow.insertCell(0).appendChild(document.createTextNode(data['text']))
+                        newRow.insertCell(1).appendChild(document.createTextNode(data['plane']))
+                        newRow.insertCell(2).appendChild(document.createTextNode(data['slice']))
+                        newRow.insertCell(3).appendChild(document.createTextNode(data['instance'] ? data['instance'] : '0'))
                         newRow.insertCell(4).appendChild(document.createTextNode(dt.toDateString()))
-                        newRow.insertCell(5).appendChild(document.createTextNode(data[i]['user'].split("@")[0]))
+                        newRow.insertCell(5).appendChild(document.createTextNode(data['user'].split("@")[0]))
 
                         var btn = document.createElement('input');
                         btn.type = "button";
@@ -1482,7 +1526,7 @@ function processNewAnnXZ(evt) {
                         btn.setAttribute('data-instance', data['instance'] ? data['instance'] : '0');
                         btn.setAttribute('data-comments', data['comments'] ? data['comments'] : '');
 
-                        newRow.insertCell(4).appendChild(btn);
+                        newRow.insertCell(6).appendChild(btn);
 
                         createAnnBtn.disabled = false;
                     })
@@ -1492,7 +1536,7 @@ function processNewAnnXZ(evt) {
 
                 xzDiv.removeChild(txtBox);
                 txtBox = null;
-                canvasXZ.addEventListener("click", orthoClick);
+                canvasXZ.addEventListener("click", xzClick);
                 createAnnBtn.disabled = false;
             }
         });
@@ -1505,10 +1549,11 @@ function loadAnnotationsFast() {
     console.log("loadAnnotationsFast")
     XYannTextGroup.remove(...XYannTextGroup.children)
     YZannTextGroup.remove(...YZannTextGroup.children)
+    XZannTextGroup.remove(...XZannTextGroup.children)
     annTableBody.innerHTML = ``
     let data = annSlices
     for (let i = 0; i < data.length; i++) {
-        if (data[i]['slice'] == slider.value && data[i]['status'] != 'hidden' || data[i]['slice'] == clipCoords[oClip['yz']]) {
+        if (data[i]['slice'] == slider.value && data[i]['status'] != 'hidden' || data[i]['slice'] == clipCoords[oClip['yz']] || data[i]['slice'] == clipCoords[oClip['xz']]) {
 
             var newRow = annTableBody.insertRow()
 
@@ -1576,7 +1621,6 @@ annModalSave.addEventListener('click', () => {
 
 
 annModalDelete.addEventListener('click', () => {
-
     let i = annSlices.findIndex(
         e => e.text == document.getElementById('annModalTxt').value
             && e.instance == document.getElementById('annModalInstance').value
@@ -2006,7 +2050,8 @@ function loadOrthos(fullLoad = true) {
     })*/
     if (fullLoad) {
         canvasXY.addEventListener("click", orthoClick)
-        // canvasYZ.addEventListener("click",orthoClick)
+        // canvasYZ.addEventListener("click", orthoClick)
+        // canvasXZ.addEventListener("click", orthoClick)
         //clipCoords.x = Math.round(parseInt(dsInfo["imageDims"]["x"]) / 2 / 4 ) * 4
         //clipCoords.y = Math.round(parseInt(dsInfo["imageDims"]["y"]) / 2 / 4 ) * 4
         var points = [];
@@ -2131,8 +2176,8 @@ function loadOrthos(fullLoad = true) {
         )
     })
 
-
     oScenes['yz'].add(YZannTextGroup)
+    oScenes['xz'].add(XZannTextGroup)
 
     oRenderers['xz'].domElement.addEventListener("click", xzClick)
     oRenderers['yz'].domElement.addEventListener("click", yzClick)
@@ -2363,10 +2408,9 @@ function initMainOrthoLines() {
 
 function updateOrthoMeshes() {
     // console.log("update")
-    showLoading('ortho')
     xclip.value = clipCoords[oClip['yz']]
     yclip.value = clipCoords[oClip['xz']]
-    // console.log("xclip,yclip", xclip.value, yclip.value)
+    console.log("xclip,yclip", xclip.value, yclip.value)
     orthos.forEach(ortho => {
         loader.load(`https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis?${SAS}`, function (texture) {
             texture.encoding = THREE.sRGBEncoding
@@ -2383,6 +2427,7 @@ function updateOrthoMeshes() {
         }, undefined, function (error) { console.error(error) }
         )
     })
+    loadAnnotationsFast()
 }
 
 // fileDownloadBtn.addEventListener('click', () => {

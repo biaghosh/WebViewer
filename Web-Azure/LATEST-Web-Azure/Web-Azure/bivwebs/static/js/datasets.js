@@ -530,6 +530,7 @@ function submitInstitutionForm() {
 
 
 document.getElementById('submitBtn').addEventListener('click', async function () {
+    console.log(institutionsList)
     const fileInputTiff = document.getElementById('fileInputTiff');
     if (!fileInputTiff.files.length) {
         alert('Please upload the .tif file');
@@ -539,6 +540,11 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     // Create an array containing all input boxes that need to be checked
     const filename = fileInputTiff.files[0].name.split('.')[0]
     const abbr = filename.split('#')[0]
+    if (!institutionsList.find(institution => institution.abbr === abbr)){
+        alert('Abbr(Institution) does not exist');
+        return;
+    }
+    
     const institutionName = institutionsList.find(institution => institution.abbr === abbr).name;
     const datasetName = filename.split('#')[1]
     const Modality = filename.split('#')[2]

@@ -147,6 +147,7 @@ def saveAnnotation():
     if 'email' not in session:
         return redirect(url_for('login'))
     json = request.get_json()
+    print(json)
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     ds = db.annotations
