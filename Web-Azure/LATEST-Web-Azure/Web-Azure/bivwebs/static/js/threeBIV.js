@@ -33,7 +33,7 @@ let edgesBox = document.getElementById("edgesCheckbox")
 // exportBtn.disabled = false, exportXYZSelect.disabled = false, exportHeightInput.disabled = false, exportWidthSelect.disabled = false;
 let context = canvas.getContext('webgl2', { antialias: true })
 const renderer = new THREE.WebGLRenderer({ canvas, context, 'powerPreference': 'high-performance' });
-var scene, camera, material, controls, animationId, tcontrols
+var scene = new THREE.Scene(), camera, material, controls, animationId, tcontrols
 var geometry, xGeometry, yGeometry, zGeometry
 var xMaterial = new THREE.ShaderMaterial({
     uniforms: {
@@ -172,30 +172,32 @@ function saveDataURI(name, dataURI) {
 
 window.isVrTabSelected = false; // 初始化为未选中状态
 window.isOrthoTabSelected = true;
-document.getElementById('vrTab').addEventListener('click', () => {
-    window.isVrTabSelected = true // 取反以更新状态
-    window.isOrthoTabSelected = false
-    init2(true)
-    // if (!alreadyOn) {
-    //     init2(true)
-    //     alreadyOn = true
-    // }
-    // else {
-    //     animate()
-    // }
 
-})
+function clearScene() {
+    while (scene.children.length > 0) {
+        console.log("clearScene > 0")
+        let object = scene.children[0];
+        if (object.dispose) {
+            object.dispose(); // 如果对象有 dispose 方法，调用它
+        }
+        scene.remove(object); // 从场景中移除对象
+    }
+}
+
+document.getElementById('vrTab').addEventListener('click', () => {
+    window.isVrTabSelected = true;
+    window.isOrthoTabSelected = false;
+    clearScene(); // 清空场景
+    init2(true); // 初始化 VR 视图
+});
 
 document.getElementById('orthoTab').addEventListener('click', () => {
-    window.isVrTabSelected = false // 取反以更新状态
-    window.isOrthoTabSelected = true
-    // window.isVrTabSelected = !window.isVrTabSelected; // 取反以更新状态
-    // window.isOrthoTabSelected = !window.isOrthoTabSelected;
-    //boundingLine = null
-    //renderer.clear()
-    window.cancelAnimationFrame(animationId)
-    //alreadyOn = false
-})
+    window.isVrTabSelected = false;
+    window.isOrthoTabSelected = true;
+    window.cancelAnimationFrame(animationId); // 取消当前的动画帧
+    clearScene(); // 清空场景
+});
+
 
 /*
 visBtn.addEventListener('click', () => {
@@ -215,7 +217,7 @@ visBtn.addEventListener('click', () => {
 
 
 function init2(fullLoad) {
-    console.log(dsInfo)
+    console.log("init2")
     document.getElementById(`vrOverlayDiv`).classList.remove('d-none')
     document.getElementById(`vrOverlayDiv`).classList.add('d-flex')
 
@@ -263,7 +265,7 @@ function init2(fullLoad) {
         controls.rotateSpeed = 0.5
         controls.update();
 
-        scene = new THREE.Scene()
+        // scene = new THREE.Scene()
 
         geometry = new THREE.BoxBufferGeometry(dsInfo['dims3']['x'], dsInfo['dims3']['y'], dsInfo['dims3']['z'] + 200)
 
@@ -348,7 +350,6 @@ function init2(fullLoad) {
     // URL = "https://bivlargefiles.blob.core.windows.net/zipfiles/WM_Brightfield-1-430.zip"
 
     new JSZip.external.Promise(function (resolve, reject) {
-
         JSZipUtils.getBinaryContent(
             `https://bivlargefiles.blob.core.windows.net/zipfiles/${dsInfo['name']}-${modSelect.value}-${exposureSelect.value}-${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}.zip`
             , function (err, data) {
@@ -361,14 +362,13 @@ function init2(fullLoad) {
     }).then(function (data) {
         JSZip.loadAsync(data).then(function (zip) {
             Object.keys(zip.files).forEach(function (filename) {
-                if (/\/xy\//.test(filename) && filename.endsWith('.png')){
+                if (/\/xy\//.test(filename) && filename.endsWith('.png')) {
                     zip.files[filename].async('base64').then(function (fileData) {
                         let can = new Image()
                         can.src = 'data:image/png;base64,' + fileData
                         can.onload = function () {
                             console.log(filename)
                             let fn = filename.split('/').pop()
-                            // console.log(fn)
                             let c = document.createElement('canvas')
                             c.width = dsInfo['dims3']['x']
                             c.height = dsInfo['dims3']['y'] * 4
@@ -395,7 +395,7 @@ function init2(fullLoad) {
                                 // yPlaneIn3d()
                                 // xPlaneIn3d()
                             }
-    
+
                         }
                     })
                 }
@@ -490,7 +490,6 @@ function init2(fullLoad) {
         let rgba = pickr2.getColor().toRGBA()
         material.uniforms.u_background.value.set(rgba[0] / 255, rgba[1] / 255, rgba[2] / 255, rgba[3])
     })
-
 }
 //only show this input if dataset has cell data available
 //use this 

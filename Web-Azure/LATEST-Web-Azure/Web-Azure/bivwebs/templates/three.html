@@ -1119,21 +1119,6 @@
     })*/
     })
 
-    $('#annotationModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget) // Button that triggered the modal
-        var text = button.data('text') // Extract info from data-* attributes
-        var iter = button.data('instance')
-        var comments = button.data('comments')
-        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-        var modal = $(this)
-        modal.find('#annModalTxt').val(text)
-        modal.find('#annModalOldTxt').val(text)
-        modal.find('#annModalInstance').val(iter)
-        modal.find('#annModalComments').val(comments)
-
-    })
-
 </script>
 <!-- Basis vert shader-->
 <script id="vertex_shader" type="x-shader/x-vertex">

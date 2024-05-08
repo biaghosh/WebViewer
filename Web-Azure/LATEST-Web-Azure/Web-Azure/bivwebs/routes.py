@@ -248,27 +248,35 @@ def updateAnnotationComments():
 def deleteAnnotation():
     if 'email' not in session:
         return redirect(url_for('login'))
-    json = request.get_json()
+    
+    json_data = request.get_json()
+    print(json_data)
+    
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     ds = db.annotations
-    if int(json["instance"]) == 0:
-        json["instance"] = ''
+    
+    # Attempt to delete the matching document
+    result = ds.delete_one({
+        "dataset": json_data["dataset"],
+        "plane": json_data["plane"],
+        "slice": json_data["slice"],
+        "text": json_data["text"]
+    })
+
+    # Prepare the response based on the result
+    if result.deleted_count == 1:
+        response_data = {
+            "message": "Annotation successfully deleted."
+        }
     else:
-        json["instance"] = int(json["instance"])
+        response_data = {
+            "message": "Annotation not found or could not be deleted."
+        }
+    
+    return make_response(dumps(response_data), 200)
 
-    ds.update_one({
-        "dataset": json["dataset"],
-        "slice": json["slice"],
-        "text": json["text"],
-        "instance": json["instance"]
-    },
-        {'$set': {
-            "status": "hidden"
-        }})
 
-    data = '{}'
-    return make_response(dumps(data), 200)
 
 @app.route('/addAssignedDataset/<email>/<datasetName>', methods=['POST'])
 def add_assigned_dataset(email, datasetName):

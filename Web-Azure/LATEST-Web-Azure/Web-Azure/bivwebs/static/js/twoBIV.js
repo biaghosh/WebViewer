@@ -12,6 +12,7 @@ let xyInputTimeout
 var previousSlice
 let session
 var SAS = 'sp=r&st=2023-08-14T15:15:15Z&se=2036-06-18T15:15:00Z&spr=https&sv=2022-11-02&sig=pisDbcAw2k0FGGNHg5i4FIqJklWf9%2BAW03VkeidVsWk%3D&sr=s'
+let Selectslice, Selectplane
 
 let measureData = {
     xy: { clicks: [], lines: [] },
@@ -28,20 +29,6 @@ dsSelect.addEventListener("change", () => {
     const loadButton = document.getElementById('loadDatasetBtn');
     const isLoadButtonEnabled = !loadButton.disabled;
 
-    // 如果按钮启用，延迟 1 秒启用
-    if (isLoadButtonEnabled) {
-        console.log("sss")
-        loadButton.disabled = true;
-        setTimeout(() => {
-            loadButton.disabled = false;
-        }, 1000);
-    }
-    else{
-        console.log("21321")
-        setTimeout(() => {
-            loadButton.disabled = false;
-        }, 1000);
-    }
 
     fetch('/getDatasetInfo', {
         method: 'POST',
@@ -93,6 +80,18 @@ dsSelect.addEventListener("change", () => {
         .catch((error) => {
             console.error('Error:', error);
         });
+    // 如果按钮启用，延迟 1 秒启用
+    if (isLoadButtonEnabled) {
+        loadButton.disabled = true;
+        setTimeout(() => {
+            loadButton.disabled = false;
+        }, 1000);
+    }
+    else {
+        setTimeout(() => {
+            loadButton.disabled = false;
+        }, 1000);
+    }
 });
 
 
@@ -1238,7 +1237,7 @@ function processNewAnn(evt) {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        'slice': slider.value,
+                        'slice': parseInt(slider.value),
                         'plane': 'XY',
                         'dataset': dsInfo["name"],
                         'moduality': modSelect.value,
@@ -1257,16 +1256,18 @@ function processNewAnn(evt) {
                         let annTxt = data['text']
                         if (data['instance'])
                             annTxt += '-' + data['instance']
-                        drawAnnotation(annTxt, data['x'], data['y'])
+                        drawAnnotation("XY", annTxt, data['x'], data['y'])
 
                         var newRow = annTableBody.insertRow()
 
                         let dt = new Date(data['datetime'])
 
                         newRow.insertCell(0).appendChild(document.createTextNode(data['text']))
-                        newRow.insertCell(1).appendChild(document.createTextNode(data['instance'] ? data['instance'] : '0'))
-                        newRow.insertCell(2).appendChild(document.createTextNode(dt.toDateString()))
-                        newRow.insertCell(3).appendChild(document.createTextNode(data['user'].split("@")[0]))
+                        newRow.insertCell(1).appendChild(document.createTextNode(data['plane']))
+                        newRow.insertCell(2).appendChild(document.createTextNode(data['slice']))
+                        newRow.insertCell(3).appendChild(document.createTextNode(data['instance'] ? data['instance'] : '0'))
+                        newRow.insertCell(4).appendChild(document.createTextNode(dt.toDateString()))
+                        newRow.insertCell(5).appendChild(document.createTextNode(data['user'].split("@")[0]))
 
                         var btn = document.createElement('input');
                         btn.type = "button";
@@ -1278,7 +1279,7 @@ function processNewAnn(evt) {
                         btn.setAttribute('data-instance', data['instance'] ? data['instance'] : '0')
                         btn.setAttribute('data-comments', data['comments'] ? data['comments'] : '')
 
-                        newRow.insertCell(4).appendChild(btn)
+                        newRow.insertCell(6).appendChild(btn)
 
                         createAnnBtn.disabled = false
 
@@ -1573,7 +1574,7 @@ function processNewAnnXZ(evt) {
 
 
 function loadAnnotationsFast() {
-    console.log("loadAnnotationsFast")
+    console.log("loadAnn")
     XYannTextGroup.remove(...XYannTextGroup.children)
     YZannTextGroup.remove(...YZannTextGroup.children)
     XZannTextGroup.remove(...XZannTextGroup.children)
@@ -1599,6 +1600,8 @@ function loadAnnotationsFast() {
             btn.setAttribute('data-toggle', 'modal')
             btn.setAttribute('data-target', '#annotationModal')
             btn.setAttribute('data-text', data[i]['text'])
+            btn.setAttribute('data-plane', data[i]['plane'])
+            btn.setAttribute('data-slice', data[i]['slice'])
             btn.setAttribute('data-instance', data[i]['instance'] ? data[i]['instance'] : '0')
             btn.setAttribute('data-comments', data[i]['comments'] ? data[i]['comments'] : '')
 
@@ -1613,12 +1616,32 @@ function loadAnnotationsFast() {
     createAnnBtn.disabled = false
 }
 
+$('#annotationModal').on('show.bs.modal', function (event) {
+    let button = $(event.relatedTarget) // Button that triggered the modal
+    console.log(button)
+    let Selecttext = button.data('text') // Extract info from data-* attributes
+    Selectplane = button.data('plane')
+    Selectslice = button.data('slice')
+    let Seleteiter = button.data('instance')
+    let Selectcomments = button.data('comments')
+    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+    let modal = $(this)
+    modal.find('#annModalTxt').val(Selecttext)
+    modal.find('#annModalOldTxt').val(Selecttext)
+    modal.find('#annModalInstance').val(Seleteiter)
+    modal.find('#annModalComments').val(Selectcomments)
+
+})
+
 annModalSave.addEventListener('click', () => {
 
     let i = annSlices.findIndex(
         e => e.text == document.getElementById('annModalOldTxt').value
             && e.instance == document.getElementById('annModalInstance').value
     )
+
+
 
     annSlices[i].text = document.getElementById('annModalTxt').value
     annSlices[i].comments = document.getElementById('annModalComments').value
@@ -1650,11 +1673,11 @@ annModalSave.addEventListener('click', () => {
 annModalDelete.addEventListener('click', () => {
     let i = annSlices.findIndex(
         e => e.text == document.getElementById('annModalTxt').value
-            && e.instance == document.getElementById('annModalInstance').value
+            && e.plane == Selectplane
     ) - 1
-
+    console.log(i)
     annSlices.splice(i, 1)
-    loadAnnotationsFast()
+
     $('#annotationModal').modal('hide')
     fetch('/deleteAnnotation', {
         method: 'POST',
@@ -1662,7 +1685,8 @@ annModalDelete.addEventListener('click', () => {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            'slice': slider.value,
+            'slice': Selectslice,
+            'plane': Selectplane,
             'dataset': dsInfo["name"],
             'moduality': modSelect.value,
             'exposure': exposureSelect.value,
@@ -1674,10 +1698,10 @@ annModalDelete.addEventListener('click', () => {
         .then(response => response.json())
         .then(data => { })
         .catch((error) => { console.error('Error:', error) })
+    loadAnnotationsFast()
 })
 
 window.addEventListener('resize', () => {
-
     if (!cameraXY)
         return
     cameraXY.aspect = (xyDiv.offsetWidth / 360)//@TODO HARDCODE
