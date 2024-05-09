@@ -22,12 +22,11 @@ let measureData = {
 
 
 dsSelect.addEventListener("change", () => {
-    console.log()
     if (!dsSelect.value) return;
 
     // 检查按钮是否已启用
-    const loadButton = document.getElementById('loadDatasetBtn');
-    const isLoadButtonEnabled = !loadButton.disabled;
+    // const loadButton = document.getElementById('loadDatasetBtn');
+    // const isLoadButtonEnabled = !loadButton.disabled;
 
 
     fetch('/getDatasetInfo', {
@@ -80,18 +79,18 @@ dsSelect.addEventListener("change", () => {
         .catch((error) => {
             console.error('Error:', error);
         });
-    // 如果按钮启用，延迟 1 秒启用
-    if (isLoadButtonEnabled) {
-        loadButton.disabled = true;
-        setTimeout(() => {
-            loadButton.disabled = false;
-        }, 1000);
-    }
-    else {
-        setTimeout(() => {
-            loadButton.disabled = false;
-        }, 1000);
-    }
+    // // 如果按钮启用，延迟 1 秒启用
+    // if (isLoadButtonEnabled) {
+    //     loadButton.disabled = true;
+    //     setTimeout(() => {
+    //         loadButton.disabled = false;
+    //     }, 1000);
+    // }
+    // else {
+    //     setTimeout(() => {
+    //         loadButton.disabled = false;
+    //     }, 1000);
+    // }
 });
 
 
@@ -134,7 +133,7 @@ function changeExposure() {
     for (const wave in dsInfo.types[modSelect.value][exposureSelect.value]) {
         waveCounter++
         let opt = document.createElement('option')
-        opt.appendChild(document.createTextNode(`${dsInfo.types[modSelect.value][exposureSelect.value][wave]}nm`))
+        opt.appendChild(document.createTextNode(`${dsInfo.types[modSelect.value][exposureSelect.value][wave]}`))
         opt.value = wave
         wavelengthSelect.appendChild(opt)
     }
@@ -151,44 +150,50 @@ function changeWavelength() {
         return
 }
 
-document.getElementById('loadDatasetBtn').addEventListener('click', () => {
-    console.log("load")
-    document.getElementById('UpMainDiv').classList.remove('d-none')
-    document.getElementById('DownMainDiv').classList.remove('d-none')
-    document.getElementById('DownToolDiv').classList.remove('d-none')
-    document.getElementById('tab1').classList.remove('d-none')
-    document.getElementById('tab2').classList.remove('d-none')
-    document.getElementById('tab3').classList.remove('d-none')
-    document.getElementById('tab4').classList.remove('d-none')
-    document.getElementById('tab5').classList.remove('d-none')
-    document.getElementById('tab6').classList.remove('d-none')
-    document.getElementById('tab7').classList.remove('d-none')
+function handleSelectChange() {
 
-    loadDynamic2D(dsChanged)
+    if (!document.getElementById('dsSelect').value || !document.getElementById('modSelect').value || !document.getElementById('exposureSelect').value || !document.getElementById('wavelengthSelect').value) {
+        return
+    };
+    document.getElementById('xy-card-body').classList.remove('d-none')
+    document.getElementById('UpMainDiv').classList.remove('d-none');
+    document.getElementById('DownMainDiv').classList.remove('d-none');
+    document.getElementById('DownToolDiv').classList.remove('d-none');
+    document.getElementById('orthoTab').classList.remove('disabled');
+    document.getElementById('orthoTab').classList.add('active');
+    document.getElementById('vrTab').classList.remove('disabled');
+    document.getElementById('tab1').classList.remove('d-none');
+    document.getElementById('tab2').classList.remove('d-none');
+    document.getElementById('tab3').classList.remove('d-none');
+    document.getElementById('tab4').classList.remove('d-none');
+    document.getElementById('tab5').classList.remove('d-none');
+    document.getElementById('tab6').classList.remove('d-none');
+    document.getElementById('tab7').classList.remove('d-none');
+
+    loadDynamic2D(dsChanged);
     if (window.isVrTabSelected) {
-        // Create a click event
         const clickEvent = new Event('click');
-        // Get the vrTab element
         const vrTabElement = document.getElementById('vrTab');
-        // Dispatches the click event to the vrTab element
         vrTabElement.dispatchEvent(clickEvent);
-    } else {
-        // console.log("vrTab is not selected");
     }
-    // exportHeightInput.value = Math.round((dsInfo["imageDims"]["y"] / dsInfo["imageDims"]["x"]) * exportWidthSelect.options[exportWidthSelect.selectedIndex].text)
-    addAnnotationEvents()
-    populateInfoTable()
+    addAnnotationEvents();
+    populateInfoTable();
 
-    //this needs to be ds
     if (dsChanged && !orthosActive) {
-        document.getElementById('orthoTab').click()
+        document.getElementById('orthoTab').click();
     }
 
-    if (dsChanged || modChanged)
-        // console.log("changed")
-        document.getElementById("dsBtnEvent").click()
-    dsChanged = false
-})
+    if (dsChanged || modChanged) {
+        document.getElementById("dsBtnEvent").click();
+    }
+    dsChanged = false;
+}
+
+// 给所有相关的选择框添加事件监听
+document.getElementById('dsSelect').addEventListener('change', handleSelectChange);
+document.getElementById('modSelect').addEventListener('change', handleSelectChange);
+document.getElementById('exposureSelect').addEventListener('change', handleSelectChange);
+document.getElementById('wavelengthSelect').addEventListener('change', handleSelectChange);
 
 //HTML ELEMENTS
 let canvasXY, canvasXZ, canvasYZ, exportWidthSelect, exportHeightInput, fullScreenInput
@@ -282,7 +287,7 @@ function loadDynamic2D(fullLoad) {
     if (!canvasXY) {
         // xyDiv.style.height = 'auto'
         rendererXY = new THREE.WebGLRenderer({ preserveDrawingBuffer: true })
-        rendererXY.setSize(xyDiv.offsetWidth, 300)
+        rendererXY.setSize(xyDiv.offsetWidth, 260)
         rendererXY.outputEncoding = THREE.sRGBEncoding
         xyDiv.appendChild(rendererXY.domElement);
         canvasXY = rendererXY.domElement
@@ -434,7 +439,6 @@ function loadDynamic2D(fullLoad) {
             fileManageBtn.disabled = false
         }
         if (document.getElementById('orthoTab').classList.contains('active')) {
-            console.log("沙俄不")
             loadOrthos()
         }
     }, undefined, function (error) { console.error(error) }
@@ -452,7 +456,6 @@ function animate2() {
         }
     })
     XYannTextGroup.traverse(function (child) {
-        // console.log("这里有吗")
         if (child.type == 'Mesh') {
             if (cameraXY.position.z <= 250) {
                 var scaleFactor = 500 * (1 / dsInfo['voxels']['z'] / (annFontNumber.value))
@@ -469,7 +472,6 @@ function animate2() {
     })
 
     XZannTextGroup.traverse(function (child) {
-        // console.log("这里有吗")
         if (child.type == 'Mesh') {
             if (oCameras['xz'].position.z <= 250) {
                 var scaleFactor = 500 * (1 / dsInfo['voxels']['z'] / (annFontNumber.value))
@@ -486,7 +488,6 @@ function animate2() {
     })
 
     YZannTextGroup.traverse(function (child) {
-        // console.log("这里有吗")
         if (child.type == 'Mesh') {
             if (oCameras['yz'].position.z <= 250) {
                 var scaleFactor = 500 * (1 / dsInfo['voxels']['z'] / (annFontNumber.value))
@@ -1196,7 +1197,6 @@ function populateInfoTable() {
 }
 
 function processNewAnn(evt) {
-    console.log("processNewAnn")
     let rect = canvasXY.getBoundingClientRect()
     mouse.x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1;
     mouse.y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1;
@@ -1290,7 +1290,8 @@ function processNewAnn(evt) {
                                 "exposure": exposureSelect.value,
                                 "instance": data['instance'],
                                 "moduality": modSelect.value,
-                                "slice": slider.value,
+                                "slice": data['slice'],
+                                "plane": "XY",
                                 "status": "active",
                                 "text": data['text'],
                                 "user": data['user'],
@@ -1306,6 +1307,11 @@ function processNewAnn(evt) {
                 xyDiv.removeChild(this)
                 txtBox = null
                 canvasXY.addEventListener("click", orthoClick)
+                canvasXZ.addEventListener("click", xzClick)
+                canvasYZ.addEventListener("click", yzClick)
+
+                canvasYZ.removeEventListener("click", processNewAnnYZ); // 针对 YZ 平面的处理函数
+                canvasXZ.removeEventListener("click", processNewAnnXZ);
                 createAnnBtn.disabled = false
             }
         })
@@ -1365,12 +1371,10 @@ function addAnnotationEvents() {
 
     function moveAnn() {
         // 这里添加移动注释的代码
-        console.log("移动注释");
     }
 }
 
 function processNewAnnYZ(evt) {
-    console.log("processNewAnnYZ");
     let rect = canvasYZ.getBoundingClientRect();
     mouse.x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1;
     mouse.y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1;
@@ -1455,6 +1459,24 @@ function processNewAnnYZ(evt) {
                         newRow.insertCell(6).appendChild(btn);
 
                         createAnnBtn.disabled = false;
+
+                        annSlices.push(
+                            {
+                                "comments": "",
+                                "datetime": data['datetime'],
+                                "exposure": exposureSelect.value,
+                                "instance": data['instance'],
+                                "moduality": modSelect.value,
+                                "slice": data['slice'],
+                                "plane": "YZ",
+                                "status": "active",
+                                "text": data['text'],
+                                "user": data['user'],
+                                "wavelength": wavelengthSelect.value,
+                                "x": data['x'],
+                                "y": data['y']
+                            }
+                        )
                     })
                     .catch((error) => {
                         console.error('Error:', error);
@@ -1462,8 +1484,16 @@ function processNewAnnYZ(evt) {
 
                 yzDiv.removeChild(txtBox);
                 txtBox = null;
-                canvasYZ.addEventListener("click", yzClick);
+                canvasXY.addEventListener("click", orthoClick)
+                canvasXZ.addEventListener("click", xzClick)
+                canvasYZ.addEventListener("click", yzClick)
+
+                canvasXY.removeEventListener("click", processNewAnn);
+                canvasXZ.removeEventListener("click", processNewAnnXZ);
+
                 createAnnBtn.disabled = false;
+
+
             }
         });
     }
@@ -1526,7 +1556,6 @@ function processNewAnnXZ(evt) {
                 })
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data)
                         let annTxt = data['text'];
                         if (data['instance']) {
                             annTxt += '-' + data['instance'];
@@ -1557,6 +1586,24 @@ function processNewAnnXZ(evt) {
                         newRow.insertCell(6).appendChild(btn);
 
                         createAnnBtn.disabled = false;
+
+                        annSlices.push(
+                            {
+                                "comments": "",
+                                "datetime": data['datetime'],
+                                "exposure": exposureSelect.value,
+                                "instance": data['instance'],
+                                "moduality": modSelect.value,
+                                "slice": data['slice'],
+                                "plane": "XZ",
+                                "status": "active",
+                                "text": data['text'],
+                                "user": data['user'],
+                                "wavelength": wavelengthSelect.value,
+                                "x": data['x'],
+                                "y": data['y']
+                            }
+                        )
                     })
                     .catch((error) => {
                         console.error('Error:', error);
@@ -1564,7 +1611,12 @@ function processNewAnnXZ(evt) {
 
                 xzDiv.removeChild(txtBox);
                 txtBox = null;
-                canvasXZ.addEventListener("click", xzClick);
+                canvasXY.addEventListener("click", orthoClick)
+                canvasXZ.addEventListener("click", xzClick)
+                canvasYZ.addEventListener("click", yzClick)
+
+                canvasXY.removeEventListener("click", processNewAnn);
+                canvasYZ.removeEventListener("click", processNewAnnYZ); // 针对 YZ 平面的处理函数
                 createAnnBtn.disabled = false;
             }
         });
@@ -1580,11 +1632,10 @@ function loadAnnotationsFast() {
     XZannTextGroup.remove(...XZannTextGroup.children)
     annTableBody.innerHTML = ``
     let data = annSlices
+    console.log(data)
     for (let i = 0; i < data.length; i++) {
         if (data[i]['slice'] == slider.value && data[i]['status'] != 'hidden' || data[i]['slice'] == clipCoords[oClip['yz']] || data[i]['slice'] == clipCoords[oClip['xz']]) {
-
             var newRow = annTableBody.insertRow()
-
             let dt = new Date(data[i]['datetime'])
             newRow.insertCell(0).appendChild(document.createTextNode(data[i]['text']))
             newRow.insertCell(1).appendChild(document.createTextNode(data[i]['plane']))
@@ -1674,9 +1725,10 @@ annModalDelete.addEventListener('click', () => {
     let i = annSlices.findIndex(
         e => e.text == document.getElementById('annModalTxt').value
             && e.plane == Selectplane
-    ) - 1
-    console.log(i)
+    )
+    console.log("删除前",annSlices)
     annSlices.splice(i, 1)
+    console.log("删除后",annSlices)
 
     $('#annotationModal').modal('hide')
     fetch('/deleteAnnotation', {
@@ -1698,6 +1750,7 @@ annModalDelete.addEventListener('click', () => {
         .then(response => response.json())
         .then(data => { })
         .catch((error) => { console.error('Error:', error) })
+
     loadAnnotationsFast()
 })
 
@@ -1706,13 +1759,13 @@ window.addEventListener('resize', () => {
         return
     cameraXY.aspect = (xyDiv.offsetWidth / 360)//@TODO HARDCODE
     cameraXY.updateProjectionMatrix()
-    rendererXY.setSize(xyDiv.offsetWidth, 300)
+    rendererXY.setSize(xyDiv.offsetWidth, 260)
 
     orthos.forEach(ortho => {
         // console.log("resize222222", $(oDivs[ortho]).width())
         oCameras[ortho].aspect = ($(oDivs[ortho]).width() / 300)
         oCameras[ortho].updateProjectionMatrix()
-        oRenderers[ortho].setSize($(oDivs[ortho]).width(), 300)
+        oRenderers[ortho].setSize($(oDivs[ortho]).width(), 260)
 
     });
 })

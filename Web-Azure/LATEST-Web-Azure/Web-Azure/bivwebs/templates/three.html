@@ -290,19 +290,19 @@
 
 <div class="container-fluid" style="height: 100vh;">
     <div id="toolsCol" class="col-lg-3 col-md-4 float-left">
-        <div id="mySidebar" class="card mt-1 shadow show">
+        <div id="mySidebar" class="card mt-1 shadow">
             <!-- <button class="openbtn" onclick="toggleNav()">☰</button> -->
             <a href="javascript:void(0)" class="closebtn" onclick="toggleNav()">☰</a>
             <div class="card-header pt-1">
                 <ul class="nav nav-tabs card-header-tabs flex-column">
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link px-2" data-toggle="tab" href="#datasetCard"><i
                                 class="fas fa-window-restore"></i> Data Browser</a>
-                    </li>
+                    </li> -->
 
                     <li id="tab1" class="nav-item">
                         <a id="imageTab" class="nav-link px-2" data-toggle="tab" href="#imageCard"><i
-                                class="fas fa-tools"></i> Image Tools</a>
+                                class="fas fa-tools "></i> Image Tools</a>
                     </li>
 
                     <li id="tab2" class="nav-item">
@@ -342,7 +342,7 @@
             </div>
             <div class="tab-content">
                 <div id="datasetCard" class="card-body tab-pane">
-                    <form class="form">
+                    <!-- <form class="form">
                         <div class="form-group mx-2 my-1">
                             <label for="dsSelect" class="mr-1">Dataset:</label>
                             <select id="dsSelect" class="form-control">
@@ -369,7 +369,7 @@
                             <button id="loadDatasetBtn" type="button" class="btn btn-primary btn-block rounded-pill"
                                 disabled>Load</button>
                         </div>
-                    </form>
+                    </form> -->
                 </div>
 
                 <div id="imageCard" class="card-body tab-pane">
@@ -636,22 +636,73 @@
         <div class="row">
             <div class="col-lg-12 col-md-6 ml-auto" style="height: 50%;">
                 <div class="d-flex justify-content-end">
-                    <div id="UpMainDiv" class="d-none" style="width: 95%;">
+                    <div id="UpMainDiv" style="width: 95%;">
                         <div class="card shadow">
                             <div class="card-header">
-                                <ul class="nav nav-tabs flex-row">
-                                    <li class="nav-item">
-                                        <a id="orthoTab" class="nav-link active px-2" data-toggle="tab"
-                                            href="#orthoCard">Orthographic
-                                            Views</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a id="vrTab" class="nav-link px-2" data-toggle="tab" href="#vrCard">Volume
-                                            Rendering</a>
-                                    </li>
-                                </ul>
+                                <div class="d-flex align-items-center">
+                                    <!-- Tab Navigation -->
+                                    <ul class="nav nav-tabs flex-row">
+                                        <li class="nav-item">
+                                            <a id="orthoTab" class="nav-link px-2 disabled" data-toggle="tab"
+                                                href="#orthoCard">
+                                                Orthographic Views
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a id="vrTab" class="nav-link px-2 disabled" data-toggle="tab"
+                                                href="#vrCard">
+                                                Volume Rendering
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <form class="form d-flex align-items-center ml-auto">
+                                        <div class="form-group d-flex align-items-center mx-2 my-0"
+                                            style="align-items: center;">
+                                            <label for="dsSelect" class="mr-1 align-self-center"
+                                                style="margin-bottom: 0;">Dataset:</label>
+                                            <select id="dsSelect" class="form-control form-control-sm"
+                                                style="width: 120px;">
+                                                <option value="" selected>Choose..</option>
+                                                {% for ds in datasets %}
+                                                <option value="{{ ds }}">{{ ds }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group d-flex align-items-center mx-2 my-0"
+                                            style="align-items: center;">
+                                            <label for="modSelect" class="mr-1 align-self-center"
+                                                style="margin-bottom: 0;">Modality:</label>
+                                            <select id="modSelect"
+                                                class="form-control form-control-sm align-self-center"
+                                                style="width: 120px; height: calc(1.5em + .75rem + 2px);"
+                                                disabled></select>
+                                        </div>
+
+                                        <div class="form-group d-flex align-items-center mx-2 my-0"
+                                            style="align-items: center;">
+                                            <label for="exposureSelect" class="mr-1 align-self-center"
+                                                style="margin-bottom: 0;">Exposure:</label>
+                                            <select id="exposureSelect"
+                                                class="form-control form-control-sm align-self-center"
+                                                style="width: 120px; height: calc(1.5em + .75rem + 2px);"
+                                                disabled></select>
+                                        </div>
+
+                                        <div class="form-group d-flex align-items-center mx-2 my-0"
+                                            style="align-items: center;">
+                                            <label for="wavelengthSelect" class="mr-1 align-self-center"
+                                                style="margin-bottom: 0;">Wavelength:</label>
+                                            <select id="wavelengthSelect"
+                                                class="form-control form-control-sm align-self-center"
+                                                style="width: 120px; height: calc(1.5em + .75rem + 2px);"
+                                                disabled></select>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
-                            <div id="xy-card-body" class="card-body">
+
+                            <div id="xy-card-body" class="card-body d-none">
                                 <div id="xyDiv" style="cursor: crosshair;"></div>
                             </div>
                         </div>
@@ -769,35 +820,49 @@
                     <div id="DownToolDiv" class="d-none" style="width: 95%;">
                         <div class="card shadow">
                             <div class="row h-100" style="display: flex;">
-                                <form id="xyForm" class="form-inline" onSubmit="return false;" style="flex: 3;">
-                                    <div id="arrowControls" class="form-group mb-2 d-flex justify-content-center"
-                                        style="flex: 3;">
-                                        <button id="stepBackBtn" class="cust-full" type="button" disabled><i
-                                                class="mx-1 fa-lg fas fa-step-backward"></i></button>
-                                        <button id="backBtn" class="cust-full" type="button" disabled><i
-                                                class="mx-1 fa-lg fas fa-arrow-left"></i></button>
-                                        <button id="forwardBtn" class="cust-full" type="button" disabled><i
-                                                class="mx-1 fa-lg fas fa-arrow-right"></i></button>
-                                        <button id="stepForwardBtn" class="cust-full" type="button" disabled><i
-                                                class="mx-1 fa-lg fas fa-step-forward"></i></button>
+                                <form id="xyForm" class="form-inline d-flex justify-content-between" style="flex: 3;"
+                                    onSubmit="return false;">
+                                    <!-- 左侧按钮和控制 -->
+                                    <div class="d-flex">
+                                        <div id="arrowControls" class="form-group mb-2 d-flex justify-content-center"
+                                            style="flex: 3;">
+                                            <button id="stepBackBtn" class="cust-full" type="button" disabled><i
+                                                    class="mx-1 fa-lg fas fa-step-backward"></i></button>
+                                            <button id="backBtn" class="cust-full" type="button" disabled><i
+                                                    class="mx-1 fa-lg fas fa-arrow-left"></i></button>
+                                            <button id="forwardBtn" class="cust-full" type="button" disabled><i
+                                                    class="mx-1 fa-lg fas fa-arrow-right"></i></button>
+                                            <button id="stepForwardBtn" class="cust-full" type="button" disabled><i
+                                                    class="mx-1 fa-lg fas fa-step-forward"></i></button>
+                                        </div>
+                                        <div id="sliceDiv" class="form-group mb-2" style="flex: 1;">
+                                            <label for="sliceInput">Slice Navigator: </label>
+                                            <input id="sliceInput" class="mx-1 form-control" type="number" max="700"
+                                                disabled>
+                                        </div>
+                                        <div id="sliderDiv" class="form-group mb-2" style="flex: 1;">
+                                            <input id="sliceRange" class="form-control-range mt-3" type="range"
+                                                disabled>
+                                        </div>
                                     </div>
-                                    <div id="sliceDiv" class="form-group mb-2" style="flex: 1;">
-                                        <label for="sliceInput">Slice Navigator: </label>
-                                        <input id="sliceInput" class="mx-1 form-control" type="number" type="button"
-                                            max="700" disabled>
-                                    </div>
-                                    <div id="sliderDiv" class="form-group mb-2" style="flex: 1;">
-                                        <input id="sliceRange" class="form-control-range mt-3" type="range" disabled>
-                                    </div>
-                                    <div class="form-group mb-1" style="flex: 5;">
-                                        <select id="FullScreenSelect" class="form-control mx-1">
-                                            <option value="0" selected> XY</option>
-                                            <option value="1"> XZ</option>
-                                            <option value="2"> YZ</option>
+
+                                    <!-- 右侧选择和全屏按钮 -->
+                                    <div class="form d-flex align-items-center ml-auto"
+                                        style="flex: 2; min-width: 600px;">
+                                        <select id="FullScreenSelect"
+                                            class="form-control d-flex align-items-center mx-2 my-0 ml-auto">
+                                            <option value="0" selected>XY</option>
+                                            <option value="1">XZ</option>
+                                            <option value="2">YZ</option>
                                         </select>
                                         <button id="FullScreenBtn" class="btn btn-primary" type="button" disabled
-                                            style="width: 30%;"><i class="fas fa-expand"></i> FullScreen</button>
+                                            style="width: 25%; margin-right: 40px;">
+                                            <i class="fas fa-expand"></i> FullScreen
+                                        </button>
+                                    </div>
+
                                 </form>
+
                             </div>
                         </div>
                     </div>
