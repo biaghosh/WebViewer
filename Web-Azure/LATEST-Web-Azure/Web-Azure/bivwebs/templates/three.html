@@ -144,10 +144,7 @@
         flex-direction: column;
     }
 
-    .nav-link {
-        border-radius: 0.5rem;
-        /* Adjust the padding as needed */
-    }
+
 
     .tab-pane {
         padding: 1rem;
@@ -299,6 +296,10 @@
                         <a class="nav-link px-2" data-toggle="tab" href="#datasetCard"><i
                                 class="fas fa-window-restore"></i> Data Browser</a>
                     </li> -->
+                    <li id="tab6" class="nav-item">
+                        <a class="nav-link px-2 active" data-toggle="tab" href="#dsCard"><i class="fas fa-info"></i>
+                            Info</a>
+                    </li>
 
                     <li id="tab1" class="nav-item">
                         <a id="imageTab" class="nav-link px-2" data-toggle="tab" href="#imageCard"><i
@@ -325,14 +326,11 @@
                             Export</a>
                     </li>
 
-                    <li id="tab6" class="nav-item">
-                        <a class="nav-link px-2" data-toggle="tab" href="#dsCard"><i class="fas fa-info"></i>
-                            Info</a>
-                    </li>
+
 
                     <li id="tab7" class="nav-item">
                         <a class="nav-link px-2" data-toggle="tab" href="#fileCard"><i class="fas fa-file"></i>
-                            File</a>
+                            Media & Files</a>
                     </li>
 
                     <li id="tab9" class="nav-item d-none">
@@ -341,36 +339,6 @@
                 </ul>
             </div>
             <div class="tab-content">
-                <div id="datasetCard" class="card-body tab-pane">
-                    <!-- <form class="form">
-                        <div class="form-group mx-2 my-1">
-                            <label for="dsSelect" class="mr-1">Dataset:</label>
-                            <select id="dsSelect" class="form-control">
-                                <option value="" selected>Choose..</option>
-                                {% for ds in datasets %}
-                                <option value="{{ ds }}">{{ ds }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="form-group mx-2 my-1">
-                            <label for="modSelect" class="mr-1">Modality:</label>
-                            <select id="modSelect" class="form-control" disabled></select>
-                        </div>
-                        <div class="form-group mx-2 my-1">
-                            <label for="exposureSelect" class="mr-1">Exposure:</label>
-                            <select id="exposureSelect" class="form-control" disabled></select>
-                        </div>
-                        <div class="form-group mx-2 my-1">
-                            <label for="wavelengthSelect" class="mr-1">Wavelength:</label>
-                            <select id="wavelengthSelect" class="form-control" disabled></select>
-                        </div>
-                        <div class="form-group mx-2 my-3" style="display: flex;justify-content: center;">
-                            <button id="loadDatasetBtn" type="button" class="btn btn-primary btn-block rounded-pill"
-                                disabled>Load</button>
-                        </div>
-                    </form> -->
-                </div>
 
                 <div id="imageCard" class="card-body tab-pane">
                     <form class="form-inline" onSubmit="return false;" style="margin-top: 10px;">
@@ -587,7 +555,8 @@
                             Image</button>
                     </div>
                 </div>
-                <div id="dsCard" class="card-body tab-pane">
+
+                <div id="dsCard" class="card-body tab-pane active">
                     <!-- JS automated-->
                     <dl class="row">
                         <dt class="col-sm-6">Institution Name: </dt>
@@ -703,7 +672,8 @@
                             </div>
 
                             <div id="xy-card-body" class="card-body d-none">
-                                <div id="xyDiv" style="cursor: crosshair;"></div>
+                                <div id="xyDiv" style="cursor: crosshair;"><label
+                                        style="display: block; text-align: center;">XY</label></div>
                             </div>
                         </div>
                     </div>
@@ -717,12 +687,15 @@
                         <div class="card shadow">
                             <div class="tab-content">
                                 <div id="orthoCard" class="card-body tab-pane active">
-                                    <div style="display: flex;">
+                                    <div style="display: flex;gap: 10px;">
                                         <div id="xzDiv" style="cursor: crosshair; flex: 1;">
+                                            <label style="display: block; text-align: center;">XZ</label>
+                                        </div>
 
-                                        </div>
                                         <div id="yzDiv" style="cursor: crosshair; flex: 1;">
+                                            <label style="display: block; text-align: center;">YZ</label>
                                         </div>
+
                                     </div>
                                     <div id="orthoOverlayDiv"
                                         class="d-none justify-content-center align-items-center overlay">

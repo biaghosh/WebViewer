@@ -5,7 +5,7 @@ let currentSelectedInstitutionName = null;
 window.addEventListener("DOMContentLoaded", function () {
     getInstitutions().then(institutions => {
         institutionsList = institutions;
-        console.log(institutionsList)
+        // console.log(institutionsList)
         populateFilter()
     });
 });
@@ -26,32 +26,37 @@ window.updateInstitutionDetails = updateInstitutionDetails;
 
 function renderDatasetList(datasets) {
     const datasetList = document.getElementById('datasetList');
-    datasetList.innerHTML = ''; // Clear existing content
+    datasetList.innerHTML = ''; // 清除现有内容
 
-    // Create table header structure
+    // 创建表头
     const tableHeader = document.createElement('table');
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
 
     const institutionHeader = document.createElement('th');
     institutionHeader.textContent = 'Institution';
-    const poNumHeader = document.createElement('th');
-    poNumHeader.textContent = 'PO_#';
     const nameHeader = document.createElement('th');
     nameHeader.textContent = 'Name';
+    const poNumHeader = document.createElement('th');
+    poNumHeader.textContent = 'PO_#';
 
     headerRow.appendChild(institutionHeader);
     headerRow.appendChild(nameHeader);
     headerRow.appendChild(poNumHeader);
     thead.appendChild(headerRow);
     tableHeader.appendChild(thead);
+    tableHeader.classList.add('dataset-table');
 
-    // Create scrollable body container
-    const bodyContainer = document.createElement('div');
-    bodyContainer.style.maxHeight = '400px';
-    bodyContainer.style.overflowY = 'auto';
+    // 为表头添加类名
+    institutionHeader.classList.add('table-header-cell');
+    nameHeader.classList.add('table-header-cell');
+    poNumHeader.classList.add('table-header-cell');
 
-    // Create table body structure
+    // 创建表体
+    const scrollContainer = document.createElement('div');
+    scrollContainer.style.maxHeight = '400px';
+    scrollContainer.style.overflowY = 'auto';
+
     const tableBody = document.createElement('table');
     const tbody = document.createElement('tbody');
 
@@ -72,13 +77,16 @@ function renderDatasetList(datasets) {
         row.appendChild(poNumCell);
         tbody.appendChild(row);
     });
+
     tableBody.appendChild(tbody);
-    bodyContainer.appendChild(tableBody);
+    tableBody.classList.add('dataset-table');
+    scrollContainer.appendChild(tableBody);
 
-    // Append header and body to the dataset list
+    // 将表头和表体添加到页面
     datasetList.appendChild(tableHeader);
-    datasetList.appendChild(bodyContainer);
+    datasetList.appendChild(scrollContainer);
 
+    // 监听点击事件，选定某一行
     tbody.addEventListener('click', (event) => {
         const selectedRow = event.target.closest('tr');
         if (selectedRow) {
@@ -100,11 +108,13 @@ function renderDatasetList(datasets) {
         }
     });
 
+    // 自动选择第一行
     if (datasets.length > 0) {
         const firstRow = tbody.querySelector('tr');
         firstRow.click();
     }
 }
+
 
 
 
@@ -540,11 +550,11 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     // Create an array containing all input boxes that need to be checked
     const filename = fileInputTiff.files[0].name.split('.')[0]
     const abbr = filename.split('#')[0]
-    if (!institutionsList.find(institution => institution.abbr === abbr)){
+    if (!institutionsList.find(institution => institution.abbr === abbr)) {
         alert('Abbr(Institution) does not exist');
         return;
     }
-    
+
     const institutionName = institutionsList.find(institution => institution.abbr === abbr).name;
     const datasetName = filename.split('#')[1]
     const Modality = filename.split('#')[2]
