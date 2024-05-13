@@ -167,7 +167,7 @@ function handleSelectChange() {
     document.getElementById('tab3').classList.remove('d-none');
     document.getElementById('tab4').classList.remove('d-none');
     document.getElementById('tab5').classList.remove('d-none');
-    document.getElementById('tab6').classList.remove('d-none');
+    // document.getElementById('tab6').classList.remove('d-none');
     document.getElementById('tab7').classList.remove('d-none');
 
     loadDynamic2D(dsChanged);
@@ -287,7 +287,7 @@ function loadDynamic2D(fullLoad) {
     if (!canvasXY) {
         // xyDiv.style.height = 'auto'
         rendererXY = new THREE.WebGLRenderer({ preserveDrawingBuffer: true })
-        rendererXY.setSize(xyDiv.offsetWidth, Math.floor(window.innerHeight * 0.3))
+        rendererXY.setSize(xyDiv.offsetWidth, Math.floor(window.innerHeight * 0.25))
         rendererXY.outputEncoding = THREE.sRGBEncoding
         xyDiv.appendChild(rendererXY.domElement);
         canvasXY = rendererXY.domElement
@@ -312,7 +312,7 @@ function loadDynamic2D(fullLoad) {
         let color = pickr2.getColor().toRGBA()
         sceneXY.background = new THREE.Color(`rgb(${Math.round(color[0])},${Math.round(color[1])},${Math.round(color[2])})`)
 
-        cameraXY = new THREE.PerspectiveCamera(30, xyDiv.offsetWidth / Math.floor(window.innerHeight * 0.3), .1, 8000)
+        cameraXY = new THREE.PerspectiveCamera(30, xyDiv.offsetWidth / Math.floor(window.innerHeight * 0.25), .1, 8000)
         cameraXY.position.set(0, 0, parseInt(dsInfo["imageDims"]["x"])) // 
         controlsXY = new OrbitControls(cameraXY, rendererXY.domElement)
 
@@ -1757,14 +1757,14 @@ annModalDelete.addEventListener('click', () => {
 window.addEventListener('resize', () => {
     if (!cameraXY)
         return
-    cameraXY.aspect = (xyDiv.offsetWidth / Math.floor(window.innerHeight * 0.3))//@TODO HARDCODE
+    cameraXY.aspect = (xyDiv.offsetWidth / Math.floor(window.innerHeight * 0.25))//@TODO HARDCODE
     cameraXY.updateProjectionMatrix()
-    rendererXY.setSize(xyDiv.offsetWidth, Math.floor(window.innerHeight * 0.3))
+    rendererXY.setSize(xyDiv.offsetWidth, Math.floor(window.innerHeight * 0.25))
 
     orthos.forEach(ortho => {
-        oCameras[ortho].aspect = ($(oDivs[ortho]).width() / Math.floor(window.innerHeight * 0.3))
+        oCameras[ortho].aspect = ($(oDivs[ortho]).width() / Math.floor(window.innerHeight * 0.25))
         oCameras[ortho].updateProjectionMatrix()
-        oRenderers[ortho].setSize($(oDivs[ortho]).width(), Math.floor(window.innerHeight * 0.3))
+        oRenderers[ortho].setSize($(oDivs[ortho]).width(), Math.floor(window.innerHeight * 0.25))
 
     });
 })
@@ -2051,9 +2051,9 @@ function takeScreenshot(width, height, axis) {
         rendererXY.render(sceneXY, cameraXY, null, false);
         const dataURL = rendererXY.domElement.toDataURL('image/png');
         saveDataURI(defaultFileName('.png'), dataURL);
-        cameraXY.aspect = (xyDiv.offsetWidth / Math.floor(window.innerHeight * 0.3))
+        cameraXY.aspect = (xyDiv.offsetWidth / Math.floor(window.innerHeight * 0.25))
         cameraXY.updateProjectionMatrix()
-        rendererXY.setSize(xyDiv.offsetWidth, Math.floor(window.innerHeight * 0.3))
+        rendererXY.setSize(xyDiv.offsetWidth, Math.floor(window.innerHeight * 0.25))
     }
     if (axis == "XZ") {
         oCameras['xz'].aspect = width / height;
@@ -2065,9 +2065,9 @@ function takeScreenshot(width, height, axis) {
         const dataURL = oRenderers['xz'].domElement.toDataURL('image/png');
         saveDataURI(defaultFileName('.png'), dataURL);
 
-        oCameras['xz'].aspect = (originWidth / Math.floor(window.innerHeight * 0.3))
+        oCameras['xz'].aspect = (originWidth / Math.floor(window.innerHeight * 0.25))
         oCameras['xz'].updateProjectionMatrix()
-        oRenderers['xz'].setSize(originWidth, Math.floor(window.innerHeight * 0.3))
+        oRenderers['xz'].setSize(originWidth, Math.floor(window.innerHeight * 0.25))
     }
 
     if (axis == "YZ") {
@@ -2079,9 +2079,9 @@ function takeScreenshot(width, height, axis) {
 
         const dataURL = oRenderers['yz'].domElement.toDataURL('image/png');
         saveDataURI(defaultFileName('.png'), dataURL);
-        oCameras['yz'].aspect = (originWidth / Math.floor(window.innerHeight * 0.3))
+        oCameras['yz'].aspect = (originWidth / Math.floor(window.innerHeight * 0.25))
         oCameras['yz'].updateProjectionMatrix()
-        oRenderers['yz'].setSize(originWidth, Math.floor(window.innerHeight * 0.3))
+        oRenderers['yz'].setSize(originWidth, Math.floor(window.innerHeight * 0.25))
     }
 }
 
@@ -2214,13 +2214,13 @@ function loadOrthos(fullLoad = true) {
         if (typeof oRenderers[ortho] !== 'object') {
 
             oRenderers[ortho] = new THREE.WebGLRenderer()
-            oRenderers[ortho].setSize($(oDivs[ortho]).width(), Math.floor(window.innerHeight * 0.3))
+            oRenderers[ortho].setSize($(oDivs[ortho]).width(), Math.floor(window.innerHeight * 0.25))
             oRenderers[ortho].outputEncoding = THREE.sRGBEncoding;
             oDivs[ortho].appendChild(oRenderers[ortho].domElement)
 
             oScenes[ortho].remove(oMeshes[ortho])
 
-            oCameras[ortho] = new THREE.PerspectiveCamera(30, $(oDivs[ortho]).width() / Math.floor(window.innerHeight * 0.3), 1, 5000)
+            oCameras[ortho] = new THREE.PerspectiveCamera(30, $(oDivs[ortho]).width() / Math.floor(window.innerHeight * 0.25), 1, 5000)
 
             oControls[ortho] = new OrbitControls(oCameras[ortho], oRenderers[ortho].domElement)
 
