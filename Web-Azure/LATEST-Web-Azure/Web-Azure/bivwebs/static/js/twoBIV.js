@@ -151,10 +151,10 @@ function changeWavelength() {
 }
 
 function handleSelectChange() {
-
     if (!document.getElementById('dsSelect').value || !document.getElementById('modSelect').value || !document.getElementById('exposureSelect').value || !document.getElementById('wavelengthSelect').value) {
         return
     };
+
     document.getElementById('xy-card-body').classList.remove('d-none')
     document.getElementById('UpMainDiv').classList.remove('d-none');
     document.getElementById('DownMainDiv').classList.remove('d-none');
@@ -167,7 +167,8 @@ function handleSelectChange() {
     document.getElementById('tab3').classList.remove('d-none');
     document.getElementById('tab4').classList.remove('d-none');
     document.getElementById('tab5').classList.remove('d-none');
-    // document.getElementById('tab6').classList.remove('d-none');
+    document.getElementById('myTabNav').classList.remove('d-none');
+    document.getElementById('info').classList.remove('d-none');
     document.getElementById('tab7').classList.remove('d-none');
 
     loadDynamic2D(dsChanged);

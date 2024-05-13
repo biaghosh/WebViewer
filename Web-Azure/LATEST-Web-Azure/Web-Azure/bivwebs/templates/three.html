@@ -283,6 +283,41 @@
         box-shadow: none;
         cursor: not-allowed;
     }
+
+    .card-body .form-group {
+        margin-right: 100px !important;
+        /* 增加间隔，并确保应用 */
+    }
+
+    .card-body dt {
+        font-weight: bold !important;
+        /* 标题加粗，并确保应用 */
+    }
+
+    .small {
+        font-size: 0.8rem;
+        /* 维持较小的字体尺寸 */
+    }
+
+    .mb-0 {
+        margin-bottom: 0;
+        /* 移除底部外边距 */
+    }
+
+    #myTabNav .nav-link {
+        font-weight: bold;
+        /* 设置字体加粗 */
+    }
+
+    .form-group label {
+        font-weight: bold;
+        /* 设置字体加粗 */
+    }
+
+    .card-header .nav-link {
+        font-weight: bold;
+        /* 设置字体加粗 */
+    }
 </style>
 
 <div class="container-fluid" style="height: 100vh;">
@@ -325,9 +360,6 @@
                         <a class="nav-link px-2" data-toggle="tab" href="#exportCard"><i class="fas fa-file-export"></i>
                             Export</a>
                     </li>
-
-
-
                     <li id="tab7" class="nav-item">
                         <a class="nav-link px-2" data-toggle="tab" href="#fileCard"><i class="fas fa-file"></i>
                             Media & Files</a>
@@ -339,7 +371,6 @@
                 </ul>
             </div>
             <div class="tab-content">
-
                 <div id="imageCard" class="card-body tab-pane">
                     <form class="form-inline" onSubmit="return false;" style="margin-top: 10px;">
                         <div class="form-group col-12">
@@ -589,7 +620,7 @@
                                 <div class="d-flex flex-column">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <!-- Tab Navigation -->
-                                        <ul class="nav nav-tabs flex-row">
+                                        <ul class="nav nav-tabs flex-row d-none" id="myTabNav">
                                             <li class="nav-item">
                                                 <a id="orthoTab" class="nav-link px-2 disabled" data-toggle="tab"
                                                     href="#orthoCard">
@@ -650,7 +681,7 @@
                                         </form>
                                     </div>
                                     <!-- Information Display -->
-                                    <div class="card mt-3">
+                                    <div class="card mt-3 d-none" id="info">
                                         <div class="card-body py-2">
                                             <div class="d-flex flex-wrap align-items-center">
                                                 <div class="form-group mx-1 my-0 d-flex align-items-center">
@@ -682,7 +713,7 @@
 
                             <div id="xy-card-body" class="card-body d-none">
                                 <div id="xyDiv" style="cursor: crosshair;"><label
-                                        style="display: block; text-align: center;">XY</label></div>
+                                        style="display: block; text-align: center; font-weight: bold;">XY</label></div>
                             </div>
                         </div>
                     </div>
@@ -698,11 +729,13 @@
                                 <div id="orthoCard" class="card-body tab-pane active">
                                     <div style="display: flex;gap: 10px;">
                                         <div id="xzDiv" style="cursor: crosshair; flex: 1;">
-                                            <label style="display: block; text-align: center;">XZ</label>
+                                            <label
+                                                style="display: block; text-align: center;font-weight: bold;">XZ</label>
                                         </div>
 
                                         <div id="yzDiv" style="cursor: crosshair; flex: 1;">
-                                            <label style="display: block; text-align: center;">YZ</label>
+                                            <label
+                                                style="display: block; text-align: center;font-weight: bold;">YZ</label>
                                         </div>
 
                                     </div>
@@ -817,11 +850,14 @@
                                             <button id="stepForwardBtn" class="cust-full" type="button" disabled><i
                                                     class="mx-1 fa-lg fas fa-step-forward"></i></button>
                                         </div>
-                                        <div id="sliceDiv" class="form-group mb-2" style="flex: 1;">
-                                            <label for="sliceInput">Slice Navigator: </label>
+
+                                        <div id="sliceDiv" class="form-group mb-2 d-flex"
+                                            style="flex: 1; align-items: center;">
+                                            <label for="sliceInput" class="mb-0">Slice Navigator: </label>
                                             <input id="sliceInput" class="mx-1 form-control" type="number" max="700"
                                                 disabled>
                                         </div>
+
                                         <div id="sliderDiv" class="form-group mb-2" style="flex: 1;">
                                             <input id="sliceRange" class="form-control-range mt-3" type="range"
                                                 disabled>
