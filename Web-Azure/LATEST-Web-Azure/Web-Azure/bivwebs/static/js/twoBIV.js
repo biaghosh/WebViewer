@@ -2025,64 +2025,65 @@ forwardStepBtn.addEventListener('click', () => {
 // exportWidthSelect.addEventListener('change', () => {
 //     exportHeightInput.value = Math.round((dsInfo["imageDims"]["y"] / dsInfo["imageDims"]["x"]) * exportWidthSelect.options[exportWidthSelect.selectedIndex].text)
 // })
-exportHeightInput = exportSizeSelect.options[exportSizeSelect.selectedIndex].text.split(" ")[2],
-    exportWidthSelect = exportSizeSelect.options[exportSizeSelect.selectedIndex].text.split(" ")[0]
+// exportHeightInput = exportSizeSelect.options[exportSizeSelect.selectedIndex].text.split(" ")[2],
+//     exportWidthSelect = exportSizeSelect.options[exportSizeSelect.selectedIndex].text.split(" ")[0]
 
-exportSizeSelect.addEventListener('change', () => {
-    exportHeightInput = exportSizeSelect.options[exportSizeSelect.selectedIndex].text.split(" ")[2]
-    exportWidthSelect = exportSizeSelect.options[exportSizeSelect.selectedIndex].text.split(" ")[0]
-    // console.log("exportWidthSelect * exportHeightInput", exportWidthSelect, exportHeightInput)
-})
+// exportSizeSelect.addEventListener('change', () => {
+//     exportHeightInput = exportSizeSelect.options[exportSizeSelect.selectedIndex].text.split(" ")[2]
+//     exportWidthSelect = exportSizeSelect.options[exportSizeSelect.selectedIndex].text.split(" ")[0]
+//     // console.log("exportWidthSelect * exportHeightInput", exportWidthSelect, exportHeightInput)
+// })
 
 exportBtn.onclick = () => {
-    takeScreenshot(exportWidthSelect, exportHeightInput, exportXYZSelect.options[exportXYZSelect.selectedIndex].text)
+    // console.log(exportWidthSelect,exportHeightInput)
+    takeScreenshot(exportXYZSelect.options[exportXYZSelect.selectedIndex].text)
 }
 
-function takeScreenshot(width, height, axis) {
-    const screenHeight = window.innerHeight;
-    if (width == 0) {
-        width = 1024
-        height = Math.round((dsInfo["imageDims"]["y"] / dsInfo["imageDims"]["x"]) * width)
-    }
+function takeScreenshot(axis) {
+    // const screenHeight = window.innerHeight;
+    // if (width == 0) {
+    //     width = 1024
+    //     height = Math.round((dsInfo["imageDims"]["y"] / dsInfo["imageDims"]["x"]) * width)
+    // }
     if (axis == "XY") {
-        cameraXY.aspect = width / height;
-        cameraXY.updateProjectionMatrix();
-        rendererXY.setSize(width, height);
+        // cameraXY.aspect = width / height;
+        // cameraXY.updateProjectionMatrix();
+        // rendererXY.setSize(xyDiv.offsetWidth, height);
 
         rendererXY.render(sceneXY, cameraXY, null, false);
         const dataURL = rendererXY.domElement.toDataURL('image/png');
         saveDataURI(defaultFileName('.png'), dataURL);
-        cameraXY.aspect = (xyDiv.offsetWidth / Math.floor(window.innerHeight * 0.25))
-        cameraXY.updateProjectionMatrix()
-        rendererXY.setSize(xyDiv.offsetWidth, Math.floor(window.innerHeight * 0.25))
+        // cameraXY.aspect = (xyDiv.offsetWidth / Math.floor(window.innerHeight * 0.25))
+        // cameraXY.updateProjectionMatrix()
+        // rendererXY.setSize(xyDiv.offsetWidth, Math.floor(window.innerHeight * 0.25))
     }
     if (axis == "XZ") {
-        oCameras['xz'].aspect = width / height;
-        oCameras['xz'].updateProjectionMatrix();
-        let originWidth = $(oDivs['xz']).width()
-        oRenderers['xz'].setSize(width, height);
+        // oCameras['xz'].aspect = width / height;
+        // oCameras['xz'].updateProjectionMatrix();
+        // let originWidth = $(oDivs['xz']).width()
+        // oRenderers['xz'].setSize(width, height);
         oRenderers['xz'].render(oScenes['xz'], oCameras['xz'], null, false);
 
         const dataURL = oRenderers['xz'].domElement.toDataURL('image/png');
         saveDataURI(defaultFileName('.png'), dataURL);
 
-        oCameras['xz'].aspect = (originWidth / Math.floor(window.innerHeight * 0.25))
-        oCameras['xz'].updateProjectionMatrix()
-        oRenderers['xz'].setSize(originWidth, Math.floor(window.innerHeight * 0.25))
+        // oCameras['xz'].aspect = (originWidth / Math.floor(window.innerHeight * 0.25))
+        // oCameras['xz'].updateProjectionMatrix()
+        // oRenderers['xz'].setSize(originWidth, Math.floor(window.innerHeight * 0.25))
     }
 
     if (axis == "YZ") {
-        oCameras['yz'].aspect = width / height;
-        oCameras['yz'].updateProjectionMatrix();
-        let originWidth = $(oDivs['yz']).width()
-        oRenderers['yz'].setSize(width, height);
+        // oCameras['yz'].aspect = width / height;
+        // oCameras['yz'].updateProjectionMatrix();
+        // let originWidth = $(oDivs['yz']).width()
+        // oRenderers['yz'].setSize(width, height);
         oRenderers['yz'].render(oScenes['yz'], oCameras['yz'], null, false);
 
         const dataURL = oRenderers['yz'].domElement.toDataURL('image/png');
         saveDataURI(defaultFileName('.png'), dataURL);
-        oCameras['yz'].aspect = (originWidth / Math.floor(window.innerHeight * 0.25))
-        oCameras['yz'].updateProjectionMatrix()
-        oRenderers['yz'].setSize(originWidth, Math.floor(window.innerHeight * 0.25))
+        // oCameras['yz'].aspect = (originWidth / Math.floor(window.innerHeight * 0.25))
+        // oCameras['yz'].updateProjectionMatrix()
+        // oRenderers['yz'].setSize(originWidth, Math.floor(window.innerHeight * 0.25))
     }
 }
 
