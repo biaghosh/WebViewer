@@ -883,7 +883,7 @@ def preview_file(filename):
     fs = db['files.files']
     file_data = fs.find_one({'name':filename})
     file_url = file_data['URL']
-    return jsonify({'file_url': file_url})
+    return jsonify(file_url)
 
 
 @app.route("/getFiles", methods=['POST'])
@@ -917,7 +917,7 @@ def store_image():
         "mp4": ("videos", 'video/mp4'),
         "png": ("images", 'image/png'),
         "jpg": ("images", 'image/jpg'),
-        "txt": ("text", 'text/plain'),
+        "txt": ("txt", 'text/plain'),
         "ppt": ("presentations", 'application/vnd.ms-powerpoint'),
         "pptx": ("presentations", 'application/vnd.openxmlformats-officedocument.presentationml.presentation'),
         "doc": ("documents", 'application/msword'),
@@ -968,35 +968,50 @@ def store_image():
 
     return make_response('{}', 200)
 
-@app.route('/download',methods=['POST'])
+@app.route('/download', methods=['POST'])
 def download_files():
+    # 连接到MongoDB
     client = MongoClient(app.config['mongo'])
     db = client.BIV
-    file_name = request.json
-    if len(file_name) == 0:
-        return
-    format = file_name.split(".")[-1] 
+    
+    # 获取客户端传递的文件名
+    file_data = request.json
+    file_name = file_data.get('filename')
+    
+    if not file_name:
+        return "File name is missing", 400
 
+    # 从MongoDB中查找文件的URL
     fs = db['files.files']
-
-    file_url = fs.find_one({'name':file_name})['URL']
+    file_doc = fs.find_one({'name': file_name})
+    if not file_doc:
+        return "File not found", 404
+    
+    file_url = file_doc.get('URL')
+    if not file_url:
+        return "URL not found in database", 404
+    
+    # 下载文件内容
     response = requests.get(file_url)
-    if response.status_code == 200:
-        file_content = response.content
-    else:
+    if response.status_code != 200:
         return "Unable to download the file", 500
     
-    zip_buffer = io.BytesIO()
+    file_content = response.content
 
+    # 创建内存中的Zip文件
+    zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED) as zf:
+        # 写入文件时指定编码
         zf.writestr(file_name, file_content)
 
     zip_buffer.seek(0)
+    
     return send_file(zip_buffer, attachment_filename='file_download.zip', as_attachment=True)
 
 @app.route('/delete', methods=['POST'])
 def delete_files():
     filesName = request.json
+    filesName = filesName['filename']
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     fs = db['files.files']

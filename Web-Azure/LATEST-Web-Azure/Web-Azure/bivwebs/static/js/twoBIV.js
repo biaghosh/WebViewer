@@ -2742,10 +2742,10 @@ function loadFiles() {
 
                         if (extension === 'png' || extension === 'jpg') {
                             fetch('/files/' + encodeURIComponent(preview_filename))
-                                .then(response => response.blob())
-                                .then(blob => {
-                                    var imageUrl = URL.createObjectURL(blob);
-                                    openImagePreviewModal(imageUrl, preview_filename);
+                                .then(response => response.text())
+                                .then(text => {
+
+                                    openImagePreviewModal(text, preview_filename);
                                 })
                                 .catch(error => console.error(error));
                         }
@@ -2759,10 +2759,9 @@ function loadFiles() {
                         }
                         else if (extension === 'mp4') {
                             fetch('/files/' + encodeURIComponent(preview_filename))
-                                .then(response => response.blob())
-                                .then(blob => {
-                                    var videoUrl = URL.createObjectURL(blob);
-                                    openVideoPreviewModal(videoUrl, preview_filename);
+                                .then(response => response.text())
+                                .then(text => {
+                                    openVideoPreviewModal(text, preview_filename);
                                 })
                                 .catch(error => console.error(error));
                         }
@@ -2782,34 +2781,52 @@ function loadFiles() {
 }
 
 function createDownloadButton(fileData) {
+    // 创建下载按钮和图标
     var download_button = document.createElement("button");
     var download_icon = document.createElement("i");
     download_icon.className = "fas fa-download";
     download_button.appendChild(download_icon);
+
+    // 设置按钮的样式
     download_button.classList.add("btn", "btn-primary");
     download_button.style.width = '30px';
     download_button.style.height = '30px';
     download_button.style.padding = '2px';
     download_button.style.fontSize = '12px';
 
+    // 设置按钮的点击事件
     download_button.onclick = function () {
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/download');
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.responseType = 'blob';
+
         xhr.onload = function () {
             if (xhr.status === 200) {
+                const blob = new Blob([xhr.response], { type: 'application/zip' });
                 const link = document.createElement('a');
-                link.href = window.URL.createObjectURL(xhr.response);
-                link.download = fileData['name'];
+                link.href = window.URL.createObjectURL(blob);
+                link.download = 'file_download.zip';  // zip文件名
+                document.body.appendChild(link);
                 link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(link.href);  // 释放内存
+            } else {
+                console.error("Failed to download file:", xhr.status, xhr.statusText);
             }
         };
+
+        xhr.onerror = function () {
+            console.error("Network error occurred while trying to download file.");
+        };
+
         xhr.send(JSON.stringify({ filename: fileData['name'] }));
     };
 
     return download_button;
 }
+
+
 
 function createDeleteButton(fileData) {
     var delete_button = document.createElement("button");
@@ -2851,13 +2868,15 @@ function openFilePreviewModal(url, fileName) {
     var filePreviewModal = document.getElementById("filePreviewModal");
     var filePreviewContent = document.getElementById("file-preview");
     var filePreviewInfo = document.getElementById("file-info");
-
+    console.log(url)
+    var cleanUrl = url.trim().replace(/^"|"$/g, '');
     // Create an iframe element and set its src attribute to the URL of the file
     var iframe = document.createElement('iframe');
-    iframe.src = url;
+    iframe.src = cleanUrl;
     iframe.style.width = '100%';
     iframe.style.height = '300px';
     iframe.style.overflow = 'auto';
+    console.log(iframe.src)
 
     // Clear the preview area and add the newly created iframe element
     filePreviewContent.innerHTML = '';
@@ -2883,8 +2902,8 @@ function openImagePreviewModal(url, filename) {
         imagePreviewInfo.innerText = filename;
         $(imagePreviewModal).modal('show');
     };
-
-    img.src = url;
+    var cleanUrl = url.trim().replace(/^"|"$/g, '');
+    img.src = cleanUrl;
 }
 
 function openVideoPreviewModal(videoUrl, filename) {
@@ -2893,8 +2912,10 @@ function openVideoPreviewModal(videoUrl, filename) {
     var videoInfo = document.getElementById("video-info");
 
     // Set the src attribute of the <video> element
-    videoPreview.src = videoUrl;
-
+    console.log(videoUrl)
+    var cleanUrl = videoUrl.trim().replace(/^"|"$/g, '');
+    videoPreview.src = cleanUrl;
+    console.log(cleanUrl)
     // Set the modal title to the file name
     videoInfo.innerText = filename;
 
