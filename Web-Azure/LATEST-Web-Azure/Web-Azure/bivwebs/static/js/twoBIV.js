@@ -2534,11 +2534,7 @@ function updateOrthoMeshes() {
     loadAnnotationsFast()
 }
 
-// fileDownloadBtn.addEventListener('click', () => {
-//     //read content directory and set content then show modal
-//     $('#contentFiledownload').modal('show')
-//     document.getElementById('contentFileTitle').innerHTML = 'File download'
-// })
+
 
 if (fileManageBtn !== null) {
     fileManageBtn.addEventListener('click', () => {
@@ -2548,19 +2544,6 @@ if (fileManageBtn !== null) {
     });
 }
 
-// imgContentBtn.addEventListener('click', () => {
-//     //read content directory and set content then show modal
-//     $('#contentModal').modal('show')
-//     document.getElementById('contentModalTitle').innerHTML = 'Images'
-// })
-
-
-// movieContentBtn.addEventListener('click', () => {
-//     $('#contentModal').modal('show')
-//     document.getElementById('contentModalTitle').innerHTML = 'Movies'
-// })
-
-//document.getElementById('')
 
 pickr2 = Pickr.create({
     el: '#bg2',
