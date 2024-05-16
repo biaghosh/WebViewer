@@ -313,7 +313,7 @@ function loadDynamic2D(fullLoad) {
         let color = pickr2.getColor().toRGBA()
         sceneXY.background = new THREE.Color(`rgb(${Math.round(color[0])},${Math.round(color[1])},${Math.round(color[2])})`)
 
-        cameraXY = new THREE.PerspectiveCamera(30, xyDiv.offsetWidth / Math.floor(window.innerHeight * 0.25), .1, 8000)
+        cameraXY = new THREE.PerspectiveCamera(30, xyDiv.offsetWidth / Math.floor(window.innerHeight * 0.25), .1, 5000)
         cameraXY.position.set(0, 0, parseInt(dsInfo["imageDims"]["x"])) // 
         controlsXY = new OrbitControls(cameraXY, rendererXY.domElement)
 
@@ -1263,12 +1263,6 @@ function processNewAnn(evt) {
 
                         let dt = new Date(data['datetime'])
 
-                        newRow.insertCell(0).appendChild(document.createTextNode(data['text']))
-                        newRow.insertCell(1).appendChild(document.createTextNode(data['plane']))
-                        newRow.insertCell(2).appendChild(document.createTextNode(data['slice']))
-                        newRow.insertCell(3).appendChild(document.createTextNode(data['instance'] ? data['instance'] : '0'))
-                        newRow.insertCell(4).appendChild(document.createTextNode(dt.toDateString()))
-                        newRow.insertCell(5).appendChild(document.createTextNode(data['user'].split("@")[0]))
 
                         var btn = document.createElement('input');
                         btn.type = "button";
@@ -1280,8 +1274,13 @@ function processNewAnn(evt) {
                         btn.setAttribute('data-instance', data['instance'] ? data['instance'] : '0')
                         btn.setAttribute('data-comments', data['comments'] ? data['comments'] : '')
 
-                        newRow.insertCell(6).appendChild(btn)
-
+                        newRow.insertCell(0).appendChild(btn)
+                        newRow.insertCell(1).appendChild(document.createTextNode(data['text']))
+                        newRow.insertCell(2).appendChild(document.createTextNode(data['plane']))
+                        newRow.insertCell(3).appendChild(document.createTextNode(data['slice']))
+                        newRow.insertCell(4).appendChild(document.createTextNode(data['instance'] ? data['instance'] : '0'))
+                        newRow.insertCell(5).appendChild(document.createTextNode(dt.toDateString()))
+                        newRow.insertCell(6).appendChild(document.createTextNode(data['user'].split("@")[0]))
                         createAnnBtn.disabled = false
 
                         annSlices.push(
@@ -1440,13 +1439,6 @@ function processNewAnnYZ(evt) {
 
                         let dt = new Date(data['datetime']);
 
-                        newRow.insertCell(0).appendChild(document.createTextNode(data['text']))
-                        newRow.insertCell(1).appendChild(document.createTextNode(data['plane']))
-                        newRow.insertCell(2).appendChild(document.createTextNode(data['slice']))
-                        newRow.insertCell(3).appendChild(document.createTextNode(data['instance'] ? data['instance'] : '0'))
-                        newRow.insertCell(4).appendChild(document.createTextNode(dt.toDateString()))
-                        newRow.insertCell(5).appendChild(document.createTextNode(data['user'].split("@")[0]))
-
                         var btn = document.createElement('input');
                         btn.type = "button";
                         btn.className = "btn btn-warning";
@@ -1457,8 +1449,13 @@ function processNewAnnYZ(evt) {
                         btn.setAttribute('data-instance', data['instance'] ? data['instance'] : '0');
                         btn.setAttribute('data-comments', data['comments'] ? data['comments'] : '');
 
-                        newRow.insertCell(6).appendChild(btn);
-
+                        newRow.insertCell(0).appendChild(btn);
+                        newRow.insertCell(1).appendChild(document.createTextNode(data['text']))
+                        newRow.insertCell(2).appendChild(document.createTextNode(data['plane']))
+                        newRow.insertCell(3).appendChild(document.createTextNode(data['slice']))
+                        newRow.insertCell(4).appendChild(document.createTextNode(data['instance'] ? data['instance'] : '0'))
+                        newRow.insertCell(5).appendChild(document.createTextNode(dt.toDateString()))
+                        newRow.insertCell(6).appendChild(document.createTextNode(data['user'].split("@")[0]))
                         createAnnBtn.disabled = false;
 
                         annSlices.push(
@@ -1567,12 +1564,7 @@ function processNewAnnXZ(evt) {
 
                         let dt = new Date(data['datetime']);
 
-                        newRow.insertCell(0).appendChild(document.createTextNode(data['text']))
-                        newRow.insertCell(1).appendChild(document.createTextNode(data['plane']))
-                        newRow.insertCell(2).appendChild(document.createTextNode(data['slice']))
-                        newRow.insertCell(3).appendChild(document.createTextNode(data['instance'] ? data['instance'] : '0'))
-                        newRow.insertCell(4).appendChild(document.createTextNode(dt.toDateString()))
-                        newRow.insertCell(5).appendChild(document.createTextNode(data['user'].split("@")[0]))
+
 
                         var btn = document.createElement('input');
                         btn.type = "button";
@@ -1584,8 +1576,13 @@ function processNewAnnXZ(evt) {
                         btn.setAttribute('data-instance', data['instance'] ? data['instance'] : '0');
                         btn.setAttribute('data-comments', data['comments'] ? data['comments'] : '');
 
-                        newRow.insertCell(6).appendChild(btn);
-
+                        newRow.insertCell(0).appendChild(btn);
+                        newRow.insertCell(1).appendChild(document.createTextNode(data['text']))
+                        newRow.insertCell(2).appendChild(document.createTextNode(data['plane']))
+                        newRow.insertCell(3).appendChild(document.createTextNode(data['slice']))
+                        newRow.insertCell(4).appendChild(document.createTextNode(data['instance'] ? data['instance'] : '0'))
+                        newRow.insertCell(5).appendChild(document.createTextNode(dt.toDateString()))
+                        newRow.insertCell(6).appendChild(document.createTextNode(data['user'].split("@")[0]))
                         createAnnBtn.disabled = false;
 
                         annSlices.push(
@@ -1638,13 +1635,6 @@ function loadAnnotationsFast() {
         if (data[i]['slice'] == slider.value && data[i]['status'] != 'hidden' || data[i]['slice'] == clipCoords[oClip['yz']] || data[i]['slice'] == clipCoords[oClip['xz']]) {
             var newRow = annTableBody.insertRow()
             let dt = new Date(data[i]['datetime'])
-            newRow.insertCell(0).appendChild(document.createTextNode(data[i]['text']))
-            newRow.insertCell(1).appendChild(document.createTextNode(data[i]['plane']))
-            newRow.insertCell(2).appendChild(document.createTextNode(data[i]['slice']))
-            newRow.insertCell(3).appendChild(document.createTextNode(data[i]['instance'] ? data[i]['instance'] : '0'))
-            newRow.insertCell(4).appendChild(document.createTextNode(dt.toDateString()))
-            newRow.insertCell(5).appendChild(document.createTextNode(data[i]['user'].split("@")[0]))
-
             var btn = document.createElement('input');
             btn.type = "button";
             btn.className = "btn btn-warning";
@@ -1657,7 +1647,13 @@ function loadAnnotationsFast() {
             btn.setAttribute('data-instance', data[i]['instance'] ? data[i]['instance'] : '0')
             btn.setAttribute('data-comments', data[i]['comments'] ? data[i]['comments'] : '')
 
-            newRow.insertCell(6).appendChild(btn)
+            newRow.insertCell(0).appendChild(btn)
+            newRow.insertCell(1).appendChild(document.createTextNode(data[i]['text']))
+            newRow.insertCell(2).appendChild(document.createTextNode(data[i]['plane']))
+            newRow.insertCell(3).appendChild(document.createTextNode(data[i]['slice']))
+            newRow.insertCell(4).appendChild(document.createTextNode(data[i]['instance'] ? data[i]['instance'] : '0'))
+            newRow.insertCell(5).appendChild(document.createTextNode(dt.toDateString()))
+            newRow.insertCell(6).appendChild(document.createTextNode(data[i]['user'].split("@")[0]))
             let annTxt = data[i]['text']
             if (data[i]['instance'])
                 annTxt += '-' + data[i]['instance']
@@ -1765,8 +1761,8 @@ window.addEventListener('resize', () => {
     orthos.forEach(ortho => {
         oCameras[ortho].aspect = ($(oDivs[ortho]).width() / Math.floor(window.innerHeight * 0.25))
         oCameras[ortho].updateProjectionMatrix()
-        oRenderers[ortho].setSize($(oDivs[ortho]).width(), Math.floor(window.innerHeight * 0.25))
 
+        oRenderers[ortho].setSize($(oDivs[ortho]).width(), Math.floor(window.innerHeight * 0.25))
     });
 })
 
@@ -1877,49 +1873,42 @@ FullScreenSelect.addEventListener('change', () => {
 })
 
 FullScreenBtn.onclick = () => {
+    let element;
     if (fullScreenInput == "XY") {
-        if (!document.fullscreenElement) {
-            let activeCanvas
-            activeCanvas = canvasXY
-            activeCanvas.requestFullscreen().catch(err => {
-                alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`)
-            })
-        } else {
-            document.exitFullscreen()
-        }
+        element = rendererXY.domElement;
+    } else if (fullScreenInput == "XZ") {
+        element = oRenderers['xz'].domElement;
+    } else if (fullScreenInput == "YZ") {
+        element = oRenderers['yz'].domElement;
+    } else {
+        element = document.querySelector('#c');
     }
-    if (fullScreenInput == "XZ") {
-        if (!document.fullscreenElement) {
-            let activeCanvas
-            if (document.getElementById('vrTab').classList.contains('active')) {
-                alert('The ortho scene(s) are not currently active')
-                return
-            }
-            activeCanvas = oRenderers['xz'].domElement
-            activeCanvas.requestFullscreen().catch(err => {
-                alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`)
-            })
-        } else {
-            document.exitFullscreen()
-        }
-    }
-    if (fullScreenInput == "YZ") {
-        if (!document.fullscreenElement) {
-            let activeCanvas
 
-            if (document.getElementById('vrTab').classList.contains('active')) {
-                alert('The ortho scene(s) are not currently active')
-                return
-            }
-            activeCanvas = oRenderers['yz'].domElement
-            activeCanvas.requestFullscreen().catch(err => {
-                alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`)
+    if (!document.fullscreenElement) {
+        element.requestFullscreen()
+            .then(() => {
+                // Adjust styles to make sure it covers the entire screen
+                element.style.width = '100vw';
+                element.style.height = '100vh';
+                element.style.display = 'block';
             })
-        } else {
-            document.exitFullscreen()
-        }
+            .catch(err => {
+                alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            });
+    } else {
+        document.exitFullscreen()
+            .then(() => {
+                // Reset styles after exiting full screen
+                element.style.width = '';
+                element.style.height = '';
+                element.style.display = '';
+            })
+            .catch(err => {
+                alert(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
+            });
     }
-}
+};
+
 // full2dBtnXY.addEventListener('click', () => {
 //     if (!document.fullscreenElement) {
 //         let activeCanvas
@@ -2942,7 +2931,7 @@ function toggleCards(showVR) {
     if (showVR) {
         orthoCard.style.display = 'none';  // 隐藏 orthoCard
         DownToolDiv.style.display = 'none'
-        canvasC.style.height = '70vh'
+        canvasC.style.height = (window.innerHeight * 0.6) + 'px';
     } else {
         orthoCard.style.display = 'block';  // 隐藏 orthoCard
         DownToolDiv.style.display = 'block'

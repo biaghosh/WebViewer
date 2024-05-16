@@ -446,13 +446,13 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
+                                    <th scope="col"></th>
                                     <th scope="col">Text</th>
                                     <th scope="col">Plane</th>
                                     <th scopr="col">Slice</th>
                                     <th scope="col">Instance</th>
                                     <th scope="col">Date</th>
                                     <th scope="col">User</th>
-                                    <th scope="col"></th>
                                 </tr>
                             </thead>
                             <tbody id="annTbody">
@@ -709,8 +709,6 @@
                                     </div>
                                 </div>
                             </div>
-
-
                             <div id="xy-card-body" class="card-body d-none">
                                 <div id="xyDiv" style="cursor: crosshair;"><label
                                         style="display: block; text-align: center; font-weight: bold;">XY</label></div>
@@ -748,14 +746,15 @@
                                 </div>
                                 <div id="vrCard" class="card-body tab-pane">
                                     <div id="progressDiv" class="progress d-none">
-                                        <div id="3dProgress" class="progress-bar " role="progressbar" style="width: 0%;"
+                                        <div id="3dProgress" class="progress-bar" role="progressbar" style="width: 0%;"
                                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                     <div style="display: flex; justify-content: center; align-items: center;">
                                         <canvas id="c"></canvas>
                                     </div>
                                     <div id="toolbars" class="height: 160px">
-                                        <form class="form-inline" onSubmit="return false;">
+                                        <form class="form-inline" onSubmit="return false;"
+                                            style="display: flex; flex-wrap: nowrap; gap: 0.5rem;">
                                             <div class="form-group">
                                                 <label class="form-check-label mr-1" for="zLockCheckbox">Z Lock:
                                                     <i class="fas fa-info-circle d-none" data-toggle="popover"
@@ -805,15 +804,10 @@
                                                 <label class="form-check-label ml-1" for="edgesCheckbox">Bounding
                                                     Box</label>
                                             </div>
-                                            <!-- <div class="form-group">
-                                                <input class="form-check-input ml-1" type="checkbox" id="cellModalbox">
-                                                <label class="form-check-label ml-1" for="cellModalbox">Cell
-                                                    Detection</label>
-                                            </div> -->
                                             <button id="3dFullIconBtn" class="btn btn-primary" type="button"
-                                                style="margin-left: 0.75rem;" disabled><i
-                                                    class="fas fa-expand"></i>&nbsp
-                                                Fullscreen&nbsp3D </button>
+                                                style="margin-left: 0.5rem;" disabled>
+                                                <i class="fas fa-expand"></i>&nbsp Fullscreen&nbsp3D
+                                            </button>
                                         </form>
                                     </div>
                                     <div id="vrOverlayDiv"
