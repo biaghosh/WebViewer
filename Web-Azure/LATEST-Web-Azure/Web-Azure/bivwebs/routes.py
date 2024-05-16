@@ -1051,7 +1051,7 @@ def send_otp():
                     </style>
             </head>
             <body>
-                <p style="line-height: 1.5;">Your OTP for BioInVision Web login is: <strong>{otp}</strong>, which will expire in 5 min.<br>
+                <p style="line-height: 1.5;">Your OTP for BioInVision WebViewer login is: <strong>{otp}</strong>, which will expire in 5 min.<br>
                 <br>
                 <p style="line-height: 1.5;color: #666;"
                     781 Beta Drive, Suite E,<br>
@@ -1065,7 +1065,7 @@ def send_otp():
             </body>
         </html>
         """
-    msg = Message('BioInVision Web Login OTP', sender=app.config['MAIL_USERNAME'],recipients=[email])
+    msg = Message('OTP - BioInVision Web Viewer', sender=app.config['MAIL_USERNAME'],recipients=[email])
     msg.html = html_body
     mail.send(msg)
     return jsonify({'status': 'success', 'message': f"OTP has been sent to '{email}, if you do not receive it, please check your spam'."})

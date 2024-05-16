@@ -16,8 +16,8 @@ app.config.update(
     MAIL_SERVER='smtp.ionos.com',
     MAIL_PORT=465,
     MAIL_USE_SSL=True,
-    MAIL_USERNAME='ybian@bioinvision.com',
-    MAIL_PASSWORD='Bian19981109'
+    MAIL_USERNAME='webvieweradmin@bioinvision.com',
+    MAIL_PASSWORD='wV!05162024CvZ781'
 )
 
 
