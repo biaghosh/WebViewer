@@ -326,7 +326,7 @@ function loadDynamic2D(fullLoad) {
         controlsXY.minDistance = 150 //@hardcode
 
         geometry = new THREE.PlaneBufferGeometry(dsInfo['dims2']['x'], dsInfo['dims2']['y'])
-        // console.log("geometry",geometry)
+        //  ("geometry",geometry)
         material2 = new THREE.MeshBasicMaterial()
         material2.side = THREE.DoubleSide
     }
@@ -351,7 +351,7 @@ function loadDynamic2D(fullLoad) {
         mesh.name = 'mouseSlice'
         mesh.translateX(parseInt((dsInfo["dims2"]["x"]) - parseInt(dsInfo["imageDims"]["x"])) / 2)
         mesh.translateY(parseInt((dsInfo["dims2"]["y"]) - parseInt(dsInfo["imageDims"]["y"])) / 2)
-        // console.log(parseInt((dsInfo["dims2"]["x"]) - parseInt(dsInfo["imageDims"]["x"])) / 2, ((dsInfo["dims2"]["y"]) - parseInt(dsInfo["imageDims"]["y"])) / 2);
+        //  (parseInt((dsInfo["dims2"]["x"]) - parseInt(dsInfo["imageDims"]["x"])) / 2, ((dsInfo["dims2"]["y"]) - parseInt(dsInfo["imageDims"]["y"])) / 2);
         mesh.translateZ(-1)
         sceneXY.add(mesh)
         sceneXY.add(lineTextGroup, XYannTextGroup, brushGroup)
@@ -602,7 +602,7 @@ function enableDrawing() {
 let vertsHolder = []
 
 function clearMask() {
-    //console.log('hi')
+    // ('hi')
     //handled in updateSlice
     //brushGroup.remove(...brushGroup.children)
 }
@@ -614,8 +614,8 @@ function drawMask() {
 
     for (let i = 0; i < vertsHolder.length; i++) {
         if (vertsHolder[i].slice == slider.value) {
-            //console.log(slider.value)
-            //console.log(vertsHolder[i].verts)
+            // (slider.value)
+            // (vertsHolder[i].verts)
             let maskIndex = 0;
             maskGeometry = new THREE.BufferGeometry()
             var positions = new Float32Array(MAX_POINTS * 3); // 3 vertices per point
@@ -661,7 +661,7 @@ startMaskBtn.addEventListener('click', () => {
         maskGeometry = new THREE.BufferGeometry()
 
         //if ( !brushflag ){
-        //    console.log("brushflag tripped")
+        //     ("brushflag tripped")
         //maskGeometry.setAttribute( 'position', null );
         //    return
         //} else {
@@ -727,7 +727,7 @@ startMaskBtn.addEventListener('click', () => {
             vertsHolder.push({ slice: slice, verts: verts })
         }
 
-        //console.log(vertsHolder)
+        // (vertsHolder)
         //update stats
         if (!document.getElementById('minSlice').value || document.getElementById('minSlice').value > slice)
             document.getElementById('minSlice').value = slice
@@ -989,7 +989,7 @@ function drawLine() {
 }
 
 function drawAnnotation(p, t, x, y) {
-    // console.log(p, t, x, y)
+    //  (p, t, x, y)
     let multiT = t.match(/.{1,12}/g);
     var texture_placeholder = document.createElement('canvas');
     texture_placeholder.width = 60;
@@ -1090,7 +1090,7 @@ function loadViews() {
 
 // Load view function
 function loadView(viewName) {
-    console.log('Loading view:', viewName); // 调试信息
+     ('Loading view:', viewName); // 调试信息
     if (!viewName) return;
 
     fetch('/getView', {
@@ -1184,7 +1184,7 @@ function loadView(viewName) {
             yLineGeom.setFromPoints(points);
             yLine.geometry.attributes.position.needsUpdate = true;
             yLine.geometry.computeBoundingSphere();
-            console.log(session)
+             (session)
             updateViewDetail(viewName, dsInfo["name"]);
         })
         .catch((error) => { console.error('Error:', error); });
@@ -1205,7 +1205,7 @@ function updateViewDetail(viewName, dataset) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log('View detail updated successfully');
+                 ('View detail updated successfully');
             } else {
                 console.error('Failed to update view detail');
             }
@@ -1250,7 +1250,7 @@ function viewDetail(viewName) {
     })
         .then(response => response.json())
         .then(data => {
-            console.log("getView", data)
+             ("getView", data)
             document.getElementById('viewNameDetail').textContent = data.name;
             document.getElementById('viewCreatorDetail').textContent = data.user;
             const totalLoadTimes = data.Visit.reduce((sum, visit) => sum + visit.count, 0);
@@ -1490,7 +1490,7 @@ function processNewAnn(evt) {
                 })
                     .then(response => response.json())
                     .then(data => {
-                        //console.log(data.length)
+                        // (data.length)
                         //for (let i = 0; i < data.length; i++){
                         let annTxt = data['text']
                         if (data['instance'])
@@ -1560,7 +1560,7 @@ function addAnnotationEvents() {
 
     // 动态创建注释的事件处理
     if (!createAnnBtn.hasAttribute('data-listener')) {
-        // console.log("ssss")
+        //  ("ssss")
         createAnnBtn.addEventListener("click", dynamicCreateAnn);
         createAnnBtn.setAttribute('data-listener', 'true'); // 标记已添加监听器
     }
@@ -1736,7 +1736,6 @@ function processNewAnnYZ(evt) {
 }
 
 function processNewAnnXZ(evt) {
-    console.log("processNewAnnXZ");
     let rect = canvasXZ.getBoundingClientRect();
     mouse.x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1;
     mouse.y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1;
@@ -1769,7 +1768,6 @@ function processNewAnnXZ(evt) {
         }, true);
 
         txtBox.addEventListener("keyup", function (e) {
-            console.log(clipCoords[oClip['xz']])
             txtBox.value = txtBox.value.replace(/[-]/g, '');
             if (e.keyCode === 13 && txtBox.value != '') {
                 fetch('/saveAnnotation', {
@@ -1862,13 +1860,11 @@ function processNewAnnXZ(evt) {
 
 
 function loadAnnotationsFast() {
-    console.log("loadAnn")
     XYannTextGroup.remove(...XYannTextGroup.children)
     YZannTextGroup.remove(...YZannTextGroup.children)
     XZannTextGroup.remove(...XZannTextGroup.children)
     annTableBody.innerHTML = ``
     let data = annSlices
-    console.log(data)
     for (let i = 0; i < data.length; i++) {
         if (data[i]['slice'] == slider.value && data[i]['status'] != 'hidden' || data[i]['slice'] == clipCoords[oClip['yz']] || data[i]['slice'] == clipCoords[oClip['xz']]) {
             var newRow = annTableBody.insertRow()
@@ -1904,7 +1900,6 @@ function loadAnnotationsFast() {
 
 $('#annotationModal').on('show.bs.modal', function (event) {
     let button = $(event.relatedTarget) // Button that triggered the modal
-    console.log(button)
     let Selecttext = button.data('text') // Extract info from data-* attributes
     Selectplane = button.data('plane')
     Selectslice = button.data('slice')
@@ -1961,9 +1956,7 @@ annModalDelete.addEventListener('click', () => {
         e => e.text == document.getElementById('annModalTxt').value
             && e.plane == Selectplane
     )
-    console.log("删除前", annSlices)
     annSlices.splice(i, 1)
-    console.log("删除后", annSlices)
 
     $('#annotationModal').modal('hide')
     fetch('/deleteAnnotation', {
@@ -1990,7 +1983,6 @@ annModalDelete.addEventListener('click', () => {
 })
 
 function updateCameraAndRendererSizes() {
-    console.log("resize")
     if (!cameraXY) return;
 
     cameraXY.aspect = (xyDiv.offsetWidth / Math.floor(window.innerHeight * 0.25)); // @TODO HARDCODE
@@ -2271,7 +2263,7 @@ forwardStepBtn.addEventListener('click', () => {
 /** Code pen example */
 
 // exportXYZSelect.addEventListener('change', () => {
-//     console.log(exportXYZSelect.options[exportXYZSelect.selectedIndex].text)
+//      (exportXYZSelect.options[exportXYZSelect.selectedIndex].text)
 // })
 
 // exportWidthSelect.addEventListener('change', () => {
@@ -2283,11 +2275,11 @@ forwardStepBtn.addEventListener('click', () => {
 // exportSizeSelect.addEventListener('change', () => {
 //     exportHeightInput = exportSizeSelect.options[exportSizeSelect.selectedIndex].text.split(" ")[2]
 //     exportWidthSelect = exportSizeSelect.options[exportSizeSelect.selectedIndex].text.split(" ")[0]
-//     // console.log("exportWidthSelect * exportHeightInput", exportWidthSelect, exportHeightInput)
+//     //  ("exportWidthSelect * exportHeightInput", exportWidthSelect, exportHeightInput)
 // })
 
 exportBtn.onclick = () => {
-    // console.log(exportWidthSelect,exportHeightInput)
+    //  (exportWidthSelect,exportHeightInput)
     takeScreenshot(exportXYZSelect.options[exportXYZSelect.selectedIndex].text)
 }
 
@@ -2508,7 +2500,7 @@ function loadOrthos(fullLoad = true) {
 
 
         animateOrtho(oRenderers[ortho], oScenes[ortho], oCameras[ortho], oMaterials[ortho], oAnimate[ortho])
-        // console.log("输出",clipCoords[oClip[ortho]])
+        //  ("输出",clipCoords[oClip[ortho]])
         let sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis?${SAS}`;
 
         loader.load(sasUrl, function (texture) {
@@ -2583,7 +2575,7 @@ function xzClick(evt) {
 
         clipCoords.x = Math.round(intersects[0].point.x + (parseInt(dsInfo["imageDims"]["x"]) / 2))
         clipCoords.z = Math.round(intersects[0].point.y / dsInfo['voxels']['z'] + (parseInt(dsInfo["imageDims"]["z"]) / 2))
-        //console.log( clipCoords.z )
+        // ( clipCoords.z )
         slider.value = clipCoords.z
         //downscaled orthos by 4
         clipCoords.x = Math.round(clipCoords.x / 4) * 4
@@ -2628,7 +2620,7 @@ function xzClick(evt) {
 }
 
 function yzClick(evt) {
-    console.log("点击")
+     ("点击")
     let rect = oRenderers['yz'].domElement.getBoundingClientRect()
     let x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
     let y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
@@ -2687,7 +2679,7 @@ function updateMeshes() {
 }
 //update
 function orthoClick(evt) {
-    console.log("点击了")
+     ("点击了")
     if (draggedAnn) {
         draggedAnn = false
         return
@@ -2764,10 +2756,10 @@ function initMainOrthoLines() {
 }
 
 function updateOrthoMeshes() {
-    // console.log("update")
+    //  ("update")
     xclip.value = clipCoords[oClip['yz']]
     yclip.value = clipCoords[oClip['xz']]
-    console.log("xclip,yclip", xclip.value, yclip.value)
+     ("xclip,yclip", xclip.value, yclip.value)
     orthos.forEach(ortho => {
         loader.load(`https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis?${SAS}`, function (texture) {
             texture.encoding = THREE.sRGBEncoding
@@ -2908,7 +2900,7 @@ document.getElementById('vrTab').addEventListener('click', () => {
     //orthos.forEach(ortho => {
     //oScenes[ortho] = null
     //oDivs[ortho].removeChild(oRenderers[ortho].domElement)
-    //console.log('this is not cancelling')
+    // ('this is not cancelling')
     //window.cancelAnimationFrame(oAnimate[ortho])
     //})
 })
@@ -3104,7 +3096,7 @@ function openFilePreviewModal(url, fileName) {
     var filePreviewModal = document.getElementById("filePreviewModal");
     var filePreviewContent = document.getElementById("file-preview");
     var filePreviewInfo = document.getElementById("file-info");
-    console.log(url)
+     (url)
     var cleanUrl = url.trim().replace(/^"|"$/g, '');
     // Create an iframe element and set its src attribute to the URL of the file
     var iframe = document.createElement('iframe');
@@ -3112,7 +3104,7 @@ function openFilePreviewModal(url, fileName) {
     iframe.style.width = '100%';
     iframe.style.height = '300px';
     iframe.style.overflow = 'auto';
-    console.log(iframe.src)
+     (iframe.src)
 
     // Clear the preview area and add the newly created iframe element
     filePreviewContent.innerHTML = '';
@@ -3148,10 +3140,10 @@ function openVideoPreviewModal(videoUrl, filename) {
     var videoInfo = document.getElementById("video-info");
 
     // Set the src attribute of the <video> element
-    console.log(videoUrl)
+     (videoUrl)
     var cleanUrl = videoUrl.trim().replace(/^"|"$/g, '');
     videoPreview.src = cleanUrl;
-    console.log(cleanUrl)
+     (cleanUrl)
     // Set the modal title to the file name
     videoInfo.innerText = filename;
 
