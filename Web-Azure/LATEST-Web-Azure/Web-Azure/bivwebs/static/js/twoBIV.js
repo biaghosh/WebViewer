@@ -13,6 +13,7 @@ var previousSlice
 let session
 var SAS = 'sp=r&st=2023-08-14T15:15:15Z&se=2036-06-18T15:15:00Z&spr=https&sv=2022-11-02&sig=pisDbcAw2k0FGGNHg5i4FIqJklWf9%2BAW03VkeidVsWk%3D&sr=s'
 let Selectslice, Selectplane
+let originODivWith
 
 let measureData = {
     xy: { clicks: [], lines: [] },
@@ -210,8 +211,8 @@ let forwardBtn = document.getElementById("forwardBtn"),
     FullScreenSelect = document.getElementById('FullScreenSelect'),
     FullScreenBtn = document.getElementById('FullScreenBtn'),
     saveViewBtn = document.getElementById('saveViewBtn'),
-    loadViewBtn = document.getElementById('loadViewBtn'),
-    delViewBtn = document.getElementById('delViewBtn'),
+    // loadViewBtn = document.getElementById('loadViewBtn'),
+    // delViewBtn = document.getElementById('delViewBtn'),
     full3dBtn = document.getElementById("3dFullIconBtn"),
     measureBtn = document.getElementById("measureBtn"),
     maskInput = document.getElementById("maskInput"),
@@ -222,7 +223,7 @@ let forwardBtn = document.getElementById("forwardBtn"),
     loadMaskBtn = document.getElementById("loadMaskBtn"),
     copySliceBox = document.getElementById("copySliceBox"),
     measureClearBtn = document.getElementById("measureClearBtn"),
-    viewSelect = document.getElementById("viewsSelect"),
+    // viewSelect = document.getElementById("viewsSelect"),
     annTableBody = document.getElementById("annTbody"),
     xyInput = document.getElementById("sliceInput"),
     slider = document.getElementById("sliceRange"),
@@ -426,7 +427,8 @@ function loadDynamic2D(fullLoad) {
         //unlock buttons
         forwardBtn.disabled = false, backBtn.disabled = false, forwardStepBtn.disabled = false, backStepBtn.disabled = false
         createAnnBtn.disabled = false, toggleAnnBtn.disabled = false,
-            exportBtn.disabled = false, exportXYZSelect.disabled = false, saveViewBtn.disabled = false, loadViewBtn.disabled = false, delViewBtn.disabled = false,
+            exportBtn.disabled = false, exportXYZSelect.disabled = false, saveViewBtn.disabled = false,
+            // loadViewBtn.disabled = false, delViewBtn.disabled = false,
             // full2dBtnXY.disabled = false,full2dBtnXZ.disabled = false, full2dBtnYZ.disabled = false, 
             full3dBtn.disabled = false, FullScreenBtn.disabled = false,
             measureBtn.disabled = false, maskInput.disabled = false
@@ -1026,10 +1028,11 @@ function drawAnnotation(p, t, x, y) {
     });
 }
 
-function loadViews() {
-    viewSelect.innerHTML = ""
-    fetch('/getView', {
 
+function loadViews() {
+    const viewsTableBody = document.querySelector('#viewsTable tbody');
+    viewsTableBody.innerHTML = "";
+    fetch('/getView', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -1041,46 +1044,54 @@ function loadViews() {
         .then(response => response.json())
         .then(data => {
             for (let i = 0; i < data.length; i++) {
-                let opt = document.createElement('option')
-                opt.appendChild(document.createTextNode(data[i]['name']))
-                opt.value = data[i]['name']
-                viewSelect.appendChild(opt)
+                let row = document.createElement('tr');
+
+                // 第一列：View Name
+                let nameCell = document.createElement('td');
+                nameCell.textContent = data[i]['name'];
+                row.appendChild(nameCell);
+
+                // 第二列：Buttons
+                let buttonCell = document.createElement('td');
+
+                // Load button
+                let loadButton = document.createElement('button');
+                loadButton.classList.add('btn', 'btn-primary', 'mr-2', 'btn-icon');
+                loadButton.innerHTML = '<i class="fas fa-download"></i>';
+                loadButton.onclick = function () {
+                    loadView(data[i]['name']);
+                };
+                buttonCell.appendChild(loadButton);
+
+                // Delete button
+                let deleteButton = document.createElement('button');
+                deleteButton.classList.add('btn', 'btn-danger', 'mr-2', 'btn-icon');
+                deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                deleteButton.onclick = function () {
+                    deleteView(data[i]['name']);
+                };
+                buttonCell.appendChild(deleteButton);
+
+                // Detail button
+                let detailButton = document.createElement('button');
+                detailButton.classList.add('btn', 'btn-info', 'btn-icon');
+                detailButton.innerHTML = '<i class="fas fa-info-circle"></i>';
+                detailButton.onclick = function () {
+                    viewDetail(data[i]['name']);
+                };
+                buttonCell.appendChild(detailButton);
+
+                row.appendChild(buttonCell);
+                viewsTableBody.appendChild(row);
             }
         })
-        .catch((error) => { console.error('Error:', error) })
-
+        .catch((error) => { console.error('Error:', error) });
 }
 
-delViewBtn.addEventListener("click", () => {
-    if (viewSelect.value == '')
-        return
-
-    fetch('/delView', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            'dataset': dsInfo["name"],
-            'name': viewSelect.value
-        }),
-    })
-        .then(response => response.json())
-        .then(() => {
-            loadViews()
-        })
-
-})
-
-loadViewBtn.addEventListener("click", () => {
-    //viewSelect.addEventListener("change", () => {
-    if (viewSelect.value == '')
-        return
-    /* Not sure if we will do this the same as annotations
-    let arr = event.object.name.split('-')
-        if ( !arr[1] )
-            arr[1] = null
-    */
+// Load view function
+function loadView(viewName) {
+    console.log('Loading view:', viewName); // 调试信息
+    if (!viewName) return;
 
     fetch('/getView', {
         method: 'POST',
@@ -1089,50 +1100,43 @@ loadViewBtn.addEventListener("click", () => {
         },
         body: JSON.stringify({
             'dataset': dsInfo["name"],
-            'name': viewSelect.value
+            'name': viewName
         }),
     })
         .then(response => response.json())
         .then(data => {
-            slider.value = data["slice"]
-            xyInput.value = data["slice"]
-            //if 3D is active maybe just switch to orthos?
-
-            //zclip.value = slider.value
-            modSelect.value = data["moduality"]
-            //updates the options
-            changeExposure()
-            exposureSelect.value = data["exposure"] //WRONG START HERE AFTER LUNCH
-            changeWavelength()
-            wavelengthSelect.selectedIndex = data["wavelength"]
-            //wavelengthSelect.value = data["wavelength"] //WRONG
-            updateSlice()
-            cameraXY.position.set(data["x"], data["y"], data["z"])
-            controlsXY.target.set(data["x"], data["y"], -7)
-            controlsXY.update()
-            threshold2D.value = parseInt(data['threshold'])
-            let modFloat = '1.0'
+            slider.value = data["slice"];
+            xyInput.value = data["slice"];
+            modSelect.value = data["moduality"];
+            changeExposure();
+            exposureSelect.value = data["exposure"];
+            changeWavelength();
+            wavelengthSelect.selectedIndex = data["wavelength"];
+            updateSlice();
+            cameraXY.position.set(data["x"], data["y"], data["z"]);
+            controlsXY.target.set(data["x"], data["y"], -7);
+            controlsXY.update();
+            threshold2D.value = parseInt(data['threshold']);
+            let modFloat = '1.0';
             if (modSelect.value == 'Brightfield')
-                modFloat = '0.0'
-            xyShader.uniforms.u_mod.value = modFloat
+                modFloat = '0.0';
+            xyShader.uniforms.u_mod.value = modFloat;
 
-            document.getElementById('orthoTab').click()
+            document.getElementById('orthoTab').click();
 
-            oMaterials['xz'].uniforms.u_mod.value = modFloat
-            oMaterials['yz'].uniforms.u_mod.value = modFloat
-            //just write what we need to happen and abstract later
-            oCameras['xz'].position.set(data["xxz"], data["yxz"], data["zxz"])
-            oControls['xz'].target.set(data["xxz"], data["yxz"], -7)
-            oControls['xz'].update()
+            oMaterials['xz'].uniforms.u_mod.value = modFloat;
+            oMaterials['yz'].uniforms.u_mod.value = modFloat;
+            oCameras['xz'].position.set(data["xxz"], data["yxz"], data["zxz"]);
+            oControls['xz'].target.set(data["xxz"], data["yxz"], -7);
+            oControls['xz'].update();
 
-            oCameras['yz'].position.set(data["xyz"], data["yyz"], data["zyz"])
-            oControls['yz'].target.set(data["xyz"], data["yyz"], -7)
-            oControls['yz'].update()
-            //need to handle vertical lines here, update slice handles horizontal
-            //need to update orthos as well
-            clipCoords.x = data["xClip"]
-            clipCoords.y = data["yClip"]
-            updateOrthoMeshes()
+            oCameras['yz'].position.set(data["xyz"], data["yyz"], data["zyz"]);
+            oControls['yz'].target.set(data["xyz"], data["yyz"], -7);
+            oControls['yz'].update();
+
+            clipCoords.x = data["xClip"];
+            clipCoords.y = data["yClip"];
+            updateOrthoMeshes();
 
             let points = [];
             points.push(new THREE.Vector3(
@@ -1146,8 +1150,8 @@ loadViewBtn.addEventListener("click", () => {
                 1
             ));
 
-            xzVertLineGeom.setFromPoints(points)
-            xzVertLine.geometry.attributes.position.needsUpdate = true
+            xzVertLineGeom.setFromPoints(points);
+            xzVertLine.geometry.attributes.position.needsUpdate = true;
             xzVertLine.geometry.computeBoundingSphere();
 
             points = [];
@@ -1162,30 +1166,264 @@ loadViewBtn.addEventListener("click", () => {
                 1
             ));
 
-            yzVertLineGeom.setFromPoints(points)
-            yzVertLine.geometry.attributes.position.needsUpdate = true
+            yzVertLineGeom.setFromPoints(points);
+            yzVertLine.geometry.attributes.position.needsUpdate = true;
             yzVertLine.geometry.computeBoundingSphere();
 
-            points = []
+            points = [];
             points.push(new THREE.Vector3(data["xClip"] - parseInt(dsInfo["imageDims"]["x"] / 2), -dsInfo["imageDims"]["y"] / 2, 1));
             points.push(new THREE.Vector3(data["xClip"] - parseInt(dsInfo["imageDims"]["x"] / 2), dsInfo["imageDims"]["y"] / 2, 1));
 
             xLineGeom.setFromPoints(points);
-            xLine.geometry.attributes.position.needsUpdate = true
+            xLine.geometry.attributes.position.needsUpdate = true;
             xLine.geometry.computeBoundingSphere();
 
             points = [];
             points.push(new THREE.Vector3(-dsInfo["imageDims"]["x"] / 2, data["yClip"] - parseInt(dsInfo["imageDims"]["y"] / 2), 1));
             points.push(new THREE.Vector3(dsInfo["imageDims"]["x"] / 2, data["yClip"] - parseInt(dsInfo["imageDims"]["y"] / 2), 1));
             yLineGeom.setFromPoints(points);
-            yLine.geometry.attributes.position.needsUpdate = true
+            yLine.geometry.attributes.position.needsUpdate = true;
             yLine.geometry.computeBoundingSphere();
-
-
-            viewSelect.selectedIndex = -1;
+            console.log(session)
+            updateViewDetail(viewName, dsInfo["name"]);
         })
-        .catch((error) => { console.error('Error:', error) })
-})
+        .catch((error) => { console.error('Error:', error); });
+}
+
+function updateViewDetail(viewName, dataset) {
+    fetch('/updateViewDetail', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            'dataset': dataset,
+            'name': viewName,
+            'user': session['email']  // 当前用户的邮箱
+        }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('View detail updated successfully');
+            } else {
+                console.error('Failed to update view detail');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+// Delete view function
+function deleteView(viewName) {
+    if (viewName == '')
+        return
+
+    fetch('/delView', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            'dataset': dsInfo["name"],
+            'name': viewName
+        }),
+    })
+        .then(response => response.json())
+        .then(() => {
+            loadViews()
+        })
+}
+
+// View detail function
+function viewDetail(viewName) {
+    fetch('/getView', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            'dataset': dsInfo["name"],
+            'name': viewName
+        }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log("getView", data)
+            document.getElementById('viewNameDetail').textContent = data.name;
+            document.getElementById('viewCreatorDetail').textContent = data.user;
+            const totalLoadTimes = data.Visit.reduce((sum, visit) => sum + visit.count, 0);
+            document.getElementById('loadtimesDetail').textContent = totalLoadTimes;
+
+            const tableBody = document.getElementById('viewDetailsTableBody');
+            tableBody.innerHTML = '';
+
+            data.Visit.forEach(visit => {
+                const row = document.createElement('tr');
+
+                const LoadUser = document.createElement('td');
+                LoadUser.textContent = visit.User;
+                row.appendChild(LoadUser);
+
+                const Count = document.createElement('td');
+                Count.textContent = visit.count;
+                row.appendChild(Count);
+
+                const LastTime = document.createElement('td');
+                LastTime.textContent = visit.lastVisit;
+                row.appendChild(LastTime);
+
+                tableBody.appendChild(row);
+            });
+
+
+            // 显示模态框
+            $('#viewDetailModal').modal('show');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+
+
+
+// delViewBtn.addEventListener("click", () => {
+//     if (viewSelect.value == '')
+//         return
+
+//     fetch('/delView', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//             'dataset': dsInfo["name"],
+//             'name': viewSelect.value
+//         }),
+//     })
+//         .then(response => response.json())
+//         .then(() => {
+//             loadViews()
+//         })
+
+// })
+
+// loadViewBtn.addEventListener("click", () => {
+//     //viewSelect.addEventListener("change", () => {
+//     if (viewSelect.value == '')
+//         return
+//     /* Not sure if we will do this the same as annotations
+//     let arr = event.object.name.split('-')
+//         if ( !arr[1] )
+//             arr[1] = null
+//     */
+
+//     fetch('/getView', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//             'dataset': dsInfo["name"],
+//             'name': viewSelect.value
+//         }),
+//     })
+//         .then(response => response.json())
+//         .then(data => {
+//             slider.value = data["slice"]
+//             xyInput.value = data["slice"]
+//             //if 3D is active maybe just switch to orthos?
+
+//             //zclip.value = slider.value
+//             modSelect.value = data["moduality"]
+//             //updates the options
+//             changeExposure()
+//             exposureSelect.value = data["exposure"] //WRONG START HERE AFTER LUNCH
+//             changeWavelength()
+//             wavelengthSelect.selectedIndex = data["wavelength"]
+//             //wavelengthSelect.value = data["wavelength"] //WRONG
+//             updateSlice()
+//             cameraXY.position.set(data["x"], data["y"], data["z"])
+//             controlsXY.target.set(data["x"], data["y"], -7)
+//             controlsXY.update()
+//             threshold2D.value = parseInt(data['threshold'])
+//             let modFloat = '1.0'
+//             if (modSelect.value == 'Brightfield')
+//                 modFloat = '0.0'
+//             xyShader.uniforms.u_mod.value = modFloat
+
+//             document.getElementById('orthoTab').click()
+
+//             oMaterials['xz'].uniforms.u_mod.value = modFloat
+//             oMaterials['yz'].uniforms.u_mod.value = modFloat
+//             //just write what we need to happen and abstract later
+//             oCameras['xz'].position.set(data["xxz"], data["yxz"], data["zxz"])
+//             oControls['xz'].target.set(data["xxz"], data["yxz"], -7)
+//             oControls['xz'].update()
+
+//             oCameras['yz'].position.set(data["xyz"], data["yyz"], data["zyz"])
+//             oControls['yz'].target.set(data["xyz"], data["yyz"], -7)
+//             oControls['yz'].update()
+//             //need to handle vertical lines here, update slice handles horizontal
+//             //need to update orthos as well
+//             clipCoords.x = data["xClip"]
+//             clipCoords.y = data["yClip"]
+//             updateOrthoMeshes()
+
+//             let points = [];
+//             points.push(new THREE.Vector3(
+//                 data["xClip"] - parseInt(dsInfo["imageDims"]["x"] / 2),
+//                 -(parseInt(dsInfo["imageDims"]["z"] * dsInfo["voxels"]["z"]) / 2),
+//                 1
+//             ));
+//             points.push(new THREE.Vector3(
+//                 data["xClip"] - parseInt(dsInfo["imageDims"]["x"] / 2),
+//                 (parseInt(dsInfo["imageDims"]["z"] * dsInfo["voxels"]["z"]) / 2),
+//                 1
+//             ));
+
+//             xzVertLineGeom.setFromPoints(points)
+//             xzVertLine.geometry.attributes.position.needsUpdate = true
+//             xzVertLine.geometry.computeBoundingSphere();
+
+//             points = [];
+//             points.push(new THREE.Vector3(
+//                 data["yClip"] - parseInt(dsInfo["imageDims"]["y"] / 2),
+//                 -(parseInt(dsInfo["imageDims"]["z"] * dsInfo["voxels"]["z"]) / 2),
+//                 1
+//             ));
+//             points.push(new THREE.Vector3(
+//                 data["yClip"] - parseInt(dsInfo["imageDims"]["y"] / 2),
+//                 (parseInt(dsInfo["imageDims"]["z"] * dsInfo["voxels"]["z"]) / 2),
+//                 1
+//             ));
+
+//             yzVertLineGeom.setFromPoints(points)
+//             yzVertLine.geometry.attributes.position.needsUpdate = true
+//             yzVertLine.geometry.computeBoundingSphere();
+
+//             points = []
+//             points.push(new THREE.Vector3(data["xClip"] - parseInt(dsInfo["imageDims"]["x"] / 2), -dsInfo["imageDims"]["y"] / 2, 1));
+//             points.push(new THREE.Vector3(data["xClip"] - parseInt(dsInfo["imageDims"]["x"] / 2), dsInfo["imageDims"]["y"] / 2, 1));
+
+//             xLineGeom.setFromPoints(points);
+//             xLine.geometry.attributes.position.needsUpdate = true
+//             xLine.geometry.computeBoundingSphere();
+
+//             points = [];
+//             points.push(new THREE.Vector3(-dsInfo["imageDims"]["x"] / 2, data["yClip"] - parseInt(dsInfo["imageDims"]["y"] / 2), 1));
+//             points.push(new THREE.Vector3(dsInfo["imageDims"]["x"] / 2, data["yClip"] - parseInt(dsInfo["imageDims"]["y"] / 2), 1));
+//             yLineGeom.setFromPoints(points);
+//             yLine.geometry.attributes.position.needsUpdate = true
+//             yLine.geometry.computeBoundingSphere();
+
+
+//             viewSelect.selectedIndex = -1;
+//         })
+//         .catch((error) => { console.error('Error:', error) })
+// })
 
 function populateInfoTable() {
     let dsDiv = document.getElementById("dsCard")
@@ -1751,20 +1989,20 @@ annModalDelete.addEventListener('click', () => {
     loadAnnotationsFast()
 })
 
-window.addEventListener('resize', () => {
-    if (!cameraXY)
-        return
-    cameraXY.aspect = (xyDiv.offsetWidth / Math.floor(window.innerHeight * 0.25))//@TODO HARDCODE
-    cameraXY.updateProjectionMatrix()
-    rendererXY.setSize(xyDiv.offsetWidth, Math.floor(window.innerHeight * 0.25))
+function updateCameraAndRendererSizes() {
+    console.log("resize")
+    if (!cameraXY) return;
+
+    cameraXY.aspect = (xyDiv.offsetWidth / Math.floor(window.innerHeight * 0.25)); // @TODO HARDCODE
+    cameraXY.updateProjectionMatrix();
+    rendererXY.setSize(xyDiv.offsetWidth, Math.floor(window.innerHeight * 0.25));
 
     orthos.forEach(ortho => {
-        oCameras[ortho].aspect = ($(oDivs[ortho]).width() / Math.floor(window.innerHeight * 0.25))
-        oCameras[ortho].updateProjectionMatrix()
-
-        oRenderers[ortho].setSize($(oDivs[ortho]).width(), Math.floor(window.innerHeight * 0.25))
+        oCameras[ortho].aspect = (originODivWith / Math.floor(window.innerHeight * 0.25));
+        oCameras[ortho].updateProjectionMatrix();
+        oRenderers[ortho].setSize(originODivWith, Math.floor(window.innerHeight * 0.25));
     });
-})
+}
 
 function showLoading(which) {
     document.getElementById(`${which}OverlayDiv`).classList.remove('d-none')
@@ -1821,48 +2059,88 @@ function updateSlice() {
 }
 
 saveViewBtn.addEventListener('click', () => {
+    const viewInput = document.getElementById('viewName');
+    const payload = {
+        dataset: dsInfo.name,
+        name: viewInput.value,
+        x: cameraXY.position.x,
+        y: cameraXY.position.y,
+        z: cameraXY.position.z,
+        moduality: modSelect.value,
+        exposure: exposureSelect.value,
+        wavelength: wavelengthSelect.value,
+        slice: slider.value,
+        datetime: Date.now(),
+        xxz: oCameras.xz.position.x,
+        yxz: oCameras.xz.position.y,
+        zxz: oCameras.xz.position.z,
+        xyz: oCameras.yz.position.x,
+        yyz: oCameras.yz.position.y,
+        zyz: oCameras.yz.position.z,
+        xClip: clipCoords.x,
+        yClip: clipCoords.y,
+        threshold: threshold2D.value
+    };
 
-    let viewInput = document.getElementById('viewName')
     fetch('/saveView', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            'dataset': dsInfo["name"],
-            'name': viewInput.value,
-            'x': cameraXY.position.x,
-            'y': cameraXY.position.y,
-            'z': cameraXY.position.z,
-            'moduality': modSelect.value,
-            'exposure': exposureSelect.value,
-            'wavelength': wavelengthSelect.value,
-            'slice': slider.value,
-            'datetime': Date.now(),
-            'xxz': oCameras['xz'].position.x,
-            'yxz': oCameras['xz'].position.y,
-            'zxz': oCameras['xz'].position.z,
-            'xyz': oCameras['yz'].position.x,
-            'yyz': oCameras['yz'].position.y,
-            'zyz': oCameras['yz'].position.z,
-            'xClip': clipCoords.x,
-            'yClip': clipCoords.y,
-            'threshold': threshold2D.value
-        }),
+        body: JSON.stringify(payload),
     })
         .then(response => response.json())
         .then(data => {
-            //console.log(data)
-            let opt = document.createElement('option')
-            opt.appendChild(document.createTextNode(data["name"]))
-            opt.value = data["name"]
-            viewSelect.appendChild(opt)
-            viewInput.value = ''
+            // 在viewsTableBody中添加新行
+            const viewsTableBody = document.querySelector('#viewsTable tbody');
+            let row = document.createElement('tr');
+
+            // 第一列：View Name
+            let nameCell = document.createElement('td');
+            nameCell.textContent = data.name;
+            row.appendChild(nameCell);
+
+            // 第二列：Buttons
+            let buttonCell = document.createElement('td');
+
+            // Load button
+            let loadButton = document.createElement('button');
+            loadButton.classList.add('btn', 'btn-primary', 'mr-2', 'btn-icon');
+            loadButton.innerHTML = '<i class="fas fa-download"></i>';
+            loadButton.onclick = function () {
+                loadView(data.name);
+            };
+            buttonCell.appendChild(loadButton);
+
+            // Delete button
+            let deleteButton = document.createElement('button');
+            deleteButton.classList.add('btn', 'btn-danger', 'mr-2', 'btn-icon');
+            deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+            deleteButton.onclick = function () {
+                deleteView(data.name);
+            };
+            buttonCell.appendChild(deleteButton);
+
+            // Detail button
+            let detailButton = document.createElement('button');
+            detailButton.classList.add('btn', 'btn-info', 'btn-icon');
+            detailButton.innerHTML = '<i class="fas fa-info-circle"></i>';
+            detailButton.onclick = function () {
+                viewDetail(data.name);
+            };
+            buttonCell.appendChild(detailButton);
+
+            row.appendChild(buttonCell);
+            viewsTableBody.appendChild(row);
+
+            // 重置viewInput
+            viewInput.value = '';
         })
-        .catch((error) => {
-            console.error('Error:', error)
-        })
-})
+        .catch(error => {
+            console.error('Error:', error);
+        });
+});
+
 
 
 /** TODO enhancement being active canvas could be auto selected based off focus*/
@@ -1875,10 +2153,21 @@ FullScreenSelect.addEventListener('change', () => {
 FullScreenBtn.onclick = () => {
     let element;
     if (fullScreenInput == "XY") {
+        cameraXY.aspect = (Math.floor(window.innerWidth) / Math.floor(window.innerHeight)); // @TODO HARDCODE
+        cameraXY.updateProjectionMatrix();
+        rendererXY.setSize(Math.floor(window.innerWidth), Math.floor(window.innerHeight));
         element = rendererXY.domElement;
     } else if (fullScreenInput == "XZ") {
+        oCameras['xz'].aspect = (Math.floor(window.innerWidth) / Math.floor(window.innerHeight));
+        oCameras['xz'].updateProjectionMatrix();
+        oRenderers['xz'].setSize(Math.floor(window.innerWidth), Math.floor(window.innerHeight));
+
         element = oRenderers['xz'].domElement;
     } else if (fullScreenInput == "YZ") {
+        oCameras['yz'].aspect = (Math.floor(window.innerWidth) / Math.floor(window.innerHeight));
+        oCameras['yz'].updateProjectionMatrix();
+        oRenderers['yz'].setSize(Math.floor(window.innerWidth), Math.floor(window.innerHeight));
+
         element = oRenderers['yz'].domElement;
     } else {
         element = document.querySelector('#c');
@@ -1897,62 +2186,36 @@ FullScreenBtn.onclick = () => {
             });
     } else {
         document.exitFullscreen()
-            .then(() => {
-                // Reset styles after exiting full screen
-                element.style.width = '';
-                element.style.height = '';
-                element.style.display = '';
-            })
             .catch(err => {
                 alert(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
             });
     }
 };
 
-// full2dBtnXY.addEventListener('click', () => {
-//     if (!document.fullscreenElement) {
-//         let activeCanvas
-//         activeCanvas = canvasXY
-//         activeCanvas.requestFullscreen().catch(err => {
-//             alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`)
-//         })
-//     } else {
-//         document.exitFullscreen()
-//     }
-// })
+// Listen for fullscreen change events
+document.addEventListener('fullscreenchange', () => {
+    let element;
+    if (fullScreenInput == "XY") {
+        element = rendererXY.domElement;
+    } else if (fullScreenInput == "XZ") {
+        element = oRenderers['xz'].domElement;
+    } else if (fullScreenInput == "YZ") {
+        element = oRenderers['yz'].domElement;
+    } else {
+        element = document.querySelector('#c');
+    }
 
-// full2dBtnXZ.addEventListener('click', () => {
-//     if (!document.fullscreenElement) {
-//         let activeCanvas
-//         if (document.getElementById('vrTab').classList.contains('active')) {
-//             alert('The ortho scene(s) are not currently active')
-//             return
-//         }
-//         activeCanvas = oRenderers['xz'].domElement
-//         activeCanvas.requestFullscreen().catch(err => {
-//             alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`)
-//         })
-//     } else {
-//         document.exitFullscreen()
-//     }
-// })
+    if (!document.fullscreenElement) {
+        // Reset styles after exiting full screen
+        element.style.width = '';
+        element.style.height = '';
+        element.style.display = '';
+        updateCameraAndRendererSizes();
+    }
+});
 
-// full2dBtnYZ.addEventListener('click', () => {
-//     if (!document.fullscreenElement) {
-//         let activeCanvas
 
-//         if (document.getElementById('vrTab').classList.contains('active')) {
-//             alert('The ortho scene(s) are not currently active')
-//             return
-//         }
-//         activeCanvas = oRenderers['yz'].domElement
-//         activeCanvas.requestFullscreen().catch(err => {
-//             alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`)
-//         })
-//     } else {
-//         document.exitFullscreen()
-//     }
-// })
+
 
 full3dBtn.addEventListener('click', () => {
     if (!document.fullscreenElement) {
@@ -2208,7 +2471,7 @@ function loadOrthos(fullLoad = true) {
             oRenderers[ortho].setSize($(oDivs[ortho]).width(), Math.floor(window.innerHeight * 0.25))
             oRenderers[ortho].outputEncoding = THREE.sRGBEncoding;
             oDivs[ortho].appendChild(oRenderers[ortho].domElement)
-
+            originODivWith = $(oDivs[ortho]).width()
             oScenes[ortho].remove(oMeshes[ortho])
 
             oCameras[ortho] = new THREE.PerspectiveCamera(30, $(oDivs[ortho]).width() / Math.floor(window.innerHeight * 0.25), 1, 5000)

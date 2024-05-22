@@ -318,6 +318,18 @@
         font-weight: bold;
         /* 设置字体加粗 */
     }
+
+    .btn-icon {
+        font-size: 14px;
+        padding: 5px 10px;
+    }
+
+    .table-responsive {
+        max-height: 300px;
+        /* 你可以根据需要调整高度 */
+        overflow-y: auto;
+    }
+
 </style>
 
 <div class="container-fluid" style="height: 100vh;">
@@ -475,18 +487,21 @@
                         </div>
                     </form>
                     <div class="row">
-                        <div class="col-6">
-                            <label for="viewsSelect">Go to View:</label>
-                            <select size="5" id="viewsSelect" class="form-control">
-                            </select>
-                            <div id="viewsTable"></div>
-                        </div>
-                        <div class="col-6">
-                            <br>
-                            <button id="loadViewBtn" type="button" class="btn btn-primary btn-block" disabled>Load
-                                View</button>
-                            <button id="delViewBtn" type="button" class="btn btn-danger btn-block" disabled>Delete
-                                View</button>
+                        <div class="col-12">
+                            <label for="viewsTable">Go to View:</label>
+                            <div class="table-responsive">
+                                <table id="viewsTable" class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>View Name</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Rows will be dynamically added here -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1098,6 +1113,42 @@
         </div>
     </div>
 </div>
+<!-- 模态框结构 -->
+<div class="modal fade" id="viewDetailModal" tabindex="-1" role="dialog" aria-labelledby="viewDetailModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewDetailModalLabel">View Detail</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong>View Name:</strong> <span id="viewNameDetail"></span></p>
+                <p><strong>Creator:</strong> <span id="viewCreatorDetail"></span></p>
+                <p><strong>Overall load times:</strong> <span id="loadtimesDetail"></span></p>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">User</th>
+                                <th scope="col">Load overall times</th>
+                                <th scope="col">Last time load</th>
+                            </tr>
+                        </thead>
+                        <tbody id="viewDetailsTableBody">
+                            <!-- 动态添加表格内容 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     //Globals (shared between 2D and 3D)
@@ -1167,14 +1218,14 @@
             'rgba(255, 235, 59, 0.95)',
             'rgba(255, 193, 7, 1)'
         ],
-
+ 
         components: {
-
+ 
             // Main components
             preview: true,
             opacity: true,
             hue: true,
-
+ 
             // Input / output Options
             interaction: {
                 clear: true,
@@ -1191,7 +1242,7 @@
             for ( let i=0; i<pickrs.length; i++)
                 pickrs.style.color = "rgba(250,0,0,1)"
         
-
+ 
         })
     })*/
     })

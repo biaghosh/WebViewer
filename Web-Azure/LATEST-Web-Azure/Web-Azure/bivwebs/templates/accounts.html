@@ -300,7 +300,9 @@
     window.addEventListener("DOMContentLoaded", function () {
         getInstitutions().then(institutions => {
             institutionsList = institutions;
+            populateInstitutionSelect(institutions);
             renderInstitutionList(institutions);
+            populateUserInstitutionSelect(institutions);
         });
     });
     let institutionsList = [];
@@ -613,24 +615,8 @@
         });
     }
 
-    function getInstitutions() {
-        return fetch('/getInstitutions')
-            .then(response => response.json())
-            .then(institutions => {
-                return institutions;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                return [];
-            });
-    }
-
     // Get the list of institutions and populate the dropdown when the page loads
-    window.addEventListener("DOMContentLoaded", function () {
-        getInstitutions().then(institutions => {
-            populateInstitutionSelect(institutions);
-        });
-    });
+
 
     function populateUserInstitutionSelect(institutions) {
         const select = document.getElementById('userInstitutionFilter');
@@ -645,12 +631,6 @@
     }
 
     // 当页面加载时，调用此函数
-    window.addEventListener("DOMContentLoaded", function () {
-        getInstitutions().then(institutions => {
-            populateUserInstitutionSelect(institutions);
-        });
-    });
-
     document.getElementById('userInstitutionFilter').addEventListener('change', function () {
         const selectedInstitution = this.value;
         usersTable(selectedInstitution); // 传入选定的机构
@@ -972,14 +952,6 @@
 
         updateInstitutionDetails();
     }
-
-
-    window.addEventListener("DOMContentLoaded", function () {
-        getInstitutions().then(institutions => {
-            institutionsList = institutions;
-            renderInstitutionList(institutions);
-        });
-    });
 
 
     function showOrderDetails(institutionName, poNumber) {

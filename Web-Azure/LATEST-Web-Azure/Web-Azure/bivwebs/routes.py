@@ -642,6 +642,40 @@ def getView():
         })
     return make_response(dumps(data), 200)
 
+
+@app.route('/updateViewDetail', methods=['POST'])
+def update_view_detail():
+    data = request.get_json()
+    print(data)
+    dataset = data.get('dataset')
+    view_name = data.get('name')
+    user_email = data.get('user')
+    
+    view = MongoClient(app.config['mongo']).BIV.views.find_one({'name': view_name, 'dataset':dataset})
+    if not view:
+        return jsonify({'error': 'View not found'}), 404
+    print(view)
+    if 'Visit' not in view:
+        view['Visit'] = []
+
+    visit_table = view['Visit']
+    user_visit = next((visit for visit in visit_table if visit['User'] == user_email), None)
+    
+    if user_visit:
+        user_visit['count'] += 1
+        user_visit['lastVisit'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        visit_table.append({
+            'User': user_email,
+            'count': 1,
+            'lastVisit': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+
+    MongoClient(app.config['mongo']).BIV.views.update_one({'_id': view['_id']}, {'$set': {'Visit': visit_table}})
+    
+    return jsonify({'success': True}), 200
+
+
 @app.route("/saveMask", methods=['POST'])
 def saveMask():
     if 'email' not in session:
