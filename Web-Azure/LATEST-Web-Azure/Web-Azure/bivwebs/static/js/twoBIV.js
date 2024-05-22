@@ -1073,13 +1073,16 @@ function loadViews() {
                 buttonCell.appendChild(deleteButton);
 
                 // Detail button
-                let detailButton = document.createElement('button');
-                detailButton.classList.add('btn', 'btn-info', 'btn-icon');
-                detailButton.innerHTML = '<i class="fas fa-info-circle"></i>';
-                detailButton.onclick = function () {
-                    viewDetail(data[i]['name']);
-                };
-                buttonCell.appendChild(detailButton);
+                if (session['level'] === 'admin') {
+                    console.log("can see")
+                    let detailButton = document.createElement('button');
+                    detailButton.classList.add('btn', 'btn-info', 'btn-icon');
+                    detailButton.innerHTML = '<i class="fas fa-info-circle"></i>';
+                    detailButton.onclick = function () {
+                        viewDetail(data[i]['name']);
+                    };
+                    buttonCell.appendChild(detailButton);
+                }
 
                 row.appendChild(buttonCell);
                 viewsTableBody.appendChild(row);
@@ -1090,7 +1093,7 @@ function loadViews() {
 
 // Load view function
 function loadView(viewName) {
-     ('Loading view:', viewName); // 调试信息
+    ('Loading view:', viewName); // 调试信息
     if (!viewName) return;
 
     fetch('/getView', {
@@ -1184,7 +1187,7 @@ function loadView(viewName) {
             yLineGeom.setFromPoints(points);
             yLine.geometry.attributes.position.needsUpdate = true;
             yLine.geometry.computeBoundingSphere();
-             (session)
+            (session)
             updateViewDetail(viewName, dsInfo["name"]);
         })
         .catch((error) => { console.error('Error:', error); });
@@ -1205,7 +1208,7 @@ function updateViewDetail(viewName, dataset) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                 ('View detail updated successfully');
+                ('View detail updated successfully');
             } else {
                 console.error('Failed to update view detail');
             }
@@ -1250,7 +1253,7 @@ function viewDetail(viewName) {
     })
         .then(response => response.json())
         .then(data => {
-             ("getView", data)
+            ("getView", data)
             document.getElementById('viewNameDetail').textContent = data.name;
             document.getElementById('viewCreatorDetail').textContent = data.user;
             const totalLoadTimes = data.Visit.reduce((sum, visit) => sum + visit.count, 0);
@@ -2620,7 +2623,7 @@ function xzClick(evt) {
 }
 
 function yzClick(evt) {
-     ("点击")
+    ("点击")
     let rect = oRenderers['yz'].domElement.getBoundingClientRect()
     let x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
     let y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
@@ -2679,7 +2682,7 @@ function updateMeshes() {
 }
 //update
 function orthoClick(evt) {
-     ("点击了")
+    ("点击了")
     if (draggedAnn) {
         draggedAnn = false
         return
@@ -2759,7 +2762,7 @@ function updateOrthoMeshes() {
     //  ("update")
     xclip.value = clipCoords[oClip['yz']]
     yclip.value = clipCoords[oClip['xz']]
-     ("xclip,yclip", xclip.value, yclip.value)
+        ("xclip,yclip", xclip.value, yclip.value)
     orthos.forEach(ortho => {
         loader.load(`https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis?${SAS}`, function (texture) {
             texture.encoding = THREE.sRGBEncoding
@@ -3096,7 +3099,7 @@ function openFilePreviewModal(url, fileName) {
     var filePreviewModal = document.getElementById("filePreviewModal");
     var filePreviewContent = document.getElementById("file-preview");
     var filePreviewInfo = document.getElementById("file-info");
-     (url)
+    (url)
     var cleanUrl = url.trim().replace(/^"|"$/g, '');
     // Create an iframe element and set its src attribute to the URL of the file
     var iframe = document.createElement('iframe');
@@ -3104,7 +3107,7 @@ function openFilePreviewModal(url, fileName) {
     iframe.style.width = '100%';
     iframe.style.height = '300px';
     iframe.style.overflow = 'auto';
-     (iframe.src)
+    (iframe.src)
 
     // Clear the preview area and add the newly created iframe element
     filePreviewContent.innerHTML = '';
@@ -3140,10 +3143,10 @@ function openVideoPreviewModal(videoUrl, filename) {
     var videoInfo = document.getElementById("video-info");
 
     // Set the src attribute of the <video> element
-     (videoUrl)
+    (videoUrl)
     var cleanUrl = videoUrl.trim().replace(/^"|"$/g, '');
     videoPreview.src = cleanUrl;
-     (cleanUrl)
+    (cleanUrl)
     // Set the modal title to the file name
     videoInfo.innerText = filename;
 
