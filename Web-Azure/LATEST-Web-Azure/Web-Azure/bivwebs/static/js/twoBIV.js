@@ -80,18 +80,6 @@ dsSelect.addEventListener("change", () => {
         .catch((error) => {
             console.error('Error:', error);
         });
-    // // 如果按钮启用，延迟 1 秒启用
-    // if (isLoadButtonEnabled) {
-    //     loadButton.disabled = true;
-    //     setTimeout(() => {
-    //         loadButton.disabled = false;
-    //     }, 1000);
-    // }
-    // else {
-    //     setTimeout(() => {
-    //         loadButton.disabled = false;
-    //     }, 1000);
-    // }
 });
 
 
@@ -119,8 +107,6 @@ function changeMod() {
     // if (expCounter < 2 && waveCounter < 2) {
     exposureSelect.selectedIndex = "0"
     changeExposure()
-
-    // }
 }
 
 exposureSelect.addEventListener("change", changeExposure)
@@ -1057,7 +1043,7 @@ function loadViews() {
                 // Load button
                 let loadButton = document.createElement('button');
                 loadButton.classList.add('btn', 'btn-primary', 'mr-2', 'btn-icon');
-                loadButton.innerHTML = '<i class="fas fa-download"></i>';
+                loadButton.innerHTML = '<i class="fas fa-search"></i>';
                 loadButton.onclick = function () {
                     loadView(data[i]['name']);
                 };
@@ -1074,7 +1060,6 @@ function loadViews() {
 
                 // Detail button
                 if (session['level'] === 'admin') {
-                    console.log("can see")
                     let detailButton = document.createElement('button');
                     detailButton.classList.add('btn', 'btn-info', 'btn-icon');
                     detailButton.innerHTML = '<i class="fas fa-info-circle"></i>';
@@ -1093,7 +1078,6 @@ function loadViews() {
 
 // Load view function
 function loadView(viewName) {
-    ('Loading view:', viewName); // 调试信息
     if (!viewName) return;
 
     fetch('/getView', {
@@ -2762,7 +2746,6 @@ function updateOrthoMeshes() {
     //  ("update")
     xclip.value = clipCoords[oClip['yz']]
     yclip.value = clipCoords[oClip['xz']]
-        ("xclip,yclip", xclip.value, yclip.value)
     orthos.forEach(ortho => {
         loader.load(`https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis?${SAS}`, function (texture) {
             texture.encoding = THREE.sRGBEncoding
