@@ -24,12 +24,6 @@ let measureData = {
 
 dsSelect.addEventListener("change", () => {
     if (!dsSelect.value) return;
-
-    // 检查按钮是否已启用
-    // const loadButton = document.getElementById('loadDatasetBtn');
-    // const isLoadButtonEnabled = !loadButton.disabled;
-
-
     fetch('/getDatasetInfo', {
         method: 'POST',
         headers: {
@@ -39,8 +33,7 @@ dsSelect.addEventListener("change", () => {
     })
         .then(response => response.json())
         .then(data => {
-
-            // 继续处理数据
+            // Continue processing data
             session = data['session'];
             dsName = data['dataset_info'][0]['name'];
             dsInfo = data['dataset_info'][0];
@@ -57,7 +50,7 @@ dsSelect.addEventListener("change", () => {
                 lineTextGroup.remove(...lineTextGroup.children);
             }
 
-            // 填充选择框
+            // Fill selection box
             for (const mod in dsInfo.types) {
                 let opt = document.createElement('option');
                 opt.appendChild(document.createTextNode(mod));
@@ -72,7 +65,7 @@ dsSelect.addEventListener("change", () => {
                 }
             }
 
-            // 默认选择第一个模式，并触发事件
+            // The first mode is selected by default and the event is triggered
             modSelect.selectedIndex = 0;
             var event = new Event('change');
             modSelect.dispatchEvent(event);
@@ -81,7 +74,6 @@ dsSelect.addEventListener("change", () => {
             console.error('Error:', error);
         });
 });
-
 
 
 modSelect.addEventListener("change", changeMod)
@@ -177,7 +169,7 @@ function handleSelectChange() {
     dsChanged = false;
 }
 
-// 给所有相关的选择框添加事件监听
+// Add event listeners to all relevant select boxes
 document.getElementById('dsSelect').addEventListener('change', handleSelectChange);
 document.getElementById('modSelect').addEventListener('change', handleSelectChange);
 document.getElementById('exposureSelect').addEventListener('change', handleSelectChange);
@@ -346,6 +338,7 @@ function loadDynamic2D(fullLoad) {
         dControls = new DragControls(XYannTextGroup.children, cameraXY, rendererXY.domElement)
 
         dControls.addEventListener('dragend', function (event) {
+            console.log("shashahsa")
             let arr = event.object.name.split('-')
             if (!arr[1])
                 arr[1] = ''
@@ -1007,10 +1000,10 @@ function drawAnnotation(p, t, x, y) {
     }
 
     YZannTextGroup.children.forEach(child => {
-        child.position.z = 0.1;  // 调整z轴坐标使注释位于图像平面之前
+        child.position.z = 0.1;  // Adjust the z-axis coordinate so that the annotation is in front of the image plane
     });
     XZannTextGroup.children.forEach(child => {
-        child.position.z = 0.1;  // 调整z轴坐标使注释位于图像平面之前
+        child.position.z = 0.1;  // Adjust the z-axis coordinate so that the annotation is in front of the image plane
     });
 }
 
@@ -1032,12 +1025,12 @@ function loadViews() {
             for (let i = 0; i < data.length; i++) {
                 let row = document.createElement('tr');
 
-                // 第一列：View Name
+                // First column: View Name
                 let nameCell = document.createElement('td');
                 nameCell.textContent = data[i]['name'];
                 row.appendChild(nameCell);
 
-                // 第二列：Buttons
+                // Second column: Buttons
                 let buttonCell = document.createElement('td');
 
                 // Load button
@@ -1186,7 +1179,7 @@ function updateViewDetail(viewName, dataset) {
         body: JSON.stringify({
             'dataset': dataset,
             'name': viewName,
-            'user': session['email']  // 当前用户的邮箱
+            'user': session['email']  // Current user's email
         }),
     })
         .then(response => response.json())
@@ -1265,7 +1258,7 @@ function viewDetail(viewName) {
             });
 
 
-            // 显示模态框
+            // Show modal box
             $('#viewDetailModal').modal('show');
         })
         .catch(error => {
@@ -1535,7 +1528,7 @@ function processNewAnn(evt) {
                 canvasXZ.addEventListener("click", xzClick)
                 canvasYZ.addEventListener("click", yzClick)
 
-                canvasYZ.removeEventListener("click", processNewAnnYZ); // 针对 YZ 平面的处理函数
+                canvasYZ.removeEventListener("click", processNewAnnYZ); // Processing functions for the YZ plane
                 canvasXZ.removeEventListener("click", processNewAnnXZ);
                 createAnnBtn.disabled = false
             }
@@ -1545,11 +1538,11 @@ function processNewAnn(evt) {
 
 function addAnnotationEvents() {
 
-    // 动态创建注释的事件处理
+    // Event handling for dynamically creating annotations
     if (!createAnnBtn.hasAttribute('data-listener')) {
         //  ("ssss")
         createAnnBtn.addEventListener("click", dynamicCreateAnn);
-        createAnnBtn.setAttribute('data-listener', 'true'); // 标记已添加监听器
+        createAnnBtn.setAttribute('data-listener', 'true'); // Mark listener added
     }
 
     function dynamicCreateAnn() {
@@ -1561,15 +1554,15 @@ function addAnnotationEvents() {
 
 
         canvasXY.addEventListener("click", processNewAnn);
-        canvasYZ.addEventListener("click", processNewAnnYZ); // 针对 YZ 平面的处理函数
+        canvasYZ.addEventListener("click", processNewAnnYZ); // Processing functions for the YZ plane
         canvasXZ.addEventListener("click", processNewAnnXZ);
-        // canvasXZ.addEventListener("click", processNewAnn); // 针对 XZ 平面的处理函数
+        // canvasXZ.addEventListener("click", processNewAnn); //Processing functions for the XZ plane
     }
 
-    // 切换注释显示状态的事件处理
+    // Event handling for switching annotation display status
     if (!toggleAnnBtn.hasAttribute('data-listener')) {
         toggleAnnBtn.addEventListener("click", toggleAnnotations);
-        toggleAnnBtn.setAttribute('data-listener', 'true'); // 标记已添加监听器
+        toggleAnnBtn.setAttribute('data-listener', 'true'); // Mark listener added
     }
 
     function toggleAnnotations() {
@@ -1588,13 +1581,14 @@ function addAnnotationEvents() {
         }
     }
 
-    // 移动注释的事件处理
+    // Event handling for moving annotations
     if (!canvasXY.hasAttribute('data-move-listener')) {
         canvasXY.addEventListener("click", moveAnn);
         canvasXY.setAttribute('data-move-listener', 'true'); // 标记已添加监听器
     }
 
     function moveAnn() {
+        console.log("sss")
         // 这里添加移动注释的代码
     }
 }
@@ -1606,7 +1600,7 @@ function processNewAnnYZ(evt) {
 
     rayCaster.setFromCamera(mouse, oCameras['yz']);
     var intersects = [];
-    oMeshes['yz'].raycast(rayCaster, intersects);  // 确保你已经定义了对应的mesh
+    oMeshes['yz'].raycast(rayCaster, intersects);  // Make sure you have defined the corresponding mesh
     if (intersects.length > 0) {
         canvasYZ.removeEventListener("click", processNewAnnYZ);
         let txtBox = document.createElement("input");
@@ -1616,7 +1610,7 @@ function processNewAnnYZ(evt) {
         txtBox.height = 20;
         txtBox.maxLength = 30;
         txtBox.style.position = "absolute";
-        yzDiv.appendChild(txtBox);  // 确保你有一个与 canvasYZ 对应的 div
+        yzDiv.appendChild(txtBox);  // Make sure you have a div corresponding to canvasYZ
         txtBox.style.zIndex = "10";
         txtBox.style.left = evt.offsetX + canvasYZ.offsetLeft + "px";
         txtBox.style.top = evt.offsetY + canvasYZ.offsetTop + "px";
@@ -1640,7 +1634,7 @@ function processNewAnnYZ(evt) {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        'slice': clipCoords[oClip['yz']],  // 确保你有相应的sliderYZ
+                        'slice': clipCoords[oClip['yz']],  // Make sure you have the corresponding sliderYZ
                         'plane': 'YZ',
                         'dataset': dsInfo["name"],
                         'moduality': modSelect.value,
@@ -1658,9 +1652,9 @@ function processNewAnnYZ(evt) {
                         if (data['instance']) {
                             annTxt += '-' + data['instance'];
                         }
-                        drawAnnotation('YZ', annTxt, data['x'], data['y']);  // 确保你有一个drawAnnotationYZ函数
+                        drawAnnotation('YZ', annTxt, data['x'], data['y']);  // Make sure you have a drawAnnotationYZ function
 
-                        var newRow = annTableBody.insertRow();  // 确保你有对应的表格
+                        var newRow = annTableBody.insertRow();  // Make sure you have the corresponding form
 
                         let dt = new Date(data['datetime']);
 
@@ -1673,7 +1667,6 @@ function processNewAnnYZ(evt) {
                         btn.setAttribute('data-text', data['text']);
                         btn.setAttribute('data-instance', data['instance'] ? data['instance'] : '0');
                         btn.setAttribute('data-comments', data['comments'] ? data['comments'] : '');
-
                         newRow.insertCell(0).appendChild(btn);
                         newRow.insertCell(1).appendChild(document.createTextNode(data['text']))
                         newRow.insertCell(2).appendChild(document.createTextNode(data['plane']))
@@ -1710,13 +1703,10 @@ function processNewAnnYZ(evt) {
                 canvasXY.addEventListener("click", orthoClick)
                 canvasXZ.addEventListener("click", xzClick)
                 canvasYZ.addEventListener("click", yzClick)
-
                 canvasXY.removeEventListener("click", processNewAnn);
                 canvasXZ.removeEventListener("click", processNewAnnXZ);
 
                 createAnnBtn.disabled = false;
-
-
             }
         });
     }
@@ -1729,7 +1719,7 @@ function processNewAnnXZ(evt) {
 
     rayCaster.setFromCamera(mouse, oCameras['xz']);
     var intersects = [];
-    oMeshes['xz'].raycast(rayCaster, intersects);  // 确保你已经定义了对应的mesh
+    oMeshes['xz'].raycast(rayCaster, intersects);  // Make sure you have defined the corresponding mesh
     if (intersects.length > 0) {
         canvasXZ.removeEventListener("click", processNewAnnXZ);
         let txtBox = document.createElement("input");
@@ -1739,7 +1729,7 @@ function processNewAnnXZ(evt) {
         txtBox.height = 20;
         txtBox.maxLength = 30;
         txtBox.style.position = "absolute";
-        xzDiv.appendChild(txtBox);  // 确保你有一个与 canvasYZ 对应的 div
+        xzDiv.appendChild(txtBox);  // Make sure you have a div corresponding to canvasYZ
         txtBox.style.zIndex = "10";
         txtBox.style.left = evt.offsetX + canvasXZ.offsetLeft + "px";
         txtBox.style.top = evt.offsetY + canvasXZ.offsetTop + "px";
@@ -1763,7 +1753,7 @@ function processNewAnnXZ(evt) {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        'slice': clipCoords[oClip['xz']],  // 确保你有相应的sliderYZ
+                        'slice': clipCoords[oClip['xz']],  // Make sure you have the corresponding sliderYZ
                         'plane': 'XZ',
                         'dataset': dsInfo["name"],
                         'moduality': modSelect.value,
@@ -1781,14 +1771,11 @@ function processNewAnnXZ(evt) {
                         if (data['instance']) {
                             annTxt += '-' + data['instance'];
                         }
-                        drawAnnotation('XZ', annTxt, data['x'], data['y']);  // 确保你有一个drawAnnotationYZ函数
+                        drawAnnotation('XZ', annTxt, data['x'], data['y']);  // Make sure you have a drawAnnotationYZ function
 
-                        var newRow = annTableBody.insertRow();  // 确保你有对应的表格
+                        var newRow = annTableBody.insertRow();  // Make sure you have the corresponding form
 
                         let dt = new Date(data['datetime']);
-
-
-
                         var btn = document.createElement('input');
                         btn.type = "button";
                         btn.className = "btn btn-warning";
@@ -1837,14 +1824,12 @@ function processNewAnnXZ(evt) {
                 canvasYZ.addEventListener("click", yzClick)
 
                 canvasXY.removeEventListener("click", processNewAnn);
-                canvasYZ.removeEventListener("click", processNewAnnYZ); // 针对 YZ 平面的处理函数
+                canvasYZ.removeEventListener("click", processNewAnnYZ); // Processing functions for the YZ plane
                 createAnnBtn.disabled = false;
             }
         });
     }
 }
-
-
 
 function loadAnnotationsFast() {
     XYannTextGroup.remove(...XYannTextGroup.children)
@@ -2070,16 +2055,16 @@ saveViewBtn.addEventListener('click', () => {
     })
         .then(response => response.json())
         .then(data => {
-            // 在viewsTableBody中添加新行
+            // Add new row in viewsTableBody
             const viewsTableBody = document.querySelector('#viewsTable tbody');
             let row = document.createElement('tr');
 
-            // 第一列：View Name
+            // First column: View Name
             let nameCell = document.createElement('td');
             nameCell.textContent = data.name;
             row.appendChild(nameCell);
 
-            // 第二列：Buttons
+            // Second column: Buttons
             let buttonCell = document.createElement('td');
 
             // Load button
@@ -2112,7 +2097,7 @@ saveViewBtn.addEventListener('click', () => {
             row.appendChild(buttonCell);
             viewsTableBody.appendChild(row);
 
-            // 重置viewInput
+            // Reset viewInput
             viewInput.value = '';
         })
         .catch(error => {
@@ -2192,8 +2177,6 @@ document.addEventListener('fullscreenchange', () => {
         updateCameraAndRendererSizes();
     }
 });
-
-
 
 
 full3dBtn.addEventListener('click', () => {
@@ -2487,7 +2470,6 @@ function loadOrthos(fullLoad = true) {
 
 
         animateOrtho(oRenderers[ortho], oScenes[ortho], oCameras[ortho], oMaterials[ortho], oAnimate[ortho])
-        //  ("输出",clipCoords[oClip[ortho]])
         let sasUrl = `https://bivlargefiles.file.core.windows.net/data/${dsInfo['name']}/basis/${modSelect.value}/${exposureSelect.value}/${dsInfo.types[modSelect.value][exposureSelect.value][wavelengthSelect.value]}/${ortho}/${clipCoords[oClip[ortho]]}.basis?${SAS}`;
 
         loader.load(sasUrl, function (texture) {
@@ -2607,7 +2589,6 @@ function xzClick(evt) {
 }
 
 function yzClick(evt) {
-    ("点击")
     let rect = oRenderers['yz'].domElement.getBoundingClientRect()
     let x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
     let y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
@@ -2666,7 +2647,6 @@ function updateMeshes() {
 }
 //update
 function orthoClick(evt) {
-    ("点击了")
     if (draggedAnn) {
         draggedAnn = false
         return
@@ -2995,20 +2975,19 @@ function loadFiles() {
 }
 
 function createDownloadButton(fileData) {
-    // 创建下载按钮和图标
     var download_button = document.createElement("button");
     var download_icon = document.createElement("i");
     download_icon.className = "fas fa-download";
     download_button.appendChild(download_icon);
 
-    // 设置按钮的样式
+    // Set button style
     download_button.classList.add("btn", "btn-primary");
     download_button.style.width = '30px';
     download_button.style.height = '30px';
     download_button.style.padding = '2px';
     download_button.style.fontSize = '12px';
 
-    // 设置按钮的点击事件
+    // Set button click event
     download_button.onclick = function () {
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/download');
@@ -3020,11 +2999,11 @@ function createDownloadButton(fileData) {
                 const blob = new Blob([xhr.response], { type: 'application/zip' });
                 const link = document.createElement('a');
                 link.href = window.URL.createObjectURL(blob);
-                link.download = 'file_download.zip';  // zip文件名
+                link.download = 'file_download.zip';  // zip file name
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                window.URL.revokeObjectURL(link.href);  // 释放内存
+                window.URL.revokeObjectURL(link.href);  // free memory
             } else {
                 console.error("Failed to download file:", xhr.status, xhr.statusText);
             }
@@ -3036,11 +3015,8 @@ function createDownloadButton(fileData) {
 
         xhr.send(JSON.stringify({ filename: fileData['name'] }));
     };
-
     return download_button;
 }
-
-
 
 function createDeleteButton(fileData) {
     var delete_button = document.createElement("button");
@@ -3170,11 +3146,11 @@ function toggleCards(showVR) {
     var DownToolDiv = document.getElementById('DownToolDiv');
 
     if (showVR) {
-        orthoCard.style.display = 'none';  // 隐藏 orthoCard
+        orthoCard.style.display = 'none';  // Hide orthoCard
         DownToolDiv.style.display = 'none'
         canvasC.style.height = (window.innerHeight * 0.6) + 'px';
     } else {
-        orthoCard.style.display = 'block';  // 隐藏 orthoCard
+        orthoCard.style.display = 'block';  // Hide orthoCard
         DownToolDiv.style.display = 'block'
         canvasC.style.height = 'none';
     }

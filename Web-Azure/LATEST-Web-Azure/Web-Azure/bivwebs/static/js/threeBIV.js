@@ -17,7 +17,7 @@ document.getElementById("dsBtnEvent").addEventListener("click", () => {
             xclip.value = null
             yclip.value = null
         }
-
+        
         //init2(false)
     }
 })
@@ -114,7 +114,6 @@ function takeScreenshot3D(width, height, axis) {
 
     // 如果 axis 为 "3D"
     if (axis == "3D") {
-        console.log("export 3D", width, height, axis);
 
         // 设置相机的 left、right、top 和 bottom 属性
         const aspect = width / height;
@@ -175,7 +174,6 @@ window.isOrthoTabSelected = true;
 
 function clearScene() {
     while (scene.children.length > 0) {
-        console.log("clearScene > 0")
         let object = scene.children[0];
         if (object.dispose) {
             object.dispose(); // 如果对象有 dispose 方法，调用它
@@ -217,7 +215,6 @@ visBtn.addEventListener('click', () => {
 
 
 function init2(fullLoad) {
-    console.log("init2")
     document.getElementById(`vrOverlayDiv`).classList.remove('d-none')
     document.getElementById(`vrOverlayDiv`).classList.add('d-flex')
 
@@ -367,7 +364,6 @@ function init2(fullLoad) {
                         let can = new Image()
                         can.src = 'data:image/png;base64,' + fileData
                         can.onload = function () {
-                            console.log(filename)
                             let fn = filename.split('/').pop()
                             let c = document.createElement('canvas')
                             c.width = dsInfo['dims3']['x']
@@ -496,7 +492,6 @@ function init2(fullLoad) {
 let cellModalBox = document.getElementById("cellModalBox")
 //function loadCellData() {
 cellModalBox.addEventListener('click', () => {
-    console.log(parseFloat(+cellModalBox.checked))
     material.uniforms["u_cell"].value = parseFloat(+cellModalBox.checked)
 })
 

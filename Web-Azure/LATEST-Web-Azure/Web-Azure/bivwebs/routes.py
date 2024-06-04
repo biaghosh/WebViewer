@@ -275,8 +275,6 @@ def deleteAnnotation():
     
     return make_response(dumps(response_data), 200)
 
-
-
 @app.route('/addAssignedDataset/<email>/<datasetName>', methods=['POST'])
 def add_assigned_dataset(email, datasetName):
   client = MongoClient(app.config['mongo'])
@@ -1003,18 +1001,18 @@ def store_image():
 
 @app.route('/download', methods=['POST'])
 def download_files():
-    # 连接到MongoDB
+    # Connect to MongoDB
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     
-    # 获取客户端传递的文件名
+    # Get the file name passed by the client
     file_data = request.json
     file_name = file_data.get('filename')
     
     if not file_name:
         return "File name is missing", 400
 
-    # 从MongoDB中查找文件的URL
+    # Find URL of file from MongoDB
     fs = db['files.files']
     file_doc = fs.find_one({'name': file_name})
     if not file_doc:
@@ -1024,17 +1022,17 @@ def download_files():
     if not file_url:
         return "URL not found in database", 404
     
-    # 下载文件内容
+    # Download file content
     response = requests.get(file_url)
     if response.status_code != 200:
         return "Unable to download the file", 500
     
     file_content = response.content
 
-    # 创建内存中的Zip文件
+    # Create an in-memory Zip file
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED) as zf:
-        # 写入文件时指定编码
+        # Specify encoding when writing to file
         zf.writestr(file_name, file_content)
 
     zip_buffer.seek(0)
@@ -1109,7 +1107,6 @@ def upload_file():
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     datasets = db.datasets
-
     dataset_name = request.form['dataset-name']
     modality = request.form['modality']
     exposure = request.form['exposure']
@@ -1716,7 +1713,7 @@ def insert_order():
     institution_name = data['institutionName']
     new_order = data['newOrder']
 
-    # 在对应机构的订单列表中插入新订单
+    # Insert a new order into the order list of the corresponding institution
     result = collection.update_one(
         {'name': institution_name},
         {'$push': {'orders': new_order}}
@@ -1743,7 +1740,7 @@ def get_orders_by_institution(institutionName):
 @app.route('/delete-wavelength', methods=['POST'])
 def delete_wavelength():
     client = MongoClient(app.config['mongo'])
-    db = client.BIV  # 请替换为你的数据库名称
+    db = client.BIV  
     collection = db.datasets
 
     data = request.json
@@ -1756,11 +1753,10 @@ def delete_wavelength():
     if not type or not exposure or not wavelength:
         return jsonify({'status': 'error', 'message': 'Missing required fields'}), 400
 
-    # 构造查询和更新路径
+    # Construct query and update paths
     query = {'name': datasetName}
     update_path = f'types.{type}.{exposure}'
 
-    # 使用 `$pull` 操作符从数组中移除波长
     result = collection.update_one(query, {'$pull': {update_path: wavelength}})
 
     if result.modified_count > 0:
@@ -1777,7 +1773,7 @@ def delete_order(institutionName,poNumber):
     institution_name = institutionName
     po_number = poNumber
 
-    # 在对应机构的订单列表中删除指定的订单
+    # Delete the specified order from the order list of the corresponding institution
     result = collection.update_one(
         {'name': institution_name},
         {'$pull': {'orders': {'PO_number': po_number}}}
