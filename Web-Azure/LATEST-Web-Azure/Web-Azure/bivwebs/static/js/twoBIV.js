@@ -221,7 +221,7 @@ let forwardBtn = document.getElementById("forwardBtn"),
     UploadFileBtn = document.getElementById("UploadFileBtn")
 
 //THREE JS ELEMENTS
-let cameraXY, sceneXY, controlsXY, rendererXY, mesh, geometry, material2, loader, maskGeometry, maskMaterial, dControls
+let cameraXY, sceneXY, controlsXY, rendererXY, mesh, geometry, material2, loader, maskGeometry, maskMaterial, dControlsXY, dControlsXZ, dControlsYZ
 let lineTextGroup = new THREE.Group(), XYannTextGroup = new THREE.Group(), XZannTextGroup = new THREE.Group(), YZannTextGroup = new THREE.Group(), brushGroup = new THREE.Group(),
     scaleVector = new THREE.Vector3()
 var xzMesh, xzMat, yzMesh, yzMat, xzGeom, yzGeom, oMaterials, oGeoms, oMeshes, oClip, oDivs, oScenes, oCameras, oRenderers, oControls, oAnimate
@@ -261,7 +261,7 @@ const yzShader = new THREE.ShaderMaterial({
 loader = new BasisTextureLoader()
 loader.setTranscoderPath('./static/js/libs/basis/')
 
-let supportPass = false, draggedAnn = false, previousHoverObj
+let supportPass = false, XYdraggedAnn = false, previousHoverObj, XZdraggedAnn = false, YZdraggedAnn = false
 
 function loadDynamic2D(fullLoad) {
     if (!canvasXY) {
@@ -334,11 +334,10 @@ function loadDynamic2D(fullLoad) {
         sceneXY.add(mesh)
         sceneXY.add(lineTextGroup, XYannTextGroup, brushGroup)
 
+        dControlsXY = new DragControls(XYannTextGroup.children, cameraXY, rendererXY.domElement)
 
-        dControls = new DragControls(XYannTextGroup.children, cameraXY, rendererXY.domElement)
 
-        dControls.addEventListener('dragend', function (event) {
-            console.log("shashahsa")
+        dControlsXY.addEventListener('dragend', function (event) {
             let arr = event.object.name.split('-')
             if (!arr[1])
                 arr[1] = ''
@@ -348,7 +347,8 @@ function loadDynamic2D(fullLoad) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    'slice': slider.value,
+                    'slice': parseInt(slider.value),
+                    'plane': "XY",
                     'dataset': dsInfo["name"],
                     'moduality': modSelect.value,
                     'exposure': exposureSelect.value,
@@ -369,12 +369,15 @@ function loadDynamic2D(fullLoad) {
 
                     annSlices[i].x = event.object.position.x
                     annSlices[i].y = event.object.position.y
+                    console.log(event.object.position.x, event.object.position.y)
                 })
                 .catch((error) => { console.error('Error:', error) })
 
         });
 
-        dControls.addEventListener('hoveron', function (event) {
+
+
+        dControlsXY.addEventListener('hoveron', function (event) {
             if (previousHoverObj)
                 if (event.object.name != previousHoverObj.name)
                     previousHoverObj.material.color.setHex(0x00ffff)
@@ -383,15 +386,13 @@ function loadDynamic2D(fullLoad) {
             event.object.material.color.setHex(0xffff00)
         });
 
-        dControls.addEventListener('hoveroff', function (event) {
+        dControlsXY.addEventListener('hoveroff', function (event) {
             event.object.material.color.setHex(0x00ffff)
         });
 
 
-        dControls.addEventListener('dragstart', function (event) {
-
-            draggedAnn = true
-
+        dControlsXY.addEventListener('dragstart', function (event) {
+            XYdraggedAnn = true
         });
 
         animate2()
@@ -549,7 +550,6 @@ const clicks = new Proxy({}, clickHandler)
 clicks.count = [0, null]
 measureBtn.addEventListener('click', () => {
     measureBtn.disabled = true
-    //createMaskBtn.disabled = true
     canvasXY.removeEventListener("click", orthoClick)
     canvasXY.addEventListener("click", getSceneClicks)
     document.documentElement.style.cursor = 'crosshair'
@@ -912,6 +912,7 @@ function getSceneClicks(evt) {
 }
 
 function drawLine() {
+    console.log("画线")
     var material3 = new THREE.LineBasicMaterial({
         color: 0xFF0000,
         linewidth: 6,
@@ -946,28 +947,30 @@ function drawLine() {
 
     lineTextGroup.add(line)
     var texture_placeholder = document.createElement('canvas');
-    texture_placeholder.width = 100;
-    texture_placeholder.height = 20;
+    texture_placeholder.width = 400;  // 增加画布的宽度
+    texture_placeholder.height = 80;  // 增加画布的高度
     var context = texture_placeholder.getContext('2d');
-    context.clearRect(0, 0, 100, 20)
+    context.clearRect(0, 0, 400, 80)
     context.fillStyle = '#00FFFF';
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.font = '3px';
+    context.font = '8px';
+    console.log("填充文本:", `${(pixelDistance * dsInfo['info']['voxels']).toFixed(2)}µ`);
+
     context.fillText(`${(pixelDistance * dsInfo['info']['voxels']).toFixed(2)}µ`, texture_placeholder.width / 2, texture_placeholder.height / 2);
     var texture = new THREE.Texture(texture_placeholder);
     texture.needsUpdate = true;
     var material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
-    var plane = new THREE.PlaneGeometry(100, 20);
+    var plane = new THREE.PlaneGeometry(400, 80);
     var text = new THREE.Mesh(plane, material)
     text.translateX(measureCoords[0].x + (middleX / 2))
-    text.translateY(measureCoords[0].y + (middleY / 2) - 5)
+    text.translateY(measureCoords[0].y + (middleY / 2) - 20)
     text.rotateZ(Math.atan2(middleY, middleX))
     lineTextGroup.add(text)
-
 }
 
 function drawAnnotation(p, t, x, y) {
+    // console.log(t)
     //  (p, t, x, y)
     let multiT = t.match(/.{1,12}/g);
     var texture_placeholder = document.createElement('canvas');
@@ -1164,7 +1167,6 @@ function loadView(viewName) {
             yLineGeom.setFromPoints(points);
             yLine.geometry.attributes.position.needsUpdate = true;
             yLine.geometry.computeBoundingSphere();
-            (session)
             updateViewDetail(viewName, dsInfo["name"]);
         })
         .catch((error) => { console.error('Error:', error); });
@@ -1473,8 +1475,8 @@ function processNewAnn(evt) {
                         // (data.length)
                         //for (let i = 0; i < data.length; i++){
                         let annTxt = data['text']
-                        if (data['instance'])
-                            annTxt += '-' + data['instance']
+                        // if (data['instance'])
+                        annTxt += '-' + data['instance']
                         drawAnnotation("XY", annTxt, data['x'], data['y'])
 
                         var newRow = annTableBody.insertRow()
@@ -1649,9 +1651,9 @@ function processNewAnnYZ(evt) {
                     .then(response => response.json())
                     .then(data => {
                         let annTxt = data['text'];
-                        if (data['instance']) {
-                            annTxt += '-' + data['instance'];
-                        }
+                        // if (data['instance']) {
+                        annTxt += '-' + data['instance'];
+                        // }
                         drawAnnotation('YZ', annTxt, data['x'], data['y']);  // Make sure you have a drawAnnotationYZ function
 
                         var newRow = annTableBody.insertRow();  // Make sure you have the corresponding form
@@ -1768,9 +1770,9 @@ function processNewAnnXZ(evt) {
                     .then(response => response.json())
                     .then(data => {
                         let annTxt = data['text'];
-                        if (data['instance']) {
-                            annTxt += '-' + data['instance'];
-                        }
+                        // if (data['instance']) {
+                        annTxt += '-' + data['instance'];
+                        // }
                         drawAnnotation('XZ', annTxt, data['x'], data['y']);  // Make sure you have a drawAnnotationYZ function
 
                         var newRow = annTableBody.insertRow();  // Make sure you have the corresponding form
@@ -1861,8 +1863,9 @@ function loadAnnotationsFast() {
             newRow.insertCell(5).appendChild(document.createTextNode(dt.toDateString()))
             newRow.insertCell(6).appendChild(document.createTextNode(data[i]['user'].split("@")[0]))
             let annTxt = data[i]['text']
-            if (data[i]['instance'])
-                annTxt += '-' + data[i]['instance']
+            // console.log(data[i]['instance'])
+            // if (data[i]['instance'])
+            annTxt += '-' + data[i]['instance']
             drawAnnotation(data[i]['plane'], annTxt, data[i]['x'], data[i]['y'])
         }
     }
@@ -2070,7 +2073,7 @@ saveViewBtn.addEventListener('click', () => {
             // Load button
             let loadButton = document.createElement('button');
             loadButton.classList.add('btn', 'btn-primary', 'mr-2', 'btn-icon');
-            loadButton.innerHTML = '<i class="fas fa-download"></i>';
+            loadButton.innerHTML = '<i class="fas fa-search"></i>';
             loadButton.onclick = function () {
                 loadView(data.name);
             };
@@ -2513,6 +2516,121 @@ function loadOrthos(fullLoad = true) {
                 oCameras[ortho].position.setZ(cameraXY.position.z)
             })
     })
+
+    dControlsXZ = new DragControls(XZannTextGroup.children, oCameras['xz'], oRenderers['xz'].domElement)
+    dControlsYZ = new DragControls(YZannTextGroup.children, oCameras['yz'], oRenderers['yz'].domElement)
+
+    dControlsXZ.addEventListener('dragend', function (event) {
+        let arr = event.object.name.split('-')
+        if (!arr[1])
+            arr[1] = ''
+        fetch('/updateAnnotation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                'slice': clipCoords[oClip['xz']],
+                'plane': "XZ",
+                'dataset': dsInfo["name"],
+                'moduality': modSelect.value,
+                'exposure': exposureSelect.value,
+                'wavelength': wavelengthSelect.value,
+                'text': arr[0],
+                'instance': arr[1],
+                'x': event.object.position.x,
+                'y': event.object.position.y,
+                'datetime': Date.now()
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                let i = annSlices.findIndex(
+                    e => e.text == arr[0]
+                        && e.instance == arr[1]
+                )
+
+                annSlices[i].x = event.object.position.x
+                annSlices[i].y = event.object.position.y
+                console.log(event.object.position.x, event.object.position.y)
+            })
+            .catch((error) => { console.error('Error:', error) })
+
+    });
+
+    dControlsYZ.addEventListener('dragend', function (event) {
+        let arr = event.object.name.split('-')
+        if (!arr[1])
+            arr[1] = ''
+        fetch('/updateAnnotation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                'slice': clipCoords[oClip['yz']],
+                'plane': "YZ",
+                'dataset': dsInfo["name"],
+                'moduality': modSelect.value,
+                'exposure': exposureSelect.value,
+                'wavelength': wavelengthSelect.value,
+                'text': arr[0],
+                'instance': arr[1],
+                'x': event.object.position.x,
+                'y': event.object.position.y,
+                'datetime': Date.now()
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                let i = annSlices.findIndex(
+                    e => e.text == arr[0]
+                        && e.instance == arr[1]
+                )
+
+                annSlices[i].x = event.object.position.x
+                annSlices[i].y = event.object.position.y
+            })
+            .catch((error) => { console.error('Error:', error) })
+
+    });
+
+    dControlsXZ.addEventListener('hoveron', function (event) {
+        if (previousHoverObj)
+            if (event.object.name != previousHoverObj.name)
+                previousHoverObj.material.color.setHex(0x00ffff)
+
+        previousHoverObj = event.object
+        event.object.material.color.setHex(0xffff00)
+    });
+
+    dControlsXZ.addEventListener('hoveroff', function (event) {
+        event.object.material.color.setHex(0x00ffff)
+    });
+
+
+    dControlsXZ.addEventListener('dragstart', function (event) {
+        XZdraggedAnn = true
+    });
+
+
+    dControlsYZ.addEventListener('hoveron', function (event) {
+        if (previousHoverObj)
+            if (event.object.name != previousHoverObj.name)
+                previousHoverObj.material.color.setHex(0x00ffff)
+
+        previousHoverObj = event.object
+        event.object.material.color.setHex(0xffff00)
+    });
+
+    dControlsYZ.addEventListener('hoveroff', function (event) {
+        event.object.material.color.setHex(0x00ffff)
+    });
+
+
+    dControlsYZ.addEventListener('dragstart', function (event) {
+        YZdraggedAnn = true
+    });
 }
 
 function animateOrtho(rend, scene, camera, mat, animationId) {
@@ -2528,6 +2646,11 @@ function animateOrtho(rend, scene, camera, mat, animationId) {
 }
 
 function xzClick(evt) {
+    console.log("hjhhh1")
+    if (XZdraggedAnn) {
+        XZdraggedAnn = false
+        return
+    }
     let rect = oRenderers['xz'].domElement.getBoundingClientRect()
     let x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
     let y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
@@ -2589,6 +2712,10 @@ function xzClick(evt) {
 }
 
 function yzClick(evt) {
+    if (YZdraggedAnn) {
+        YZdraggedAnn = false
+        return
+    }
     let rect = oRenderers['yz'].domElement.getBoundingClientRect()
     let x = ((evt.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
     let y = - ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
@@ -2647,8 +2774,9 @@ function updateMeshes() {
 }
 //update
 function orthoClick(evt) {
-    if (draggedAnn) {
-        draggedAnn = false
+    console.log("啥")
+    if (XYdraggedAnn) {
+        XYdraggedAnn = false
         return
     }
     let rect = canvasXY.getBoundingClientRect()

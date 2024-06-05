@@ -202,12 +202,13 @@ def updateAnnotation():
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     ds = db.annotations
+    print(json)
     ds.update_one({
         "dataset": json["dataset"],
+        "plane":json["plane"],
         "slice": json["slice"],
         "text": json["text"],
         "instance": json["instance"],
-        "status": 'active'
     },
         {'$set': {
             "user": session['email'],
@@ -1774,6 +1775,7 @@ def delete_order(institutionName,poNumber):
     po_number = poNumber
 
     # Delete the specified order from the order list of the corresponding institution
+    
     result = collection.update_one(
         {'name': institution_name},
         {'$pull': {'orders': {'PO_number': po_number}}}
