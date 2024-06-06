@@ -947,15 +947,14 @@ function drawLine() {
 
     lineTextGroup.add(line)
     var texture_placeholder = document.createElement('canvas');
-    texture_placeholder.width = 400;  // 增加画布的宽度
-    texture_placeholder.height = 80;  // 增加画布的高度
+    texture_placeholder.width = 200;  // 增加画布的宽度
+    texture_placeholder.height = 40;  // 增加画布的高度
     var context = texture_placeholder.getContext('2d');
-    context.clearRect(0, 0, 400, 80)
+    context.clearRect(0, 0, 200, 40)
     context.fillStyle = '#00FFFF';
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.font = '8px';
-    console.log("填充文本:", `${(pixelDistance * dsInfo['info']['voxels']).toFixed(2)}µ`);
+    context.font = `${annFontNumber.value}px`;
 
     context.fillText(`${(pixelDistance * dsInfo['info']['voxels']).toFixed(2)}µ`, texture_placeholder.width / 2, texture_placeholder.height / 2);
     var texture = new THREE.Texture(texture_placeholder);

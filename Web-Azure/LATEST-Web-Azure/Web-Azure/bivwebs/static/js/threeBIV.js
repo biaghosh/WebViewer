@@ -776,7 +776,6 @@ window.addEventListener('resize', () => {
         renderer.setSize( canvas.offsetWidth , 600 )
                 
     }, 250);
-    
 
 }) */
 
