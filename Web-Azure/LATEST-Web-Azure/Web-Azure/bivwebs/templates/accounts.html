@@ -54,20 +54,6 @@
             border-bottom: none;
         }
 
-        .list-group-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .list-group-item.selected-user,
-        .list-group-item.selected-dataset {
-            background-color: #007bff;
-            /* 蓝色背景 */
-            color: white;
-            /* 白色文字 */
-            font-weight: bold;
-            /* 加粗文字 */
-        }
-
         .list-group-item.selected-user:hover,
         .list-group-item.selected-dataset:hover {
             background-color: #0056b3;
@@ -83,11 +69,7 @@
         .scrollable-table {
             max-height: 170px;
             overflow-y: auto;
-            margin-bottom: 20px;
-        }
-
-        .scrollable-table table {
-            width: 100%;
+            overflow-x: hidden;
         }
 
         .table th,
@@ -222,6 +204,7 @@
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
+                                            <label> </label>
                                             <button id="createUserBtn" type="submit"
                                                 class="btn btn-sm btn-primary btn-icon-only">Create</button>
                                         </div>

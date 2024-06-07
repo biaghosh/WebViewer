@@ -216,7 +216,7 @@ def updateAnnotation():
             "y": json["y"],
             "datetime": json["datetime"]
         }})
-    
+
     data = '{}'
     return make_response(dumps(data), 200)
 
@@ -915,6 +915,7 @@ def preview_file(filename):
     fs = db['files.files']
     file_data = fs.find_one({'name':filename})
     file_url = file_data['URL']
+    print(file_url)
     return jsonify(file_url)
 
 

@@ -3232,7 +3232,7 @@ function openVideoPreviewModal(videoUrl, filename) {
     (videoUrl)
     var cleanUrl = videoUrl.trim().replace(/^"|"$/g, '');
     videoPreview.src = cleanUrl;
-    (cleanUrl)
+    console.log(cleanUrl)
     // Set the modal title to the file name
     videoInfo.innerText = filename;
 
