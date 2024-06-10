@@ -673,7 +673,6 @@ def update_view_detail():
     
     return jsonify({'success': True}), 200
 
-
 @app.route("/saveMask", methods=['POST'])
 def saveMask():
     if 'email' not in session:
@@ -961,7 +960,7 @@ def store_image():
         return 'Unsupported file format', 400
 
     container_name, content_type = content_types[format]
-
+    print(container_name, content_type)
     # Setup Azure Blob Service Client
     AZURE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=bivlargefiles;AccountKey=PPPXG+UXhU+gyB4WWWjeRMdE4Av8Svfnc9IOPd66hxsnIwx9IpP3C8aj/OA311i1zt+qF/Jkbg4l+AStegZGxw==;EndpointSuffix=core.windows.net"
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
