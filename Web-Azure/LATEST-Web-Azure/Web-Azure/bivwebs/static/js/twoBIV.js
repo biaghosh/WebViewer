@@ -3045,7 +3045,7 @@ function loadFiles() {
                 var extension = filename.split('.').pop().toLowerCase();
 
                 // Only add a preview button for supported formats
-                if (extension === 'png' || extension === 'jpg' || extension === 'txt' || extension === 'mp4') {
+                if (extension === 'png' || extension === 'jpg' || extension === 'txt') {
                     var preview_button = document.createElement("button");
                     var preview_icon = document.createElement("i");
                     preview_icon.className = "fas fa-search";

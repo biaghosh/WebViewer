@@ -1048,9 +1048,6 @@ def delete_files():
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     fs = db['files.files']
-    chunks = db['files.chunks']
-    for chunk in fs.find({'name': filesName}):
-        chunks.delete_many({'files_id': chunk['_id']})
     fs.delete_one({'name': filesName})
     return 'Files deleted successfully!'
 
