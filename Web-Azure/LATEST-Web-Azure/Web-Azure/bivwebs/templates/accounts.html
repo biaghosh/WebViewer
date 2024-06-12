@@ -37,9 +37,9 @@
             transition: background-color 0.2s ease-in-out;
         }
 
-        .list-group-item:last-child {
+        /* .list-group-item:last-child {
             border-bottom: none;
-        }
+        } */
 
         .list-group-item.selected-user:hover,
         .list-group-item.selected-dataset:hover,
@@ -689,7 +689,7 @@
             <div class="order-info">
                 <span class="po-number">${order.PO_number}</span>
                 <span class="order-date">${order.date}</span>
-                <button class="btn btn-danger btn-sm" onclick="deleteOrder('${institution.name}', '${order.PO_number}')">Delete</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteOrder('${institution.name}', '${order.PO_number}')"><i class="fas fa-trash"></i></button>
             </div>
         </div>
     `).join('')}

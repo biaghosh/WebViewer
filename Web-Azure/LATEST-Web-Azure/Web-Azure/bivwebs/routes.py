@@ -873,7 +873,6 @@ def bwperimReplace(im):
 
 
 def bwperim(bw, n=4):
-
     if n not in (4, 8):
         raise ValueError('mahotas.bwperim: n must be 4 or 8')
     rows, cols = bw.shape
