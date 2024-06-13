@@ -28,6 +28,10 @@ function renderDatasetList(datasets) {
     const datasetList = document.getElementById('datasetList');
     datasetList.innerHTML = ''; // 清除现有内容
 
+    // 创建容器
+    const container = document.createElement('div');
+    container.classList.add('table-container');
+
     // 创建表头
     const tableHeader = document.createElement('table');
     const thead = document.createElement('thead');
@@ -54,7 +58,7 @@ function renderDatasetList(datasets) {
 
     // 创建表体
     const scrollContainer = document.createElement('div');
-    scrollContainer.style.maxHeight = '400px';
+    scrollContainer.style.maxHeight = '300px';
     scrollContainer.style.overflowY = 'auto';
 
     const tableBody = document.createElement('table');
@@ -82,9 +86,12 @@ function renderDatasetList(datasets) {
     tableBody.classList.add('dataset-table');
     scrollContainer.appendChild(tableBody);
 
-    // 将表头和表体添加到页面
-    datasetList.appendChild(tableHeader);
-    datasetList.appendChild(scrollContainer);
+    // 将表头和表体添加到容器
+    container.appendChild(tableHeader);
+    container.appendChild(scrollContainer);
+
+    // 将容器添加到页面
+    datasetList.appendChild(container);
 
     // 监听点击事件，选定某一行
     tbody.addEventListener('click', (event) => {
@@ -114,6 +121,7 @@ function renderDatasetList(datasets) {
         firstRow.click();
     }
 }
+
 
 
 

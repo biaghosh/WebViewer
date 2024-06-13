@@ -4,7 +4,6 @@
 
 <head>
     <style>
-        /* Basic style reset */
         * {
             box-sizing: border-box;
         }
@@ -16,9 +15,7 @@
             margin: 0;
             height: 300px;
             width: 438px;
-            /* Fixed height */
             overflow-y: auto;
-            /* Enables vertical scrolling */
             border: 1px solid #ccc;
         }
 
@@ -29,34 +26,15 @@
             line-height: 1.5;
             color: #333;
             cursor: pointer;
-            /* Changes cursor on hover */
             transition: background-color 0.3s ease;
         }
 
         .list-group-item:last-child {
             border-bottom: none;
-            /* Removes border from the last item */
-        }
-
-        /* 特定于表头的样式 */
-        .order-info-header {
-            font-weight: bold;
-            /* 加粗字体 */
-            color: #343a40;
-            /* 暗色字体 */
-            background-color: #f8f9fa;
-            /* 浅灰色背景 */
-            border-bottom: 2px solid #dee2e6;
-            /* 较厚的底部边框 */
-            padding: 10px 15px;
-            /* 与.list-group-item保持一致的padding */
-            cursor: default;
-            /* 确保鼠标不会显示为指针 */
         }
 
         .list-group-item:hover {
             background-color: #f0f0f0;
-            /* Changes background on hover */
         }
 
         .list-group-item.selected {
@@ -67,36 +45,22 @@
         /* Table cell styling */
         .list-group th,
         .list-group td {
-            /* Remove the width setting to allow automatic adjustment based on content */
             text-align: center;
-            /* Keep text centered */
             padding: 13px;
-            /* Maintain cell padding */
             border: 1px solid #ddd;
-            /* Maintain cell border */
             min-width: 145px;
-            /* Ensure a minimum width for each cell */
             box-sizing: border-box;
-            /* Include border and padding in the element's total width */
         }
 
-        /* 用于标识不可点击的表头项 */
-        .list-group-item.header {
-            cursor: default;
-            pointer-events: none;
-            /* 禁用点击事件 */
+        /* Specific styling for headers */
+        .order-info-header,
+        .list-group th {
+            font-weight: bold;
+            color: #343a40;
             background-color: #f8f9fa;
-            /* 浅灰色背景，可根据设计调整 */
-        }
-
-        /* Adjust the container class as needed */
-        .table-container {
-            width: 100%;
-            /* Use 100% of the container's width */
-            max-width: 1000px;
-            /* Or any maximum width that fits your design */
-            margin: auto;
-            /* Center the table container if less than max width */
+            border-bottom: 2px solid #dee2e6;
+            padding: 10px 15px;
+            cursor: default;
         }
 
         .list-group th {
@@ -105,6 +69,50 @@
             position: sticky;
             top: 0;
             z-index: 1;
+        }
+
+        .list-group-item.header {
+            pointer-events: none;
+        }
+
+        /* Table container styling */
+        .table-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .dataset-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-header-cell,
+        .dataset-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .table-header-cell {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        #datasetList .dataset-table tbody tr.selected-dataset {
+            background-color: #e2e2e2;
+        }
+
+        #datasetList {
+            margin-top: 20px;
+        }
+
+        /* Scrollable table body */
+        #datasetTableContainer {
+            max-height: 200px;
+            overflow-y: auto;
         }
 
         /* Progress bar styling */
@@ -129,21 +137,17 @@
             margin-bottom: 10px;
         }
 
-        /* Flex items with adjustable margins */
         .flex-item {
             margin-right: 10px;
-            /* Spacing between items, adjusted as needed */
         }
 
         .flex-item:last-child {
             margin-right: 0;
-            /* No margin for the last item */
         }
 
         .flex-item.institution,
         .flex-item.ponum {
             flex: 2;
-            /* Taking up more space */
         }
 
         .flex-item.title {
@@ -178,7 +182,6 @@
         .order-details {
             flex: 1;
             margin-left: 40px;
-            /* Space between columns */
             max-height: 300px;
         }
 
@@ -188,8 +191,8 @@
             padding: 0;
         }
 
-        .order-list li:hover,
-        .order-list li {
+        .order-list li,
+        .order-list li:hover {
             cursor: pointer;
             padding: 5px 10px;
             border-bottom: 1px solid #eee;
@@ -217,18 +220,6 @@
             color: red;
             font-size: 0.9em;
             margin-left: 5px;
-        }
-
-        #datasetTableContainer {
-            max-height: 200px;
-            /* 可以根据需求调整高度 */
-            overflow-y: auto;
-        }
-
-        .table-header-cell {
-            padding: 25px;
-            /* 可以根据需要调整 */
-            text-align: left;
         }
     </style>
 </head>

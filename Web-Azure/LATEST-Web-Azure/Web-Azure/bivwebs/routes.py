@@ -913,7 +913,6 @@ def preview_file(filename):
     fs = db['files.files']
     file_data = fs.find_one({'name':filename})
     file_url = file_data['URL']
-    print(file_url)
     return jsonify(file_url)
 
 
