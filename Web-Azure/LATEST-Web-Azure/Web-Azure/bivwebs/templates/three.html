@@ -329,6 +329,77 @@
         /* 你可以根据需要调整高度 */
         overflow-y: auto;
     }
+
+    .tab-pane {
+        padding: 20px;
+    }
+
+    .modal-content {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+
+    .sticky-header th {
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa;
+    }
+
+    .file-selector {
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .file-choose-container {
+        display: flex;
+        align-items: center;
+        flex-grow: 1;
+    }
+
+    /* .btn-primary {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    } */
+
+    .btn-primary:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .action-buttons button {
+        margin: 0 10px;
+    }
+    
 </style>
 
 <div class="container-fluid" style="height: 100vh;">
@@ -438,12 +509,14 @@
                 </div>
 
                 <div id="annCard" class="card-body tab-pane">
+
                     <div class="form-group col-12 d-flex justify-content-between">
                         <button id="createAnnBtn" type="button" class="btn btn-secondary" disabled>Create
                             Annotations</button>
                         <button id="toggleAnnBtn" type="button" class="btn btn-secondary" disabled>Hide
                             Annotations</button>
                     </div>
+
                     <div class="form-group col-12">
                         <hr class="m-1" />
                         <div style="overflow: scroll; max-height: 200px;">
@@ -604,14 +677,42 @@
                 </div>
 
 
-                <div id="fileCard" class="card-body tab-pane">
-                    <div class="row mx-2 p-1">
-                        <button id="fileManageBtn" type="button" class="btn btn-primary col-5 m-1"
-                            disabled>File</button>
-                        <!-- <button id="imgContentBtn" type="button" class="btn btn-primary col-5 m-1" disabled>View Images</button>
-                            <button id="movieContentBtn" type="button" class="btn btn-primary col-5 m-1" disabled>View Movies</button> -->
+                <div id="fileCard" class="tab-pane">
+                    <div>
+                        <div class="modal-body" style="width: 380px;">
+                            <div style="max-height: 250px; overflow-y: auto;">
+                                <table class="table table-bordered sticky-header">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">File Name</th>
+                                            <th scope="col">Tag</th>
+                                            <th scope="col">Tools</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fileMTbody" style="max-height:220px;">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <div class="file-selector">
+                                <div class="file-choose-container">
+                                    <button type="button" id="FileChooseBtn" class="btn-primary"
+                                        disabled>Choose</button>
+                                    <input type="text" id="file-name" placeholder="File Name" readonly
+                                        style="width: 200px; margin-left: 5px;">
+                                    <input type="file" name="file" id="file-input" style="display: none;">
+                                </div>
+                            </div>
+                            <div class="action-buttons">
+                                <button id="UploadFileBtn" type="button" class="btn-primary" disabled>Upload</button>
+                                <button type="button" class="btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
                 <div id="settingsCard" class="card-body tab-pane">
                     <div class="form-row form-check form-check-inline">
                         <!---
@@ -987,6 +1088,7 @@
                 <div class="modal-header">
                     <h5 id="contentFileTitle" class="modal-title">File download</h5>
                 </div>
+
                 <div class="modal-body">
                     <div style="overflow: scroll; max-height: 200px;">
                         <table class="table table-bordered">
@@ -1074,7 +1176,7 @@
     </div>
 </div>
 
-<div class="container-fluid">
+<!-- <div class="container-fluid">
     <div class="modal fade" id="contentFileManagement" tabindex="-1" role="dialog" aria-labelledby="contentModal"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -1116,7 +1218,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <!-- 模态框结构 -->
 <div class="modal fade" id="viewDetailModal" tabindex="-1" role="dialog" aria-labelledby="viewDetailModalLabel"

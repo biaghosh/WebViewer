@@ -3093,8 +3093,12 @@ function loadFiles() {
                 var download_button = createDownloadButton(data[i]);
                 buttonGroup.appendChild(download_button);
 
-                var delete_button = createDeleteButton(data[i]);
-                buttonGroup.appendChild(delete_button);
+                if (session['level'] === "admin") {
+                    var delete_button = createDeleteButton(data[i]);
+                    buttonGroup.appendChild(delete_button);
+                }
+
+
 
                 newRow.insertCell(2).appendChild(buttonGroup);
             }
@@ -3156,9 +3160,6 @@ function createDeleteButton(fileData) {
     delete_button.style.padding = '2px';
     delete_button.style.fontSize = '12px';
 
-    if (session['level'] === "user") {
-        delete_button.disabled = true;
-    }
 
     delete_button.onclick = function () {
         var xhr = new XMLHttpRequest();
