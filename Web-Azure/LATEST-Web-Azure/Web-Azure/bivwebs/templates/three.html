@@ -399,7 +399,6 @@
     .action-buttons button {
         margin: 0 10px;
     }
-    
 </style>
 
 <div class="container-fluid" style="height: 100vh;">
@@ -409,15 +408,6 @@
             <a href="javascript:void(0)" class="closebtn" onclick="toggleNav()">☰</a>
             <div class="card-header pt-1">
                 <ul class="nav nav-tabs card-header-tabs flex-column">
-                    <!-- <li class="nav-item">
-                        <a class="nav-link px-2" data-toggle="tab" href="#datasetCard"><i
-                                class="fas fa-window-restore"></i> Data Browser</a>
-                    </li> -->
-                    <!-- <li id="tab6" class="nav-item">
-                        <a class="nav-link px-2 active" data-toggle="tab" href="#dsCard"><i class="fas fa-info"></i>
-                            Info</a>
-                    </li> -->
-
                     <li id="tab1" class="nav-item">
                         <a id="imageTab" class="nav-link px-2" data-toggle="tab" href="#imageCard"><i
                                 class="fas fa-tools "></i> Image Tools</a>
@@ -511,10 +501,8 @@
                 <div id="annCard" class="card-body tab-pane">
 
                     <div class="form-group col-12 d-flex justify-content-between">
-                        <button id="createAnnBtn" type="button" class="btn btn-secondary" disabled>Create
-                            Annotations</button>
-                        <button id="toggleAnnBtn" type="button" class="btn btn-secondary" disabled>Hide
-                            Annotations</button>
+                        <button id="createAnnBtn" type="button" class="btn btn-secondary" disabled>Create Annotations</button>
+                        <button id="toggleAnnBtn" type="button" class="btn btn-secondary" disabled>Hide Annotations</button>
                     </div>
 
                     <div class="form-group col-12">
@@ -657,57 +645,46 @@
                 </div>
 
                 <div id="exportCard" class="card-body tab-pane">
-                    <div class="row mx-2 my-1 p-1">
+                    <div class="row mx-1 my-1 p-1">
                         <label for="exportXYZSelect">Axis</label>
                         <select id="exportXYZSelect" class="form-control mx-1">
                             <option value="0" selected> XY </option>
                             <option value="1"> XZ </option>
                             <option value="2"> YZ </option>
                         </select>
-                        <!-- <label for="exportSizeSelect">Size</label>
-                        <select id="exportSizeSelect" class="form-control mx-1">
-                            <option value="0" selected> 1000 * 475 pixels</option>
-                            <option value="1"> 2000 * 950 pixels</option>
-                            <option value="2"> 3000 * 1425 pixels</option>
-                            <option value="3"> 4000 * 1900 pixels</option>
-                        </select> -->
-                        <button id="exportBtn" class="btn btn-info" role="button" disabled>Export
+                        <button id="exportBtn" class="btn btn-primary col-12" role="button" disabled>Export
                             Image</button>
                     </div>
                 </div>
 
 
                 <div id="fileCard" class="tab-pane">
-                    <div>
-                        <div class="modal-body" style="width: 380px;">
-                            <div style="max-height: 250px; overflow-y: auto;">
-                                <table class="table table-bordered sticky-header">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">File Name</th>
-                                            <th scope="col">Tag</th>
-                                            <th scope="col">Tools</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="fileMTbody" style="max-height:220px;">
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div class="modal-body" style="width: 380px;">
+                        <div style="max-height: 250px; overflow-y: auto;">
+                            <table class="table table-bordered sticky-header">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">File Name</th>
+                                        <th scope="col">Tag</th>
+                                        <th scope="col">Tools</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fileMTbody" style="max-height:220px;">
+                                </tbody>
+                            </table>
                         </div>
+                    </div>
 
-                        <div class="modal-footer">
-                            <div class="file-selector">
-                                <div class="file-choose-container">
-                                    <button type="button" id="FileChooseBtn" class="btn-primary"
-                                        disabled>Choose</button>
-                                    <input type="text" id="file-name" placeholder="File Name" readonly
-                                        style="width: 200px; margin-left: 5px;">
-                                    <input type="file" name="file" id="file-input" style="display: none;">
-                                </div>
-                            </div>
-                            <div class="action-buttons">
-                                <button id="UploadFileBtn" type="button" class="btn-primary" disabled>Upload</button>
-                                <button type="button" class="btn-secondary" data-dismiss="modal">Close</button>
+                    <div class="modal-footer">
+                        <div class="file-selector">
+                            <div class="file-choose-container">
+                                <button type="button" id="FileChooseBtn" class="btn btn-secondary"
+                                    disabled>Choose</button>
+                                <input type="text" id="file-name" placeholder="File Name" readonly
+                                    class="form-control" style="width: 150px; margin-left: 5px;">
+                                <input type="file" name="file" id="file-input" style="display: none;">
+                                <button id="UploadFileBtn" type="button" style="margin-left: 5px;"
+                                    class="btn btn-secondary" disabled>Upload</button>
                             </div>
                         </div>
                     </div>

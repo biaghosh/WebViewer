@@ -1568,12 +1568,14 @@ function addAnnotationEvents() {
 
     function toggleAnnotations() {
         if (toggleAnnBtn.innerHTML == 'Hide Annotations') {
+            console.log("hide")
             XYannTextGroup.visible = false;
             YZannTextGroup.visible = false;
             XZannTextGroup.visible = false;
             createAnnBtn.disabled = true;
             toggleAnnBtn.innerHTML = 'Show Annotations';
         } else {
+            console.log("show")
             XYannTextGroup.visible = true;
             YZannTextGroup.visible = true;
             XZannTextGroup.visible = true;

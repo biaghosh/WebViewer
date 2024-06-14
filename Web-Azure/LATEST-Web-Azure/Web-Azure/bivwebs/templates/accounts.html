@@ -988,6 +988,7 @@
                 if (data.status === 'success') {
                     alert('Order generated and inserted successfully!');
                     currentSelectedInstitutionName = institutionName; // Save current selected institution name
+                    console.log(currentSelectedInstitutionName)
                     getInstitutions().then(institutions => {
                         institutionsList = institutions;
                         renderInstitutionList(institutions);
