@@ -501,8 +501,10 @@
                 <div id="annCard" class="card-body tab-pane">
 
                     <div class="form-group col-12 d-flex justify-content-between">
-                        <button id="createAnnBtn" type="button" class="btn btn-secondary" disabled>Create Annotations</button>
-                        <button id="toggleAnnBtn" type="button" class="btn btn-secondary" disabled>Hide Annotations</button>
+                        <button id="createAnnBtn" type="button" class="btn btn-secondary" disabled>Create
+                            Annotations</button>
+                        <button id="toggleAnnBtn" type="button" class="btn btn-secondary" disabled>Hide
+                            Annotations</button>
                     </div>
 
                     <div class="form-group col-12">
@@ -543,7 +545,7 @@
                                 <input id="viewName" type="text" class="form-control" placeholder="View name">
                             </div>
                             <div class="col">
-                                <button id="saveViewBtn" type="button" class="btn btn-success btn-block" disabled>Save
+                                <button id="saveViewBtn" type="button" class="btn btn-secondary" disabled>Save
                                     View</button>
                             </div>
                         </div>
@@ -659,17 +661,20 @@
 
 
                 <div id="fileCard" class="tab-pane">
-                    <div class="modal-body" style="width: 380px;">
-                        <div style="max-height: 250px; overflow-y: auto;">
-                            <table class="table table-bordered sticky-header">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">File Name</th>
-                                        <th scope="col">Tag</th>
-                                        <th scope="col">Tools</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="fileMTbody" style="max-height:220px;">
+                    <div class="modal-body" style="width: 370px;">
+                        <table class="table table-bordered sticky-header" style="width: 100%; table-layout: fixed;">
+                            <thead>
+                                <tr>
+                                    <th scope="col">File Name</th>
+                                    <th scope="col">Tag</th>
+                                    <th scope="col">Tools</th>
+                                </tr>
+                            </thead>
+                        </table>
+                        <div style="max-height: 280px; overflow-y: auto;">
+                            <table class="table table-bordered sticky-header" style="width: 100%; table-layout: fixed;">
+                                <tbody id="fileMTbody">
+                                    <!-- 表体内容 -->
                                 </tbody>
                             </table>
                         </div>
@@ -680,8 +685,8 @@
                             <div class="file-choose-container">
                                 <button type="button" id="FileChooseBtn" class="btn btn-secondary"
                                     disabled>Choose</button>
-                                <input type="text" id="file-name" placeholder="File Name" readonly
-                                    class="form-control" style="width: 150px; margin-left: 5px;">
+                                <input type="text" id="file-name" placeholder="File Name" readonly class="form-control"
+                                    style="width: 150px; margin-left: 5px;">
                                 <input type="file" name="file" id="file-input" style="display: none;">
                                 <button id="UploadFileBtn" type="button" style="margin-left: 5px;"
                                     class="btn btn-secondary" disabled>Upload</button>
@@ -1048,8 +1053,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="annModalSave" type="button" class="btn btn-primary">Save</button>
-                    <button id="annModalDelete" type="button" class="btn btn-danger">Delete</button>
+                    <button id="annModalSave" type="button" class="btn btn-secondary">Save</button>
+                    <button id="annModalDelete" type="button" class="btn btn-secondary btn-danger">Delete</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>

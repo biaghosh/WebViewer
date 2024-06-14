@@ -369,7 +369,6 @@ function loadDynamic2D(fullLoad) {
 
                     annSlices[i].x = event.object.position.x
                     annSlices[i].y = event.object.position.y
-                    console.log(event.object.position.x, event.object.position.y)
                 })
                 .catch((error) => { console.error('Error:', error) })
 
@@ -912,7 +911,6 @@ function getSceneClicks(evt) {
 }
 
 function drawLine() {
-    console.log("画线")
     var material3 = new THREE.LineBasicMaterial({
         color: 0xFF0000,
         linewidth: 6,
@@ -969,7 +967,6 @@ function drawLine() {
 }
 
 function drawAnnotation(p, t, x, y) {
-    // console.log(t)
     //  (p, t, x, y)
     let multiT = t.match(/.{1,12}/g);
     var texture_placeholder = document.createElement('canvas');
@@ -1568,14 +1565,12 @@ function addAnnotationEvents() {
 
     function toggleAnnotations() {
         if (toggleAnnBtn.innerHTML == 'Hide Annotations') {
-            console.log("hide")
             XYannTextGroup.visible = false;
             YZannTextGroup.visible = false;
             XZannTextGroup.visible = false;
             createAnnBtn.disabled = true;
             toggleAnnBtn.innerHTML = 'Show Annotations';
         } else {
-            console.log("show")
             XYannTextGroup.visible = true;
             YZannTextGroup.visible = true;
             XZannTextGroup.visible = true;
@@ -1591,7 +1586,6 @@ function addAnnotationEvents() {
     }
 
     function moveAnn() {
-        console.log("sss")
         // 这里添加移动注释的代码
     }
 }
@@ -1864,8 +1858,6 @@ function loadAnnotationsFast() {
             newRow.insertCell(5).appendChild(document.createTextNode(dt.toDateString()))
             newRow.insertCell(6).appendChild(document.createTextNode(data[i]['user'].split("@")[0]))
             let annTxt = data[i]['text']
-            // console.log(data[i]['instance'])
-            // if (data[i]['instance'])
             annTxt += '-' + data[i]['instance']
             drawAnnotation(data[i]['plane'], annTxt, data[i]['x'], data[i]['y'])
         }
@@ -2553,7 +2545,6 @@ function loadOrthos(fullLoad = true) {
 
                 annSlices[i].x = event.object.position.x
                 annSlices[i].y = event.object.position.y
-                console.log(event.object.position.x, event.object.position.y)
             })
             .catch((error) => { console.error('Error:', error) })
 
@@ -2647,7 +2638,6 @@ function animateOrtho(rend, scene, camera, mat, animationId) {
 }
 
 function xzClick(evt) {
-    console.log("hjhhh1")
     if (XZdraggedAnn) {
         XZdraggedAnn = false
         return
@@ -2775,7 +2765,6 @@ function updateMeshes() {
 }
 //update
 function orthoClick(evt) {
-    console.log("啥")
     if (XYdraggedAnn) {
         XYdraggedAnn = false
         return
@@ -3235,7 +3224,6 @@ function openVideoPreviewModal(videoUrl, filename) {
     (videoUrl)
     var cleanUrl = videoUrl.trim().replace(/^"|"$/g, '');
     videoPreview.src = cleanUrl;
-    console.log(cleanUrl)
     // Set the modal title to the file name
     videoInfo.innerText = filename;
 
