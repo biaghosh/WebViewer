@@ -1840,7 +1840,7 @@ function loadAnnotationsFast() {
             let dt = new Date(data[i]['datetime'])
             var btn = document.createElement('input');
             btn.type = "button";
-            btn.className = "btn btn-warning";
+            btn.className = "btn btn-secondary";
             btn.value = 'Edit';
             btn.setAttribute('data-toggle', 'modal')
             btn.setAttribute('data-target', '#annotationModal')
@@ -3027,11 +3027,16 @@ function loadFiles() {
             fileMTableBody.innerHTML = "";
             for (let i = 0; i < data.length; i++) {
                 var newRow = fileMTableBody.insertRow();
-                newRow.insertCell(0).appendChild(document.createTextNode(data[i]['name']));
-                newRow.insertCell(1).appendChild(document.createTextNode(data[i]['format']));
+
+                var fileNameCell = newRow.insertCell(0);
+                fileNameCell.style.width = '120px';
+                fileNameCell.appendChild(document.createTextNode(data[i]['name']));
+
+                var formatCell = newRow.insertCell(1);
+                formatCell.appendChild(document.createTextNode(data[i]['format']));
+                formatCell.style.width = '60px';
 
                 var buttonGroup = document.createElement("div");
-
                 var filename = data[i]['name'];
                 var extension = filename.split('.').pop().toLowerCase();
 
@@ -3056,7 +3061,6 @@ function loadFiles() {
                             fetch('/files/' + encodeURIComponent(preview_filename))
                                 .then(response => response.text())
                                 .then(text => {
-
                                     openImagePreviewModal(text, preview_filename);
                                 })
                                 .catch(error => console.error(error));
@@ -3088,8 +3092,6 @@ function loadFiles() {
                     var delete_button = createDeleteButton(data[i]);
                     buttonGroup.appendChild(delete_button);
                 }
-
-
 
                 newRow.insertCell(2).appendChild(buttonGroup);
             }
