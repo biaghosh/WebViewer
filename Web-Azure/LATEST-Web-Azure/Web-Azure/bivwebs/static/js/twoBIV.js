@@ -2020,6 +2020,10 @@ function updateSlice() {
 
 saveViewBtn.addEventListener('click', () => {
     const viewInput = document.getElementById('viewName');
+    if (!viewInput || viewInput.value.trim() === '') {
+        alert("Please input a valid viewName");
+        return;
+    }
     const payload = {
         dataset: dsInfo.name,
         name: viewInput.value,
