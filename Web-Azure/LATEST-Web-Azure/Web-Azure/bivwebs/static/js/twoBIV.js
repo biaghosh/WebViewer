@@ -1564,7 +1564,7 @@ function addAnnotationEvents() {
     }
 
     function toggleAnnotations() {
-        if (toggleAnnBtn.innerHTML == 'Hide Annotations') {
+        if (toggleAnnBtn.innerHTML.includes('Hide')) {
             XYannTextGroup.visible = false;
             YZannTextGroup.visible = false;
             XZannTextGroup.visible = false;
@@ -1578,6 +1578,7 @@ function addAnnotationEvents() {
             toggleAnnBtn.innerHTML = 'Hide Annotations';
         }
     }
+
 
     // Event handling for moving annotations
     if (!canvasXY.hasAttribute('data-move-listener')) {
@@ -2945,7 +2946,6 @@ zclip.addEventListener('input', () => {
     if (zLockBox.checked) {
         if (zclip.value > parseInt(dsInfo["imageDims"]["z"]))
             zclip.value = dsInfo["imageDims"]["z"] - 1
-
         xyInput.value = zclip.value
         slider.value = zclip.value
         updateSlice()

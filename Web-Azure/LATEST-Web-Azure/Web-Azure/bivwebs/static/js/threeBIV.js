@@ -137,7 +137,7 @@ function takeScreenshot3D(width, height, axis) {
 
         // 更新相机的 left、right、top 和 bottom 属性和渲染器的大小
         const divWidth = $(oDivs['yz']).width() - 30;
-        const divHeight = screenHeight / 5;
+        const divHeight = screenHeight / 3;
         const divAspect = divWidth / divHeight;
         const cameraLeft2 = -(100 * divAspect);
         const cameraRight2 = 100 * divAspect;
@@ -211,7 +211,6 @@ visBtn.addEventListener('click', () => {
         alreadyOn = false
     }
 }) */
-
 
 
 function init2(fullLoad) {
@@ -391,7 +390,6 @@ function init2(fullLoad) {
                                 // yPlaneIn3d()
                                 // xPlaneIn3d()
                             }
-
                         }
                     })
                 }
@@ -527,7 +525,6 @@ function loadCellData() {
         JSZip.loadAsync(data).then(function (zip) {
             zip.file("tmp_file.txt").async("text")
                 .then(function success(txt) {
-
                     //let dataArray = new Uint8Array(dataSliceSize)
                     let sectionSize = dsInfo['dims3']['x'] * dsInfo['dims3']['y'] * 1
                     for (let z = 0; z < dsInfo['dims3']['z']; z++) {
