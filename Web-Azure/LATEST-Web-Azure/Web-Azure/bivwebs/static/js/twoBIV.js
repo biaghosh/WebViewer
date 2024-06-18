@@ -2983,14 +2983,6 @@ xyInput.addEventListener("input", () => {
 document.getElementById('vrTab').addEventListener('click', () => {
     toggleCards(true);
     orthosActive = false
-    //pause execution
-    //Handling this now in the ortho animation loop because this failed
-    //orthos.forEach(ortho => {
-    //oScenes[ortho] = null
-    //oDivs[ortho].removeChild(oRenderers[ortho].domElement)
-    // ('this is not cancelling')
-    //window.cancelAnimationFrame(oAnimate[ortho])
-    //})
 })
 
 

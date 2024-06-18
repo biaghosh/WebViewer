@@ -47,14 +47,15 @@
             cursor: pointer;
             background-color: #447fff;
             color: white;
-            /* 悬浮时更暗的蓝色 */
         }
 
-        @media (max-width: 768px) {
+        
+
+        /* @media (max-width: 768px) {
             .list-group-item {
                 padding: 8px 12px;
             }
-        }
+        } */
 
         .scrollable-table {
             max-height: 170px;
@@ -91,19 +92,6 @@
             overflow-y: auto;
         }
 
-        .card {
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-        }
-
-        .card-header {
-            background: #f8f9fa;
-            border-bottom: 1px solid #e3e4e6;
-            padding: 10px 15px;
-        }
-
         .form-row>.col-md-4 {
             padding-right: 15px;
             padding-left: 15px;
@@ -138,10 +126,10 @@
         <!-- View Users-->
         <div class="col-6">
             <div class="card shadow">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex justify-content-between align-items-center">   
                     <span>Active Users</span>
                     <select id="userInstitutionFilter" class="form-control w-auto">
-                        <!-- 机构选项将动态填充 -->
+                        <!--The option of instutiation will be filled in automatically-->
                     </select>
                 </div>
 
@@ -260,13 +248,12 @@
                     <div class="row">
                         <!-- Organization list container -->
                         <div class="col-3">
-                            <h5>Institution List</h5>
                             <div id="institutionList" class="scrollable-table-inst"></div>
                             <button id="newInstitutionBtn" class="btn btn-sm btn-primary btn-icon-only">New</button>
                         </div>
+                        
                         <!-- Organization details container -->
                         <div class="col-9">
-                            <h5>Institution Details</h5>
                             <div id="institutionDetails"></div>
                         </div>
 
