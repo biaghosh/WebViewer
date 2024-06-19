@@ -23,11 +23,11 @@
             background-color: #b3b3b3;
         }
 
-        .list-group {
+        /* .list-group {
             list-style: none;
             margin: 0;
             padding: 0;
-        }
+        } */
 
         .list-group-item {
             display: block;
@@ -49,7 +49,7 @@
             color: white;
         }
 
-        
+
 
         /* @media (max-width: 768px) {
             .list-group-item {
@@ -126,7 +126,7 @@
         <!-- View Users-->
         <div class="col-6">
             <div class="card shadow">
-                <div class="card-header d-flex justify-content-between align-items-center">   
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <span>Active Users</span>
                     <select id="userInstitutionFilter" class="form-control w-auto">
                         <!--The option of instutiation will be filled in automatically-->
@@ -138,11 +138,11 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th scope="col">Email</th>
-                                <th scope="col">Level</th>
-                                <th scope="col">Logins</th>
-                                <th scope="col">Institution</th>
-                                <th scope="col">Last Login</th>
+                                <th scope="col" style="width: 30%;">Email</th>
+                                <th scope="col" style="width: 10%;">Level</th>
+                                <th scope="col" style="width: 10%;">Logins</th>
+                                <th scope="col" style="width: 30%;">Institution</th>
+                                <th scope="col" style="width: 30%;">Last Login</th>
                             </tr>
                         </thead>
                     </table>
@@ -249,12 +249,17 @@
                         <!-- Organization list container -->
                         <div class="col-3">
                             <div id="institutionList" class="scrollable-table-inst"></div>
-                            <button id="newInstitutionBtn" class="btn btn-sm btn-primary btn-icon-only">New</button>
+
                         </div>
-                        
+
                         <!-- Organization details container -->
                         <div class="col-9">
                             <div id="institutionDetails"></div>
+                            <button id="newInstitutionBtn" class="btn btn-sm btn-primary btn-icon-only">New</button>
+                            <button type="submit" class="btn btn-sm btn-primary ml-2 btn-icon-only"
+                                onclick="updateInstitutionDetails()">Update</button>
+                            <button type="button" class="btn btn-sm btn-danger ml-2 btn-icon-only"
+                                onclick="deleteInstitution()"><i class="fas fa-trash"></i></button>
                         </div>
 
                     </div>
@@ -284,7 +289,6 @@
     const assignedDatasetsTitle = document.getElementById('assignedDatasetsTitle');
 
     function addAssignedDataset(email, datasetName) {
-        console.log(email, datasetName)
         fetch(`/addAssignedDataset/${email}/${datasetName}`, { method: 'POST' })
             .then(response => {
                 if (!response.ok) {
@@ -471,19 +475,24 @@
 
     function renderUserTable(data) {
         // Initialize the table with headers
-        let tableHTML = ``;
+        let tableHTML = `
+        <table>
+            <tbody>
+    `;
 
         // Populate the table with data from existing users
         data.forEach(user => {
             let date = formatDate(user.lastLogin ? user.lastLogin['$date'] : '');
             tableHTML += `<tr class="selectable-user" data-email="${user.email}">
-            <td>${user.email}</td>
-            <td>${user.level}</td>
-            <td>${user.logins}</td>
-            <td>${user.institution}</td>
-            <td>${date}</td>
+            <td style="width: 30%;">${user.email}</td>
+            <td style="width: 10%;">${user.level}</td>
+            <td style="width: 10%;">${user.logins}</td>
+            <td style="width: 30%;">${user.institution}</td>
+            <td style="width: 30%;">${date}</td>
         </tr>`;
         });
+
+        tableHTML += `</tbody></table>`;
 
         // Set the innerHTML of the usersCard to the new table
         const usersCard = document.getElementById("viewUsersCard");
@@ -770,8 +779,6 @@
             </div>
 
             
-            <button type="submit" class="btn btn-sm btn-primary ml-2 btn-icon-only">Update</button>
-            <button type="button" class="btn btn-sm btn-danger ml-2 btn-icon-only" onclick="deleteInstitution()"><i class="fas fa-trash"></i></button>
         </form>
     `;
 
@@ -808,6 +815,7 @@
     }
 
     function updateInstitutionDetails() {
+        console.log("更新")
         const form = document.getElementById('institutionForm');
         const formData = new FormData(form);
         const updatedDetails = {};
@@ -877,12 +885,14 @@
                 <label>Website:</label>
                 <input type="text" class="form-control" name="website" value="">
             </div>
+            
             <div class="form-group">
                 <label>Status:</label>
                 <select class="form-control" name="status">
                     ${statusSelectHTML}
                 </select>
             </div>
+
             <button type="button" id="CreateInsititution"class="btn btn-sm btn-primary btn-icon-only" onclick="CreateInstitution()">Insert</button>
         </form>
     `;
