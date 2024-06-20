@@ -1482,7 +1482,7 @@ function processNewAnn(evt) {
 
                         var btn = document.createElement('input');
                         btn.type = "button";
-                        btn.className = "btn btn-warning";
+                        btn.className = "btn btn-secondary";
                         btn.value = 'Edit';
                         btn.setAttribute('data-toggle', 'modal')
                         btn.setAttribute('data-target', '#annotationModal')
@@ -1658,7 +1658,7 @@ function processNewAnnYZ(evt) {
 
                         var btn = document.createElement('input');
                         btn.type = "button";
-                        btn.className = "btn btn-warning";
+                        btn.className = "btn btn-secondary";
                         btn.value = 'Edit';
                         btn.setAttribute('data-toggle', 'modal');
                         btn.setAttribute('data-target', '#annotationModal');
@@ -1776,7 +1776,7 @@ function processNewAnnXZ(evt) {
                         let dt = new Date(data['datetime']);
                         var btn = document.createElement('input');
                         btn.type = "button";
-                        btn.className = "btn btn-warning";
+                        btn.className = "btn btn-secondary";
                         btn.value = 'Edit';
                         btn.setAttribute('data-toggle', 'modal');
                         btn.setAttribute('data-target', '#annotationModal');

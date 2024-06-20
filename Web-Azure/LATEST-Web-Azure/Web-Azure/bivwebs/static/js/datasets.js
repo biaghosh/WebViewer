@@ -39,10 +39,15 @@ function renderDatasetList(datasets) {
 
     const institutionHeader = document.createElement('th');
     institutionHeader.textContent = 'Institution';
+    institutionHeader.style.width = "40%";
+
     const nameHeader = document.createElement('th');
     nameHeader.textContent = 'Name';
+    nameHeader.style.width = "30%";
+
     const poNumHeader = document.createElement('th');
     poNumHeader.textContent = 'PO_#';
+    poNumHeader.style.width = "30%";
 
     headerRow.appendChild(institutionHeader);
     headerRow.appendChild(nameHeader);
@@ -70,11 +75,16 @@ function renderDatasetList(datasets) {
         row.style.cursor = "pointer";
 
         const institutionCell = document.createElement('td');
+        institutionCell.style.width = "40%";
         institutionCell.textContent = dataset.institution;
+
         const nameCell = document.createElement('td');
         nameCell.textContent = dataset.name;
+        nameCell.style.width = "30%";
+
         const poNumCell = document.createElement('td');
         poNumCell.textContent = dataset.ponum;
+        poNumCell.style.width = "30%";
 
         row.appendChild(institutionCell);
         row.appendChild(nameCell);

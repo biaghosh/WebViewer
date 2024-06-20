@@ -3,6 +3,12 @@
 
 <head>
     <style>
+        .scrollable-orders {
+            max-height: 200px;
+            /* 设置一个合适的最大高度 */
+            overflow-y: auto;
+        }
+
         .selected-user,
         .selected-dataset,
         .selected-inst {
@@ -23,23 +29,12 @@
             background-color: #b3b3b3;
         }
 
-        /* .list-group {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        } */
-
         .list-group-item {
             display: block;
             padding: 10px 15px;
-            /* border-bottom: 1px solid #f0f0f0; */
             cursor: pointer;
             transition: background-color 0.2s ease-in-out;
         }
-
-        /* .list-group-item:last-child {
-            border-bottom: none;
-        } */
 
         .list-group-item.selected-user:hover,
         .list-group-item.selected-dataset:hover,
@@ -48,14 +43,6 @@
             background-color: #447fff;
             color: white;
         }
-
-
-
-        /* @media (max-width: 768px) {
-            .list-group-item {
-                padding: 8px 12px;
-            }
-        } */
 
         .scrollable-table {
             max-height: 170px;
@@ -120,7 +107,6 @@
         }
     </style>
 </head>
-
 <div class="container-fluid">
     <div class="row" style="margin-top: 70px;">
         <!-- View Users-->
@@ -132,7 +118,6 @@
                         <!--The option of instutiation will be filled in automatically-->
                     </select>
                 </div>
-
                 <div class="card-body">
                     <!-- Fixed Table Header -->
                     <table class="table">
@@ -249,26 +234,210 @@
                         <!-- Organization list container -->
                         <div class="col-3">
                             <div id="institutionList" class="scrollable-table-inst"></div>
-
                         </div>
 
                         <!-- Organization details container -->
                         <div class="col-9">
-                            <div id="institutionDetails"></div>
-                            <button id="newInstitutionBtn" class="btn btn-sm btn-primary btn-icon-only">New</button>
+                            <div id="institutionDetails">
+                                <form id="institutionForm">
+                                    <div class="form-row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="name">Full Name:</label>
+                                                <input type="text" class="form-control" name="name" id="name" value=""
+                                                    readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="abbr">Abbr:</label>
+                                                <input type="text" class="form-control" name="abbr" id="abbr" value="">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="type">Type:</label>
+                                                <select class="form-control" name="type" id="type">
+                                                    <option value="Industry">Industry</option>
+                                                    <option value="Academic">Academic</option>
+                                                    <option value="Government">Government</option>
+                                                    <option value="Others">Others</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="phone">Phone Number:</label>
+                                                <input type="text" class="form-control" name="phone" id="phone"
+                                                    value="">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="email">Email:</label>
+                                                <input type="text" class="form-control" name="email" id="email"
+                                                    value="">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="address">Address:</label>
+                                                <input type="text" class="form-control" name="address" id="address"
+                                                    value="">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="website">Website:</label>
+                                                <input type="text" class="form-control" name="website" id="website"
+                                                    value="">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="status">Status:</label>
+                                                <select class="form-control" name="status" id="status">
+                                                    <option value="Active">Active</option>
+                                                    <option value="Inactive">Inactive</option>
+                                                    <option value="Pending">Pending</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Orders:</label>
+                                        <div class="orders-container">
+                                            <div class="orders list-group">
+                                                <!-- Orders will be dynamically filled here -->
+                                            </div>
+                                            <div id="orderDetails" class="order-details scrollable-table"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="flex-row-container"
+                                            style="display: flex; align-items: center; justify-content: space-between;">
+                                            <div class="flex-item" style="flex-grow: 1; margin-right: 10px;"><input
+                                                    type="text" class="form-control" placeholder="Enter PO Number"
+                                                    id="newPoNumber"></div>
+                                            <div class="flex-item"><button class="btn btn-sm btn-primary"
+                                                    onclick="generateAndInsertOrder('institutionName')">Generate
+                                                    Order</button></div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <button id="newInstitutionBtn" class="btn btn-sm btn-primary btn-icon-only"
+                                data-toggle="modal" data-target="#newInstitutionModal">New</button>
                             <button type="submit" class="btn btn-sm btn-primary ml-2 btn-icon-only"
                                 onclick="updateInstitutionDetails()">Update</button>
                             <button type="button" class="btn btn-sm btn-danger ml-2 btn-icon-only"
                                 onclick="deleteInstitution()"><i class="fas fa-trash"></i></button>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
+<!-- New Institution Modal -->
+<div class="modal fade" id="newInstitutionModal" tabindex="-1" role="dialog" aria-labelledby="newInstitutionModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newInstitutionModalLabel">New Institution</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="NewinstitutionForm">
+                    <div class="form-group">
+                        <label>Name:</label>
+                        <input type="text" class="form-control" name="name" value=""
+                            placeholder="Once created, cannot be modified">
+                    </div>
+                    <div class="form-group">
+                        <label>Abbr:</label>
+                        <input type="text" class="form-control" name="Abbr" value="">
+                    </div>
+                    <div class="form-group">
+                        <label>Type:</label>
+                        <select class="form-control" name="type">
+                            <option value="Industry">Industry</option>
+                            <option value="Academic">Academic</option>
+                            <option value="Government">Government</option>
+                            <option value="Others">Others</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Address:</label>
+                        <input type="text" class="form-control" name="address" value="">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number:</label>
+                        <input type="text" class="form-control" name="phone" value="">
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="text" class="form-control" name="Email" value="">
+                    </div>
+                    <div class="form-group">
+                        <label>Website:</label>
+                        <input type="text" class="form-control" name="website" value="">
+                    </div>
+                    <div class="form-group">
+                        <label>Status:</label>
+                        <select class="form-control" name="status">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary btn-icon-only"
+                        onclick="CreateInstitution()">Insert</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" role="dialog" aria-labelledby="orderDetailsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Dataset Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderDetailsTableBody">
+                        <!-- Order details will be dynamically filled here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     window.addEventListener("DOMContentLoaded", usersTable())
     window.addEventListener("DOMContentLoaded", renderDatasetList())
@@ -297,7 +466,6 @@
                 return response.json();
             })
             .then(data => {
-                console.log(data)
                 handleSelectedUser(selectedUserEmail);
                 alert(data.message)
             })
@@ -439,7 +607,6 @@
                     const selectedLi = event.target.closest('li');
                     if (selectedLi) {
                         // Print the selected data set name on the console
-                        // console.log('Selected dataset:', selectedLi.textContent);
                         selectedAssignedDatasetName = selectedLi.textContent
                         // Remove selected-dataset class from all other li elements
                         const allLiElements = document.querySelectorAll('#assignedDatasets li');
@@ -512,7 +679,6 @@
 
     function handleTableRowClick(event) {
         const selectedRow = event.target.closest('tr');
-        console.log(selectedRow)
         if (selectedRow) {
             const rowData = {
                 email: selectedRow.querySelector('td:nth-child(1)').textContent,
@@ -521,7 +687,6 @@
                 lastLogin: selectedRow.querySelector('td:nth-child(4)').textContent,
             };
             selectedUserEmail = rowData['email']
-            // assignedDatasetsHead.textContent = `Assigned Datasets for ${selectedUserEmail}`;
             handleSelectedUser(selectedUserEmail);
             // Remove the selected-row class from all other tr elements
             const allRows = document.querySelectorAll('tr');
@@ -594,9 +759,6 @@
         });
     }
 
-    // Get the list of institutions and populate the dropdown when the page loads
-
-
     function populateUserInstitutionSelect(institutions) {
         const select = document.getElementById('userInstitutionFilter');
         select.innerHTML = '<option value="all">All Institutions</option>'; // 允许用户选择所有机构
@@ -609,7 +771,6 @@
         });
     }
 
-    // 当页面加载时，调用此函数
     document.getElementById('userInstitutionFilter').addEventListener('change', function () {
         const selectedInstitution = this.value;
         usersTable(selectedInstitution); // 传入选定的机构
@@ -653,58 +814,53 @@
             }
         });
     }
-
-
     function showInstitutionDetails(institution) {
-        // console.log(institution)
         const institutionDetails = document.getElementById('institutionDetails');
-
-        // Assume the type and status options
-        const typeOptions = ['Industry', 'Academic', 'Government', 'Others'];
-        const statusOptions = ['Active', 'Inactive', 'Pending'];
-
-        // Create drop down options
-        const typeSelectHTML = typeOptions.map(option => `<option value="${option}" ${institution.type === option ? 'selected' : ''}>${option}</option>`).join('');
-        const statusSelectHTML = statusOptions.map(option => `<option value="${option}" ${institution.status === option ? 'selected' : ''}>${option}</option>`).join('');
-
-        // Generate showing PO-Number order list with two columns
         const ordersHeader = `
-    <div class="list-group-item header">
-        <div class="order-info-header">
-            <span class="po-number-header">PO Number</span>
-            <span class="order-date-header">Order Date</span>
-        </div>
-    </div>
-`;
-
-        const ordersHTML = `
-<div class="order-list-container">
-    ${institution.orders.map(order => `
-        <div class="list-group-item list-group-item-action" onclick="showOrderDetails('${institution.name}', '${order.PO_number}')">
-            <div class="order-info">
-                <span class="po-number">${order.PO_number}</span>
-                <span class="order-date">${order.date}</span>
-                <button class="btn btn-danger btn-sm" onclick="deleteOrder('${institution.name}', '${order.PO_number}')"><i class="fas fa-trash"></i></button>
+        <div class="list-group-item header">
+            <div class="order-info-header">
+                <span class="po-number-header">PO Number</span>
+                <span class="order-date-header">Order Date</span>
             </div>
         </div>
-    `).join('')}
-</div>`;
+    `;
+        const ordersHTML = `
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">PO Number</th>
+                    <th scope="col">Order Date</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${institution.orders.map(order => `
+                    <tr>
+                        <td>${order.PO_number}</td>
+                        <td>${order.date}</td>
+                        <!-- Inside the order table row -->
+    <td>
+        <button class="btn btn-danger btn-sm" type="button" onclick="deleteOrder('${institution.name}', '${order.PO_number}', event)">
+    <i class="fas fa-trash"></i>
+</button>
 
-        // Combine header and list items
-        const ordersListHTML = ordersHeader + ordersHTML;
+        <button class="btn btn-primary btn-sm" type="button" onclick="showOrderDetails('${institution.name}', '${order.PO_number}')"><i class="fas fa-search"></i></button>
+    </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
 
-        // Set the details HTML
         institutionDetails.innerHTML = `
         <form id="institutionForm">
             <div class="form-row">
-
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="name">Full Name:</label>
                         <input type="text" class="form-control" name="name" id="name" value="${institution.name}" readonly>
                     </div>
                 </div>
-
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="abbr">Abbr:</label>
@@ -712,12 +868,16 @@
                     </div>
                 </div>
             </div>
-
             <div class="form-row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="type">Type:</label>
-                        <select class="form-control" name="type" id="type"> ${typeSelectHTML} </select>
+                        <select class="form-control" name="type" id="type">
+                            <option value="Industry" ${institution.type === 'Industry' ? 'selected' : ''}>Industry</option>
+                            <option value="Academic" ${institution.type === 'Academic' ? 'selected' : ''}>Academic</option>
+                            <option value="Government" ${institution.type === 'Government' ? 'selected' : ''}>Government</option>
+                            <option value="Others" ${institution.type === 'Others' ? 'selected' : ''}>Others</option>
+                        </select>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -726,72 +886,63 @@
                         <input type="text" class="form-control" name="phone" id="phone" value="${institution.phone}">
                     </div>
                 </div>
-
-                
             </div>
-
-    <div class="form-row">
-        <div class="col-md-6">
+            <div class="form-row">
+                <div class="col-md-6">
                     <div class="form-group">
                         <label for="email">Email:</label>
                         <input type="text" class="form-control" name="email" id="email" value="${institution.email}">
                     </div>
                 </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="address">Address:</label>
-                <input type="text" class="form-control" name="address" id="address" value="${institution.address}">
-            </div>
-        </div>
-    </div>
-
-    <div class="form-row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="website">Website:</label>
-                <input type="text" class="form-control" name="website" id="website" value="${institution.website}">
-            </div>
-        </div>
-        <div class="col-md-6">
-        <div class="flex-item title">Status:</div>
-                <select class="form-control" name="status">
-                    ${statusSelectHTML}
-                </select>
-            </div>
-    </div>
-
-
-            <div class="form-group">
-                <div class="flex-item title">Orders:</div>
-                <div class="orders-container">
-                    <div class="orders list-group">
-                        ${ordersListHTML}
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="address">Address:</label>
+                        <input type="text" class="form-control" name="address" id="address" value="${institution.address}">
                     </div>
-                    <div id="orderDetails" class="order-details class="scrollable-table""></div>
                 </div>
             </div>
-
+            <div class="form-row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="website">Website:</label>
+                        <input type="text" class="form-control" name="website" id="website" value="${institution.website}">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="status">Status:</label>
+                        <select class="form-control" name="status" id="status">
+                            <option value="Active" ${institution.status === 'Active' ? 'selected' : ''}>Active</option>
+                            <option value="Inactive" ${institution.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                            <option value="Pending" ${institution.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Orders:</label>
+                <div class="scrollable-orders">
+                    ${ordersHTML}
+                </div>
+            </div>
             <div class="form-group">
                 <div class="flex-row-container" style="display: flex; align-items: center; justify-content: space-between;">
                     <div class="flex-item" style="flex-grow: 1; margin-right: 10px;"><input type="text" class="form-control" placeholder="Enter PO Number" id="newPoNumber"></div>
                     <div class="flex-item"><button class="btn btn-sm btn-primary" onclick="generateAndInsertOrder('${institution.name}')">Generate Order</button></div>
                 </div>
             </div>
-
-            
         </form>
     `;
 
-        // Add form submit event listener
-        document.getElementById('institutionForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            updateInstitutionDetails(); // Implement this function to handle form submission
-        });
     }
+
+    document.getElementById('institutionForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        updateInstitutionDetails(); // Implement this function to handle form submission
+    });
 
     function CreateInstitution() {
         const form = document.getElementById('NewinstitutionForm');
-        console.log(form)
         const formData = new FormData(form);
         const updatedDetails = {};
         formData.forEach((value, key) => {
@@ -807,6 +958,7 @@
             .then(response => response.json())
             .then(data => {
                 window.location.reload();
+                $('#newInstitutionModal').modal('hide'); // Hide the modal after insertion
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -814,8 +966,8 @@
             });
     }
 
+
     function updateInstitutionDetails() {
-        console.log("更新")
         const form = document.getElementById('institutionForm');
         const formData = new FormData(form);
         const updatedDetails = {};
@@ -839,89 +991,31 @@
             });
     }
 
-    document.getElementById('newInstitutionBtn').addEventListener('click', function () {
-        const institutionDetails = document.getElementById('institutionDetails');
-        const typeOptions = ['Industry', 'Academic', 'Government', 'Others'];
-        const statusOptions = ['Active', 'Inactive', 'Pending'];
-        const statusSelectHTML = statusOptions.map(option => `<option value="${option}">${option}</option>`).join('');
-        const typeSelectHTML = typeOptions.map(option => `<option value="${option}"}>${option}</option>`).join('');
-
-        // Clear the details area and provide a blank form
-        institutionDetails.innerHTML = `
-        <form id="NewinstitutionForm">
-            <div class="form-group">
-                <label>Name:</label>
-                <input type="text" class="form-control" name="name" value="" placeholder="Once created, cannot be modified">
-            </div>
-
-            <div class="form-group">
-                <label>Abbr:</label>
-                <input type="text" class="form-control" name="Abbr" value="">
-            </div>
-
-            <div class="form-group">
-                <label>Type:</label>
-                <select class="form-control" name="type">
-                    ${typeSelectHTML}
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Address:</label>
-                <input type="text" class="form-control" name="address" value="">
-            </div>
-
-            <div class="form-group">
-                <label>Phone Number:</label>
-                <input type="text" class="form-control" name="phone" value="">
-            </div>
-
-            <div class="form-group">
-                <label>Email:</label>
-                <input type="text" class="form-control" name="Email" value="">
-            </div>
-
-            <div class="form-group">
-                <label>Website:</label>
-                <input type="text" class="form-control" name="website" value="">
-            </div>
-            
-            <div class="form-group">
-                <label>Status:</label>
-                <select class="form-control" name="status">
-                    ${statusSelectHTML}
-                </select>
-            </div>
-
-            <button type="button" id="CreateInsititution"class="btn btn-sm btn-primary btn-icon-only" onclick="CreateInstitution()">Insert</button>
-        </form>
-    `;
-    });
-
     function deleteInstitution() {
         const institutionName = document.querySelector('#institutionForm [name="name"]').value;
-        if (confirm(`Are you sure you want to delete the institution "${institutionName}"?`)) {
-            fetch('/deleteInstitution', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name: institutionName }),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        alert('Institution deleted successfully!');
-                        window.location.reload(); // Refresh the page to update the list of institutions
-                    } else {
-                        alert('Failed to delete institution.');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+        let isConfirmed = confirm(`Are you sure you want to delete the institution "${institutionName}"?`);
+        if (!isConfirmed) {
+            return; // If the user clicked "Cancel", exit the function early
         }
+        fetch('/deleteInstitution', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: institutionName }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Institution deleted successfully!');
+                    window.location.reload(); // Refresh the page to update the list of institutions
+                } else {
+                    alert('Failed to delete institution.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
     }
 
-    // Modify the submitInstitutionForm function to distinguish between update and new creation
     function submitInstitutionForm() {
         const form = document.getElementById('institutionForm');
         const formData = new FormData(form);
@@ -929,30 +1023,20 @@
         formData.forEach((value, key) => {
             institutionData[key] = value;
         });
-
         updateInstitutionDetails();
     }
-
 
     function showOrderDetails(institutionName, poNumber) {
         fetch(`/getOrderDetails/${institutionName}/${poNumber}`)
             .then(response => response.json())
             .then(orderDetails => {
-                // Create tables and headers
-                const tableHTML = `
-            <table class="table">
-                <tbody>
-                    ${orderDetails.datasets.map(dataset => `
-                        <tr>
-                            <td>${dataset.name}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-
-                // Update the page to show order details in a tabular form
-                document.getElementById('orderDetails').innerHTML = tableHTML;
+                const tableBody = document.getElementById('orderDetailsTableBody');
+                tableBody.innerHTML = orderDetails.datasets.map(dataset => `
+                <tr>
+                    <td>${dataset.name}</td>
+                </tr>
+            `).join('');
+                $('#orderDetailsModal').modal('show');  // Use jQuery to show the modal
             })
             .catch(error => console.error('Error fetching order details:', error));
     }
@@ -972,7 +1056,6 @@
             datasets: [] // Assume that the new order does not have a data set
         };
 
-        // Send a request to the backend to insert a new order
         fetch('/insertOrder', {
             method: 'POST',
             headers: {
@@ -985,11 +1068,9 @@
                 if (data.status === 'success') {
                     alert('Order generated and inserted successfully!');
                     currentSelectedInstitutionName = institutionName; // Save current selected institution name
-                    console.log(currentSelectedInstitutionName)
                     getInstitutions().then(institutions => {
                         institutionsList = institutions;
                         renderInstitutionList(institutions);
-                        // Restore the selected institution
                         if (currentSelectedInstitutionName) {
                             const items = document.querySelectorAll('#institutionList .list-group-item');
                             items.forEach(item => {
@@ -1006,11 +1087,9 @@
             .catch(error => console.error('Error:', error));
     }
 
-
     function populatePoNumberSelect(institutionName, currentPoNumber) {
         const poNumberSelect = document.getElementById('poNumberSelect');
         poNumberSelect.innerHTML = ''; // Clear existing options
-        // Get order information from backend
         fetch(`/getOrdersByInstitution/${institutionName}`)
             .then(response => response.json())
             .then(orders => {
@@ -1031,7 +1110,6 @@
             headers: {
                 'Content-Type': 'application/json',
             },
-            // Include datasetName in the request body
             body: JSON.stringify({
                 datasetName: selectedDatasetName, // Using the global variable selectedDatasetName
                 type,
@@ -1042,16 +1120,13 @@
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
-                // 更新数据视图的逻辑可以放在这里
-                // 可能不想立即重载整个页面，而是更新显示的数据集列表
-                // window.location.reload(); // 为了提供更好的用户体验，考虑不使用此行
-                // updateDatasetDetails(selectedDatasetName); // 假设这是更新数据集详细信息的函数
             })
             .catch((error) => {
                 console.error('Error:', error);
             });
 
-        console.log(`Request sent to delete wavelength: ${wavelength} from type: ${type}, exposure: ${exposure}, for dataset: ${selectedDatasetName}`);
+        console.log(`Request sent to delete wavelength: ${wavelength} from type: ${type}, exposure: ${exposure}, for dataset:
+${selectedDatasetName}`);
     }
 
     function updateOrderList(institutionName) {
@@ -1061,10 +1136,8 @@
                 const ordersContainer = document.querySelector('.orders-container'); // Change this selector to match your HTML
                 ordersContainer.innerHTML = ''; // Clear existing orders
 
-                // Assuming orders are displayed in a list
                 orders.forEach(order => {
                     const orderElement = document.createElement('div');
-                    // orderElement.className = 'list-group-item list-group-item-action';
                     orderElement.textContent = `PO Number: ${order.PO_number}, Date: ${order.date}`;
                     ordersContainer.appendChild(orderElement);
                 });
@@ -1072,10 +1145,9 @@
             .catch(error => console.error('Error updating orders:', error));
     }
 
-    function deleteOrder(institutionName, poNumber) {
-        console.log(institutionName, poNumber)
+    function deleteOrder(institutionName, poNumber, event) {
+        if (event) event.preventDefault(); // Prevent default behavior if event is passed
         if (confirm(`Are you sure you want to delete order ${poNumber} from ${institutionName}?`)) {
-            // 实现与后端的API交互，删除订单
             fetch(`/deleteOrder/${institutionName}/${poNumber}`, { method: 'POST' })
                 .then(response => response.json())
                 .then(data => {
@@ -1084,7 +1156,6 @@
                     getInstitutions().then(institutions => {
                         institutionsList = institutions;
                         renderInstitutionList(institutions);
-                        // Restore the selected institution
                         if (currentSelectedInstitutionName) {
                             const items = document.querySelectorAll('#institutionList .list-group-item');
                             items.forEach(item => {
@@ -1096,9 +1167,11 @@
                     });
                 })
                 .catch(error => console.error('Error:', error));
+        } else {
+            return;
         }
     }
 
-
 </script>
+
 {% endblock %}
