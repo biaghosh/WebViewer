@@ -413,6 +413,7 @@
     </div>
 </div>
 <!-- Order Details Modal -->
+<!-- Order Details Modal -->
 <div class="modal fade" id="orderDetailsModal" tabindex="-1" role="dialog" aria-labelledby="orderDetailsModalLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -424,6 +425,10 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div id="orderDetailsHeader">
+                    <p><strong>PO Number:</strong> <span id="orderPoNumber"></span></p>
+                    <p><strong>Order Date:</strong> <span id="orderDate"></span></p>
+                </div>
                 <table class="table">
                     <thead>
                         <tr>
@@ -438,6 +443,8 @@
         </div>
     </div>
 </div>
+
+
 <script>
     window.addEventListener("DOMContentLoaded", usersTable())
     window.addEventListener("DOMContentLoaded", renderDatasetList())
@@ -1030,16 +1037,24 @@
         fetch(`/getOrderDetails/${institutionName}/${poNumber}`)
             .then(response => response.json())
             .then(orderDetails => {
+                // Set the PO Number and Order Date in the modal
+                document.getElementById('orderPoNumber').textContent = poNumber;
+                document.getElementById('orderDate').textContent = orderDetails.date;
+
+                // Populate the order details table
                 const tableBody = document.getElementById('orderDetailsTableBody');
                 tableBody.innerHTML = orderDetails.datasets.map(dataset => `
                 <tr>
                     <td>${dataset.name}</td>
                 </tr>
             `).join('');
-                $('#orderDetailsModal').modal('show');  // Use jQuery to show the modal
+
+                // Show the modal
+                $('#orderDetailsModal').modal('show');
             })
             .catch(error => console.error('Error fetching order details:', error));
     }
+
 
 
 
