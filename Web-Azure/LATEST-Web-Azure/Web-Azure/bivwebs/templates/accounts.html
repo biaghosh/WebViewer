@@ -113,7 +113,7 @@
         <div class="col-6">
             <div class="card shadow">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Active Users</span>
+                    <span><b>Active Users</b></span>
                     <select id="userInstitutionFilter" class="form-control w-auto">
                         <!--The option of instutiation will be filled in automatically-->
                     </select>
@@ -149,24 +149,24 @@
                                     <!-- Email Address Input -->
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="email">Email address</label>
+                                            <label for="email"><b>Email address</b></label>
                                             <input id="email" class="form-control" type="text">
                                         </div>
                                     </div>
                                     <!-- Access Level Selection -->
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="levelSelect">Access Level</label>
+                                            <label for="levelSelect"><b>Access Level</b></label>
                                             <select id="levelSelect" class="form-control">
-                                                <option value="admin">Admin</option>
-                                                <option value="user">User</option>
+                                                <option value="admin"><b>Admin</b></option>
+                                                <option value="user"><b>User</b></option>
                                             </select>
                                         </div>
                                     </div>
                                     <!-- Institution Selection -->
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="institutionSelect">Institution</label>
+                                            <label for="institutionSelect"><b>Institution</b></label>
                                             <select id="institutionSelect" class="form-control">
                                                 <!-- All institution will be filled here dynamically -->
                                             </select>
@@ -188,7 +188,7 @@
                     <div class="col-md-5">
                         <div class="card border-0">
                             <div class="card-body">
-                                <h5 class="card-title">Dataset List</h5>
+                                <h5 class="card-title"><b>Dataset List</b></h5>
                                 <div class="scrollable-table">
                                     <table class="table">
                                         <div id="datasetList"></div>
@@ -228,7 +228,7 @@
         </div>
         <div class="col-6">
             <div class="card shadow">
-                <div class="card-header">Institution</div>
+                <div class="card-header"><b>Institution</b></div>
                 <div class="card-body">
                     <div class="row">
                         <!-- Organization list container -->
@@ -1048,7 +1048,6 @@
                     <td>${dataset.name}</td>
                 </tr>
             `).join('');
-
                 // Show the modal
                 $('#orderDetailsModal').modal('show');
             })
