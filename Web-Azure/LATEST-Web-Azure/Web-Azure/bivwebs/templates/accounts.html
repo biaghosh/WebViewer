@@ -5,7 +5,6 @@
     <style>
         .scrollable-orders {
             max-height: 200px;
-            /* 设置一个合适的最大高度 */
             overflow-y: auto;
         }
 
@@ -17,11 +16,8 @@
             -ms-user-select: none;
             user-select: none;
             background-color: #447fff;
-            /* 蓝色背景 */
             color: white;
-            /* 白色文字 */
         }
-
 
         .selectable-user:hover,
         li:hover {
@@ -56,11 +52,27 @@
             overflow-x: hidden;
         }
 
+        .table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1rem;
+            color: #212529;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+        }
+
         .table th,
         .table td {
             padding: 8px;
             vertical-align: middle;
             border-top: 1px solid #dee2e6;
+        }
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+            background-color: #f8f9fa;
+            color: #495057;
         }
 
         .form-row input,
@@ -105,8 +117,19 @@
             max-height: 150px;
             overflow-y: auto;
         }
+
+        /* Enhanced styling for the assignedDatasetsTitle */
+        .assigned-datasets-title {
+            font-size: 1.25rem;
+            color: #495057;
+            background-color: #e9ecef;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.25rem;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
+
 <div class="container-fluid">
     <div class="row" style="margin-top: 70px;">
         <!-- View Users-->
@@ -316,7 +339,6 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label><b>Orders:</b></label>
                                         <div class="scrollable-orders">
                                             <table class="table">
                                                 <thead>
@@ -607,14 +629,12 @@
     }
 
     function handleSelectedUser(selectedUserEmail) {
-        assignedDatasetsTitle.textContent = `${selectedUserEmail}`;
+        assignedDatasetsTitle.textContent = `Assigned Datasets for ${selectedUserEmail}`;
+        assignedDatasetsTitle.classList.add('assigned-datasets-title');
         const assignedDatasets = document.getElementById('assignedDatasets');
         // Empty the current datasets list
         assignedDatasets.innerHTML = '';
-        // Show the selected user
-        const selectedUserHeading = document.createElement('h5');
-        assignedDatasets.appendChild(selectedUserHeading);
-        // Query the datasets of selceted user
+        // Query the datasets of selected user
         fetch(`/getUserDatasets/${selectedUserEmail}`, {
             method: 'GET',
         })
