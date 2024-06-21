@@ -172,14 +172,15 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <!-- Create User Button -->
+                                    <div class="col-md-3 d-flex align-items-end">
                                         <div class="form-group">
-                                            <label> </label>
                                             <button id="createUserBtn" type="submit"
                                                 class="btn btn-sm btn-primary btn-icon-only">Create</button>
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -188,7 +189,7 @@
                     <div class="col-md-5">
                         <div class="card border-0">
                             <div class="card-body">
-                                <h5 class="card-title"><b>Dataset List</b></h5>
+                                <h6 class="card-title"><b>Dataset List</b></h6>
                                 <div class="scrollable-table">
                                     <table class="table">
                                         <div id="datasetList"></div>
@@ -243,7 +244,7 @@
                                     <div class="form-row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="name">Full Name:</label>
+                                                <label for="name"><b>Full Name:</b></label>
                                                 <input type="text" class="form-control" name="name" id="name" value=""
                                                     readonly>
                                             </div>
@@ -316,39 +317,52 @@
 
                                     <div class="form-group">
                                         <label>Orders:</label>
-                                        <div class="orders-container">
-                                            <div class="orders list-group">
-                                                <!-- Orders will be dynamically filled here -->
-                                            </div>
-                                            <div id="orderDetails" class="order-details scrollable-table"></div>
+                                        <div class="scrollable-orders">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">PO Number</th>
+                                                        <th scope="col">Order Date</th>
+                                                        <th scope="col">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Orders will be dynamically filled here -->
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
 
                                     <div class="form-group">
                                         <div class="flex-row-container"
                                             style="display: flex; align-items: center; justify-content: space-between;">
-                                            <div class="flex-item" style="flex-grow: 1; margin-right: 10px;"><input
-                                                    type="text" class="form-control" placeholder="Enter PO Number"
-                                                    id="newPoNumber"></div>
-                                            <div class="flex-item"><button class="btn btn-sm btn-primary"
+                                            <div class="flex-item" style="flex-grow: 1; margin-right: 10px;">
+                                                <input type="text" class="form-control" placeholder="Enter PO Number"
+                                                    id="newPoNumber">
+                                            </div>
+                                            <div class="flex-item">
+                                                <button class="btn btn-sm btn-primary"
                                                     onclick="generateAndInsertOrder('institutionName')">Generate
-                                                    Order</button></div>
+                                                    Order</button>
+                                            </div>
                                         </div>
                                     </div>
-                                </form>
+                                    <button type="button" id="newInstitutionBtn"
+                                        class="btn btn-sm btn-primary btn-icon-only" data-toggle="modal"
+                                        data-target="#newInstitutionModal">New</button>
+                                    <button type="submit" class="btn btn-sm btn-primary ml-2 btn-icon-only"
+                                        onclick="updateInstitutionDetails()">Update</button>
+                                    <button type="button" class="btn btn-sm btn-danger ml-2 btn-icon-only"
+                                        onclick="deleteInstitution()"><i class="fas fa-trash"></i></button>
                             </div>
-                            <button id="newInstitutionBtn" class="btn btn-sm btn-primary btn-icon-only"
-                                data-toggle="modal" data-target="#newInstitutionModal">New</button>
-                            <button type="submit" class="btn btn-sm btn-primary ml-2 btn-icon-only"
-                                onclick="updateInstitutionDetails()">Update</button>
-                            <button type="button" class="btn btn-sm btn-danger ml-2 btn-icon-only"
-                                onclick="deleteInstitution()"><i class="fas fa-trash"></i></button>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 <!-- New Institution Modal -->
 <div class="modal fade" id="newInstitutionModal" tabindex="-1" role="dialog" aria-labelledby="newInstitutionModalLabel"
@@ -406,12 +420,13 @@
                         </select>
                     </div>
                     <button type="button" class="btn btn-sm btn-primary btn-icon-only"
-                        onclick="CreateInstitution()">Insert</button>
+                        onclick="CreateInstitution(event)">Insert</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 <!-- Order Details Modal -->
 <!-- Order Details Modal -->
 <div class="modal fade" id="orderDetailsModal" tabindex="-1" role="dialog" aria-labelledby="orderDetailsModalLabel"
@@ -465,6 +480,9 @@
     const assignedDatasetsTitle = document.getElementById('assignedDatasetsTitle');
 
     function addAssignedDataset(email, datasetName) {
+        if (!email || !datasetName) {
+            return;
+        }
         fetch(`/addAssignedDataset/${email}/${datasetName}`, { method: 'POST' })
             .then(response => {
                 if (!response.ok) {
@@ -483,6 +501,9 @@
 
     // Delete selected datasets from Assigned Datasets
     function removeAssignedDataset(email, datasetName) {
+        if (!email || !datasetName) {
+            return;
+        }
         fetch(`/removeUserDataset/${email}/${datasetName}`, { method: 'POST' })
             .then(response => {
                 if (!response.ok) {
@@ -646,24 +667,27 @@
                 document.getElementById("viewUsersCard").innerHTML = '<div class="alert alert-danger" role="alert">Failed to load user data.</div>';
             });
     }
-
     function renderUserTable(data) {
         // Initialize the table with headers
         let tableHTML = `
-        <table>
-            <tbody>
-    `;
+    <table>
+        <tbody>
+`;
 
         // Populate the table with data from existing users
-        data.forEach(user => {
+        data.forEach((user, index) => {
             let date = formatDate(user.lastLogin ? user.lastLogin['$date'] : '');
             tableHTML += `<tr class="selectable-user" data-email="${user.email}">
-            <td style="width: 30%;">${user.email}</td>
-            <td style="width: 10%;">${user.level}</td>
-            <td style="width: 10%;">${user.logins}</td>
-            <td style="width: 30%;">${user.institution}</td>
-            <td style="width: 30%;">${date}</td>
-        </tr>`;
+        <td style="width: 30%;">${user.email}</td>
+        <td style="width: 10%;">${user.level}</td>
+        <td style="width: 10%;">${user.logins}</td>
+        <td style="width: 30%;">${user.institution}</td>
+        <td style="width: 30%;">${date}</td>
+    </tr>`;
+            // 默认选择第一项
+            if (index === 0) {
+                selectedUserEmail = user.email;
+            }
         });
 
         tableHTML += `</tbody></table>`;
@@ -673,8 +697,13 @@
         usersCard.innerHTML = tableHTML;
 
         // Add click event listeners to the user rows for selection functionality
-        usersCard.querySelectorAll('.selectable-user').forEach(row => {
+        usersCard.querySelectorAll('.selectable-user').forEach((row, index) => {
             row.addEventListener('click', (event) => handleTableRowClick(event));
+            // 默认选择第一项
+            if (index === 0) {
+                row.classList.add('selected-user');
+                handleSelectedUser(selectedUserEmail);
+            }
         });
     }
 
@@ -822,125 +851,32 @@
         });
     }
     function showInstitutionDetails(institution) {
-        const institutionDetails = document.getElementById('institutionDetails');
-        const ordersHeader = `
-        <div class="list-group-item header">
-            <div class="order-info-header">
-                <span class="po-number-header">PO Number</span>
-                <span class="order-date-header">Order Date</span>
-            </div>
-        </div>
-    `;
-        const ordersHTML = `
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">PO Number</th>
-                    <th scope="col">Order Date</th>
-                    <th scope="col">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${institution.orders.map(order => `
-                    <tr>
-                        <td>${order.PO_number}</td>
-                        <td>${order.date}</td>
-                        <!-- Inside the order table row -->
-    <td>
-        <button class="btn btn-danger btn-sm" type="button" onclick="deleteOrder('${institution.name}', '${order.PO_number}', event)">
-    <i class="fas fa-trash"></i>
-</button>
+        const form = document.getElementById('institutionForm');
+        form.elements['name'].value = institution.name;
+        form.elements['abbr'].value = institution.abbr;
+        form.elements['type'].value = institution.type;
+        form.elements['phone'].value = institution.phone;
+        form.elements['email'].value = institution.email;
+        form.elements['address'].value = institution.address;
+        form.elements['website'].value = institution.website;
+        form.elements['status'].value = institution.status;
 
-        <button class="btn btn-primary btn-sm" type="button" onclick="showOrderDetails('${institution.name}', '${order.PO_number}')"><i class="fas fa-search"></i></button>
-    </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-
-        institutionDetails.innerHTML = `
-        <form id="institutionForm">
-            <div class="form-row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="name">Full Name:</label>
-                        <input type="text" class="form-control" name="name" id="name" value="${institution.name}" readonly>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="abbr">Abbr:</label>
-                        <input type="text" class="form-control" name="abbr" id="abbr" value="${institution.abbr}">
-                    </div>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="type">Type:</label>
-                        <select class="form-control" name="type" id="type">
-                            <option value="Industry" ${institution.type === 'Industry' ? 'selected' : ''}>Industry</option>
-                            <option value="Academic" ${institution.type === 'Academic' ? 'selected' : ''}>Academic</option>
-                            <option value="Government" ${institution.type === 'Government' ? 'selected' : ''}>Government</option>
-                            <option value="Others" ${institution.type === 'Others' ? 'selected' : ''}>Others</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="phone">Phone Number:</label>
-                        <input type="text" class="form-control" name="phone" id="phone" value="${institution.phone}">
-                    </div>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="text" class="form-control" name="email" id="email" value="${institution.email}">
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="address">Address:</label>
-                        <input type="text" class="form-control" name="address" id="address" value="${institution.address}">
-                    </div>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="website">Website:</label>
-                        <input type="text" class="form-control" name="website" id="website" value="${institution.website}">
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="status">Status:</label>
-                        <select class="form-control" name="status" id="status">
-                            <option value="Active" ${institution.status === 'Active' ? 'selected' : ''}>Active</option>
-                            <option value="Inactive" ${institution.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
-                            <option value="Pending" ${institution.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Orders:</label>
-                <div class="scrollable-orders">
-                    ${ordersHTML}
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="flex-row-container" style="display: flex; align-items: center; justify-content: space-between;">
-                    <div class="flex-item" style="flex-grow: 1; margin-right: 10px;"><input type="text" class="form-control" placeholder="Enter PO Number" id="newPoNumber"></div>
-                    <div class="flex-item"><button class="btn btn-sm btn-primary" onclick="generateAndInsertOrder('${institution.name}')">Generate Order</button></div>
-                </div>
-            </div>
-        </form>
-    `;
-
+        // Populate orders
+        const ordersContainer = document.querySelector('.scrollable-orders tbody');
+        ordersContainer.innerHTML = institution.orders.map(order => `
+        <tr>
+            <td>${order.PO_number}</td>
+            <td>${order.date}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" type="button" onclick="deleteOrder('${institution.name}', '${order.PO_number}', event)">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button class="btn btn-primary btn-sm" type="button" onclick="showOrderDetails('${institution.name}', '${order.PO_number}')">
+                    <i class="fas fa-search"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
     }
 
     document.getElementById('institutionForm').addEventListener('submit', function (e) {
