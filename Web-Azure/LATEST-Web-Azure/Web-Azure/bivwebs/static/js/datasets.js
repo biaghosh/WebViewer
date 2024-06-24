@@ -2,21 +2,17 @@ let selectedDatasetName = "";
 let institutionsList = [];
 let shouldContinue = true;
 let currentSelectedInstitutionName = null;
+
 window.addEventListener("DOMContentLoaded", function () {
     getInstitutions().then(institutions => {
         institutionsList = institutions;
-        // console.log(institutionsList)
-        populateFilter()
+        populateFilter();
     });
-});
 
-window.addEventListener("DOMContentLoaded", function () {
     getDatasets().then(datasets => {
-        // Initial rendering form
         renderDatasetList(datasets);
     });
 });
-
 
 window.generateAndInsertOrder = generateAndInsertOrder;
 window.showOrderDetails = showOrderDetails;
@@ -25,49 +21,8 @@ window.deleteInstitution = deleteInstitution;
 window.updateInstitutionDetails = updateInstitutionDetails;
 
 function renderDatasetList(datasets) {
-    const datasetList = document.getElementById('datasetList');
-    datasetList.innerHTML = ''; // 清除现有内容
-
-    // 创建容器
-    const container = document.createElement('div');
-    container.classList.add('table-container');
-
-    // 创建表头
-    const tableHeader = document.createElement('table');
-    const thead = document.createElement('thead');
-    const headerRow = document.createElement('tr');
-
-    const institutionHeader = document.createElement('th');
-    institutionHeader.textContent = 'Institution';
-    institutionHeader.style.width = "40%";
-
-    const nameHeader = document.createElement('th');
-    nameHeader.textContent = 'Name';
-    nameHeader.style.width = "30%";
-
-    const poNumHeader = document.createElement('th');
-    poNumHeader.textContent = 'PO_#';
-    poNumHeader.style.width = "30%";
-
-    headerRow.appendChild(institutionHeader);
-    headerRow.appendChild(nameHeader);
-    headerRow.appendChild(poNumHeader);
-    thead.appendChild(headerRow);
-    tableHeader.appendChild(thead);
-    tableHeader.classList.add('dataset-table');
-
-    // 为表头添加类名
-    institutionHeader.classList.add('table-header-cell');
-    nameHeader.classList.add('table-header-cell');
-    poNumHeader.classList.add('table-header-cell');
-
-    // 创建表体
-    const scrollContainer = document.createElement('div');
-    scrollContainer.style.maxHeight = '300px';
-    scrollContainer.style.overflowY = 'auto';
-
-    const tableBody = document.createElement('table');
-    const tbody = document.createElement('tbody');
+    const tbody = document.getElementById('datasetTableBody');
+    tbody.innerHTML = ''; // 清除现有内容
 
     datasets.forEach(dataset => {
         const row = document.createElement('tr');
@@ -92,18 +47,6 @@ function renderDatasetList(datasets) {
         tbody.appendChild(row);
     });
 
-    tableBody.appendChild(tbody);
-    tableBody.classList.add('dataset-table');
-    scrollContainer.appendChild(tableBody);
-
-    // 将表头和表体添加到容器
-    container.appendChild(tableHeader);
-    container.appendChild(scrollContainer);
-
-    // 将容器添加到页面
-    datasetList.appendChild(container);
-
-    // 监听点击事件，选定某一行
     tbody.addEventListener('click', (event) => {
         const selectedRow = event.target.closest('tr');
         if (selectedRow) {
@@ -125,31 +68,21 @@ function renderDatasetList(datasets) {
         }
     });
 
-    // 自动选择第一行
     if (datasets.length > 0) {
         const firstRow = tbody.querySelector('tr');
         firstRow.click();
     }
 }
 
-
-
-
-
 document.getElementById("downloadDatasetBtn").addEventListener("click", function () {
     if (selectedDatasetName) {
         fetch('/downloadDataset', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                'datasetName': selectedDatasetName,
-            }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 'datasetName': selectedDatasetName }),
         })
             .then(response => response.json())
             .then(data => {
-                // Check if we get the URL list
                 if (data.download_urls && Array.isArray(data.download_urls)) {
                     if (data.download_urls.length === 0) {
                         alert("No files found for the selected dataset.");
@@ -168,19 +101,14 @@ document.getElementById("downloadDatasetBtn").addEventListener("click", function
     }
 });
 
-// Listen to the delete button 
 document.getElementById("deleteDatasetBtn").addEventListener("click", function () {
     if (selectedDatasetName) {
         const isConfirmed = confirm("Are you sure you want to delete this dataset? This action cannot be undone.");
         if (isConfirmed) {
             fetch('/deleteDataset', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    'datasetName': selectedDatasetName,
-                }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 'datasetName': selectedDatasetName }),
             })
                 .then(response => response.json())
                 .then(data => {
@@ -198,135 +126,53 @@ document.getElementById("deleteDatasetBtn").addEventListener("click", function (
 });
 
 function updateDatasetList(datasets) {
-    const dataset = datasets[0]
-    const datasetInfoDiv = document.getElementById('datasetInfo');
-    datasetInfoDiv.innerHTML = ''; // Clear existing content
+    const dataset = datasets[0];
 
-    let institutionSelectHTML = '<select class="form-control" name="institution">';
+    document.getElementById('datasetName').value = dataset.name;
+    document.getElementById('voxelsX').value = dataset.voxels.x;
+    document.getElementById('voxelsY').value = dataset.voxels.y;
+    document.getElementById('voxelsZ').value = dataset.voxels.z;
+    document.getElementById('dims3X').value = dataset.dims3.x;
+    document.getElementById('dims3Y').value = dataset.dims3.y;
+    document.getElementById('dims3Z').value = dataset.dims3.z;
+    document.getElementById('dims2X').value = dataset.dims2.x;
+    document.getElementById('dims2Y').value = dataset.dims2.y;
+    document.getElementById('dims2Z').value = dataset.dims2.z;
+    document.getElementById('imageDimsX').value = dataset.imageDims.x;
+    document.getElementById('imageDimsY').value = dataset.imageDims.y;
+    document.getElementById('imageDimsZ').value = dataset.imageDims.z;
+    document.getElementById('infoVoxels').value = dataset.info.voxels;
+    document.getElementById('infoThickness').value = dataset.info.thickness;
+    document.getElementById('pixelLengthUM').value = dataset.pixelLengthUM;
+    document.getElementById('zSkip').value = dataset.zskip;
+    document.getElementById('infoSpecimen').value = dataset.info.specimen;
+    document.getElementById('infoPI').value = dataset.info.PI;
+
+    let institutionSelectHTML = '';
     institutionsList.forEach(institution => {
         const isSelected = dataset.institution === institution.name ? ' selected' : '';
         institutionSelectHTML += `<option value="${institution.name}"${isSelected}>${institution.name}</option>`;
     });
+    document.getElementById('institutionSelect').innerHTML = institutionSelectHTML;
 
-    institutionSelectHTML += '</select>';
+    populatePoNumberSelect(dataset.institution, dataset.ponum);
 
-    const form = document.createElement('form');
-    form.className = 'dataset-info-form';
-    let formHTML = `
-        <div class="xyz-container">
-            <div class="flex-item title">Name:</div>
-            <div class="flex-item"><input type="text" class="form-control" name="name" value="${dataset.name}" /></div>
-            <div class="flex-item title">Institution:</div>
-            <div class="flex-item institution">${institutionSelectHTML}</div>
-            <div class="flex-item title">PO#:</div>
-            <div class="flex-item ponum"><select id="poNumberSelect" class="form-control">
-        <!-- Options will be added dynamically via JavaScript -->
-        </select></div>
-        </div>`;
-
-    // 假设 dataset.types 已经被定义
-    if (dataset.types) {
-        let typesContent = '<div class="types-row">';
-
-        Object.keys(dataset.types).forEach((type, index) => {
-            // 对每种类型使用 flex-item 容器
-            typesContent += `<div class="flex-item"><div class="type-name">{ ${type} }</div><div class="exposures">`;
-
-            Object.keys(dataset.types[type]).forEach(exposure => {
-                typesContent += `<div>[ Exposure ${exposure}:`;
-                const wavelengths = dataset.types[type][exposure];
-                wavelengths.forEach(wavelength => {
-                    typesContent += `<span class="wavelength"> (Wavelength: ${wavelength}`;
-                });
-                typesContent += ` ]</div>`;
-            });
-
-            typesContent += '</div></div>';
-
-            // 每两个类型创建一个新行
-            if ((index + 1) % 2 === 0) typesContent += '</div><div class="types-row">';
-        });
-
-        typesContent += '</div>'; // 结束最后一行
-        datasetInfoDiv.innerHTML = typesContent;
-    } else {
-        datasetInfoDiv.innerHTML = '<p>No types information available.</p>';
-    }
-
-
-    formHTML += `
-        <div class="xyz-container">
-            <div class="flex-item title">Voxels:</div>
-            <div class="flex-item">X: <input type="number" class="form-control" name="voxels[x]" value="${dataset.voxels.x}" /></div>
-            <div class="flex-item">Y: <input type="number" class="form-control" name="voxels[y]" value="${dataset.voxels.y}" /></div>
-            <div class="flex-item">Z: <input type="number" class="form-control" name="voxels[z]" value="${dataset.voxels.z}" /></div>
-        </div>
-
-        <div class="xyz-container">
-            <div class="flex-item title">Dims3:</div>
-            <div class="flex-item">X: <input type="number" class="form-control" name="dims3[x]" value="${dataset.dims3.x}" readonly /></div>
-            <div class="flex-item">Y: <input type="number" class="form-control" name="dims3[y]" value="${dataset.dims3.y}" readonly /></div>
-            <div class="flex-item">Z: <input type="number" class="form-control" name="dims3[z]" value="${dataset.dims3.z}" readonly /></div>
-        </div>
-
-<div class="xyz-container">
-    <div class="flex-item title">Dims2:</div>
-    <div class="flex-item">X: <input type="number" class="form-control" name="dims2[x]" value="${dataset.dims2.x}" readonly /></div>
-    <div class="flex-item">Y: <input type="number" class="form-control" name="dims2[y]" value="${dataset.dims2.y}" readonly /></div>
-    <div class="flex-item">Z: <input type="number" class="form-control" name="dims2[z]" value="${dataset.dims2.z}" readonly /></div>
-</div>
-
-<div class="xyz-container">
-    <div class="flex-item title">Image Dims:</div>
-    <div class="flex-item">X: <input type="number" class="form-control" name="imageDims[x]" value="${dataset.imageDims.x}" readonly /></div>
-    <div class="flex-item">Y: <input type="number" class="form-control" name="imageDims[y]" value="${dataset.imageDims.y}" readonly /></div>
-    <div class="flex-item">Z: <input type="number" class="form-control" name="imageDims[z]" value="${dataset.imageDims.z}" readonly /></div>
-</div>
-  
-
-        <div class="xyz-container">
-            <div class="flex-item title">Info:</div>
-            <div class="flex-item">Voxels: <input type="text" class="form-control" name="info[voxels]" value="${dataset.info.voxels}" /></div>
-            <div class="flex-item">Thickness: <input type="text" class="form-control" name="info[thickness]" value="${dataset.info.thickness}" /></div>
-            <div class="flex-item">Pixel Length UM: <input type="text" class="form-control" name="pixelLengthUM" value="${dataset.pixelLengthUM}" /></div>
-            <div class="flex-item">Z Skip: <input type="number" class="form-control" name="zskip" value="${dataset.zskip}" /></div>
-        </div> 
-
-        <div class="xyz-container">
-            <div class="mb-2">Specimen: <input type="text" class="form-control" name="info[specimen]" value="${dataset.info.specimen}" /></div>
-            <div class="mb-2">PI: <input type="text" class="form-control" name="info[PI]" value="${dataset.info.PI}" /></div>
-        </div> 
-    `;
-
-    form.innerHTML = formHTML;
-    datasetInfoDiv.appendChild(form);
-    // const form = document.querySelector('.dataset-info-form');
-    const institutionSelect = document.querySelector('select[name="institution"]');
-    institutionSelect.addEventListener('change', function () {
-        const selectedInstitution = this.value;
-        const currentPoNumber = document.getElementById('poNumberSelect').value;
-        populatePoNumberSelect(selectedInstitution, currentPoNumber);
-    });
-
+    const form = document.querySelector('.dataset-info-form');
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         const formData = new FormData(form);
         const updateData = Object.fromEntries(formData.entries());
         const selectedPoNumber = document.getElementById('poNumberSelect').value;
         updateData.ponum = selectedPoNumber;
-        // Send update request
         fetch('/updateDataset', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updateData),
         })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
                     alert('Dataset updated successfully!');
-                    // The dataset list may need to be reloaded or updated
                 } else {
                     alert('Failed to update dataset.');
                 }
@@ -340,6 +186,7 @@ document.getElementById('updateDatasetBtn').addEventListener('click', function (
     window.location.reload();
 });
 
+
 function populateFilter() {
     const filter = document.getElementById('institutionFilter');
     institutionsList.forEach(institution => {
@@ -351,17 +198,13 @@ function populateFilter() {
 }
 
 function filterDatasets(institution) {
-    // Assume that getDatasets() returns a Promise for all data sets
     getDatasets().then(datasets => {
-        // Filter the dataset based on the selected institution
         const filteredDatasets = institution === 'all' ? datasets : datasets.filter(dataset => dataset.institution === institution);
-        // Re-render the table
         renderDatasetList(filteredDatasets);
     });
 }
 
 document.getElementById('institutionFilter').addEventListener('change', (e) => {
-    // Pass the selected institution name to the filterDatasets function
     filterDatasets(e.target.value);
 });
 
@@ -377,7 +220,6 @@ function getDatasets() {
         });
 }
 
-
 function getInstitutions() {
     return fetch('/getInstitutions')
         .then(response => response.json())
@@ -390,20 +232,15 @@ function getInstitutions() {
         });
 }
 
-
-
 function showInstitutionDetails(institution) {
     const institutionDetails = document.getElementById('institutionDetails');
 
-    // Assume the type and status options
     const typeOptions = ['Industry', 'Academic', 'Government', 'Others'];
     const statusOptions = ['Active', 'Inactive', 'Pending'];
 
-    // Create drop down options
     const typeSelectHTML = typeOptions.map(option => `<option value="${option}" ${institution.type === option ? 'selected' : ''}>${option}</option>`).join('');
     const statusSelectHTML = statusOptions.map(option => `<option value="${option}" ${institution.status === option ? 'selected' : ''}>${option}</option>`).join('');
 
-    // Generate showing PO-Number order list with two columns
     const ordersHeader = `
     <div class="list-group-item header">
         <div class="order-info-header">
@@ -422,48 +259,38 @@ function showInstitutionDetails(institution) {
     </div>
 `).join('');
 
-
-    // Combine header and list items
     const ordersListHTML = ordersHeader + ordersHTML;
 
-    // Set the details HTML
     institutionDetails.innerHTML = `
         <form id="institutionForm">
             <div class="xyz-container">
                 <div class="flex-item title">Name:</div>
                 <div class="flex-item"><input type="text" class="form-control" name="name" value="${institution.name}"></div>
-
                 <div class="flex-item title">Type:</div>
                 <div class="flex-item"><select class="form-control" name="type">
                     ${typeSelectHTML}
                 </select></div>
             </div>  
-
             <div class="xyz-container">
                 <div class="flex-item title">Phone Number:</div>
                 <div class="flex-item"><input type="text" class="form-control" name="phone" value="${institution.phone}"></div>
-
                 <div class="flex-item title">Email:</div>
                 <div class="flex-item"><input type="text" class="form-control" name="Email" value="${institution.Email}"></div>
             </div>
-
             <div class="form-group">
                 <div class="flex-item title">Address:</div>
                 <input type="text" class="form-control" name="address" value="${institution.address}">
             </div>
-
             <div class="form-group">
                 <div class="flex-item title">Website:</div>
                 <input type="text" class="form-control" name="website" value="${institution.website}">
             </div>
-
             <div class="form-group">
                 <div class="flex-item title">Status:</div>
                 <select class="form-control" name="status">
                     ${statusSelectHTML}
                 </select>
             </div>
-
             <div class="form-group">
                 <div class="flex-item title">Orders:</div>
                 <div class="orders-container">
@@ -473,24 +300,20 @@ function showInstitutionDetails(institution) {
                     <div id="orderDetails" class="order-details"></div>
                 </div>
             </div>
-
             <div class="form-group">
                 <div class="flex-row-container" style="display: flex; align-items: center; justify-content: space-between;">
                     <div class="flex-item" style="flex-grow: 1; margin-right: 10px;"><input type="text" class="form-control" placeholder="Enter PO Number" id="newPoNumber"></div>
                     <div class="flex-item"><button class="btn btn-sm btn-primary" onclick="generateAndInsertOrder('${institution.name}')">Generate Order</button></div>
                 </div>
             </div>
-
-            
             <button type="submit" class="btn btn-sm btn-primary btn-icon-only">Update</button>
             <button type="button" class="btn btn-sm btn-danger ml-2 btn-icon-only" onclick="deleteInstitution()"><i class="fas fa-trash"></i></button>
         </form>
     `;
 
-    // Add form submit event listener
     document.getElementById('institutionForm').addEventListener('submit', function (e) {
         e.preventDefault();
-        updateInstitutionDetails(); // Implement this function to handle form submission
+        updateInstitutionDetails();
     });
 }
 
@@ -515,10 +338,8 @@ function updateInstitutionDetails() {
         })
         .catch((error) => {
             console.error('Error:', error);
-            // Handle error conditions
         });
 }
-
 
 function deleteInstitution() {
     const institutionName = document.querySelector('#institutionForm [name="name"]').value;
@@ -534,7 +355,7 @@ function deleteInstitution() {
             .then(data => {
                 if (data.status === 'success') {
                     alert('Institution deleted successfully!');
-                    window.location.reload(); // Refresh the page to update the list of institutions
+                    window.location.reload();
                 } else {
                     alert('Failed to delete institution.');
                 }
@@ -543,7 +364,6 @@ function deleteInstitution() {
     }
 }
 
-// Modify the submitInstitutionForm function to distinguish between update and new creation
 function submitInstitutionForm() {
     const form = document.getElementById('institutionForm');
     const formData = new FormData(form);
@@ -555,8 +375,6 @@ function submitInstitutionForm() {
     updateInstitutionDetails();
 }
 
-
-
 document.getElementById('submitBtn').addEventListener('click', async function () {
     console.log(institutionsList)
     const fileInputTiff = document.getElementById('fileInputTiff');
@@ -565,7 +383,6 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         return;
     }
     const fileTiff = fileInputTiff.files[0];
-    // Create an array containing all input boxes that need to be checked
     const filename = fileInputTiff.files[0].name.split('.')[0]
     const abbr = filename.split('#')[0]
     if (!institutionsList.find(institution => institution.abbr === abbr)) {
@@ -586,9 +403,9 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     formData.append('exposure', Exposure);
     formData.append('wavelength', Wavelength);
     formData.append('FileName', fileTiff.name);
-    formData.append('fileContent', fileTiff); // Add the file content here
+    formData.append('fileContent', fileTiff);
 
-    var fileExtension = fileInputTiff.files[0].name.split('.').pop().toLowerCase(); // Get file extension name
+    var fileExtension = fileInputTiff.files[0].name.split('.').pop().toLowerCase();
     const institutionExists = institutionsList.find(institution => institution.abbr === abbr);
 
     if (!institutionExists) {
@@ -600,8 +417,6 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         alert('Wrong file format! Please upload the .tif file');
         return;
     }
-
-    // Start getProgress function
 
     getProgress();
 
@@ -622,7 +437,6 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 });
 
 function getProgress() {
-
     if (!shouldContinue) {
         console.log("Exiting getProgress because shouldContinue is false");
         return;
@@ -643,9 +457,8 @@ function getProgress() {
             document.getElementById('progress-bar-fill').style.width = progress_per + '%';
             document.getElementById('progress-bar-fill').textContent = Math.round(progress_per) + '%';
 
-            // If shouldContinue still true，invoke getProgress
             if (shouldContinue) {
-                setTimeout(getProgress, 1000); // set 1 second delay time 
+                setTimeout(getProgress, 1000);
             }
         })
         .catch(error => {
@@ -657,55 +470,47 @@ function showOrderDetails(institutionName, poNumber) {
     fetch(`/getOrderDetails/${institutionName}/${poNumber}`)
         .then(response => response.json())
         .then(orderDetails => {
-            // Create tables and headers
             const tableHTML = `
-                <table class="table">
-                    <tbody>
-                        ${orderDetails.datasets.map(dataset => `
-                            <tr>
-                                <td>${dataset.name}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-
-            // Updated page to show order details and now displays the dataset in tabular form
+            <table class="table">
+                <tbody>
+                    ${orderDetails.datasets.map(dataset => `
+                        <tr>
+                            <td>${dataset.name}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
             document.getElementById('orderDetails').innerHTML = tableHTML;
         })
         .catch(error => console.error('Error fetching order details:', error));
 }
 
-
 function generateAndInsertOrder(institutionName) {
     if (!document.getElementById('newPoNumber').value.length) {
         alert("Please enter a valid institution name.");
-        return; // Early return to stop the function execution
+        return;
     }
 
-    const today = new Date().toISOString().slice(0, 10); // Get current date
+    const today = new Date().toISOString().slice(0, 10);
     const newOrder = {
         PO_number: document.getElementById('newPoNumber').value,
         date: today,
-        datasets: [] // Assume that the new order does not have a data set
+        datasets: []
     };
 
-    // Send a request to the backend to insert a new order
     fetch('/insertOrder', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ institutionName, newOrder }),
     })
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
                 alert('Order generated and inserted successfully!');
-                currentSelectedInstitutionName = institutionName; // Save current selected institution name
+                currentSelectedInstitutionName = institutionName;
                 getInstitutions().then(institutions => {
                     renderInstitutionList(institutions);
-                    // Restore the selected institution
                     if (currentSelectedInstitutionName) {
                         const items = document.querySelectorAll('#institutionList .list-group-item');
                         items.forEach(item => {
@@ -722,11 +527,9 @@ function generateAndInsertOrder(institutionName) {
         .catch(error => console.error('Error:', error));
 }
 
-
 function populatePoNumberSelect(institutionName, currentPoNumber) {
     const poNumberSelect = document.getElementById('poNumberSelect');
-    poNumberSelect.innerHTML = ''; // Clear existing options
-    // Get order information from backend
+    poNumberSelect.innerHTML = '';
     fetch(`/getOrdersByInstitution/${institutionName}`)
         .then(response => response.json())
         .then(orders => {
@@ -744,12 +547,9 @@ function populatePoNumberSelect(institutionName, currentPoNumber) {
 function deleteWavelength(type, exposure, wavelength) {
     fetch('/delete-wavelength', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        // Include datasetName in the request body
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            datasetName: selectedDatasetName, // Using the global variable selectedDatasetName
+            datasetName: selectedDatasetName,
             type,
             exposure,
             wavelength
@@ -758,10 +558,6 @@ function deleteWavelength(type, exposure, wavelength) {
         .then(response => response.json())
         .then(data => {
             console.log('Success:', data);
-            // 更新数据视图的逻辑可以放在这里
-            // 可能不想立即重载整个页面，而是更新显示的数据集列表
-            // window.location.reload(); // 为了提供更好的用户体验，考虑不使用此行
-            // updateDatasetDetails(selectedDatasetName); // 假设这是更新数据集详细信息的函数
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -774,20 +570,15 @@ function updateOrderList(institutionName) {
     fetch(`/getOrdersByInstitution/${institutionName}`)
         .then(response => response.json())
         .then(orders => {
-            const ordersContainer = document.querySelector('.orders-container'); // Change this selector to match your HTML
-            ordersContainer.innerHTML = ''; // Clear existing orders
+            const ordersContainer = document.querySelector('.orders-container');
+            ordersContainer.innerHTML = '';
 
-            // Assuming orders are displayed in a list
             orders.forEach(order => {
                 console.log(order)
                 const orderElement = document.createElement('div');
-                // orderElement.className = 'list-group-item list-group-item-action';
                 orderElement.textContent = `PO Number: ${order.PO_number}, Date: ${order.date}`;
                 ordersContainer.appendChild(orderElement);
             });
         })
         .catch(error => console.error('Error updating orders:', error));
 }
-
-
-

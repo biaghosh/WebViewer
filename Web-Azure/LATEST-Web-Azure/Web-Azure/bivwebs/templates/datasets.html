@@ -243,7 +243,22 @@
                                 <div id="filterContainer">
                                 </div>
                                 <!-- <h5 class="card-title">Dataset List</h5> -->
-                                <div id="datasetList" class="table table-striped table-hover"></div>
+                                <div id="datasetList" class="table table-striped table-hover">
+                                    <div class="table-container">
+                                        <table class="dataset-table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="table-header-cell" style="width: 40%;">Institution</th>
+                                                    <th class="table-header-cell" style="width: 30%;">Name</th>
+                                                    <th class="table-header-cell" style="width: 30%;">PO_#</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="datasetTableBody">
+                                                <!-- 动态填充 -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -268,7 +283,78 @@
                         <!-- Right content, fixed width -->
                         <div class="col-md-7">
                             <div id="datasetInfo">
-                                <!-- The data will be dynamically populated by JavaScript -->
+                                <form class="dataset-info-form">
+                                    <div class="xyz-container">
+                                        <div class="flex-item title">Name:</div>
+                                        <div class="flex-item"><input type="text" class="form-control" name="name"
+                                                id="datasetName" /></div>
+                                        <div class="flex-item title">Institution:</div>
+                                        <div class="flex-item institution">
+                                            <select class="form-control" name="institution" id="institutionSelect">
+                                                <!-- 动态填充 -->
+                                            </select>
+                                        </div>
+                                        <div class="flex-item title">PO#:</div>
+                                        <div class="flex-item ponum">
+                                            <select id="poNumberSelect" class="form-control">
+                                                <!-- 动态填充 -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="xyz-container">
+                                        <div class="flex-item title">Voxels:</div>
+                                        <div class="flex-item">X: <input type="number" class="form-control"
+                                                name="voxels[x]" id="voxelsX" /></div>
+                                        <div class="flex-item">Y: <input type="number" class="form-control"
+                                                name="voxels[y]" id="voxelsY" /></div>
+                                        <div class="flex-item">Z: <input type="number" class="form-control"
+                                                name="voxels[z]" id="voxelsZ" /></div>
+                                    </div>
+                                    <div class="xyz-container">
+                                        <div class="flex-item title">Dims3:</div>
+                                        <div class="flex-item">X: <input type="number" class="form-control"
+                                                name="dims3[x]" id="dims3X" readonly /></div>
+                                        <div class="flex-item">Y: <input type="number" class="form-control"
+                                                name="dims3[y]" id="dims3Y" readonly /></div>
+                                        <div class="flex-item">Z: <input type="number" class="form-control"
+                                                name="dims3[z]" id="dims3Z" readonly /></div>
+                                    </div>
+                                    <div class="xyz-container">
+                                        <div class="flex-item title">Dims2:</div>
+                                        <div class="flex-item">X: <input type="number" class="form-control"
+                                                name="dims2[x]" id="dims2X" readonly /></div>
+                                        <div class="flex-item">Y: <input type="number" class="form-control"
+                                                name="dims2[y]" id="dims2Y" readonly /></div>
+                                        <div class="flex-item">Z: <input type="number" class="form-control"
+                                                name="dims2[z]" id="dims2Z" readonly /></div>
+                                    </div>
+                                    <div class="xyz-container">
+                                        <div class="flex-item title">Image Dims:</div>
+                                        <div class="flex-item">X: <input type="number" class="form-control"
+                                                name="imageDims[x]" id="imageDimsX" readonly /></div>
+                                        <div class="flex-item">Y: <input type="number" class="form-control"
+                                                name="imageDims[y]" id="imageDimsY" readonly /></div>
+                                        <div class="flex-item">Z: <input type="number" class="form-control"
+                                                name="imageDims[z]" id="imageDimsZ" readonly /></div>
+                                    </div>
+                                    <div class="xyz-container">
+                                        <div class="flex-item title">Info:</div>
+                                        <div class="flex-item">Voxels: <input type="text" class="form-control"
+                                                name="info[voxels]" id="infoVoxels" /></div>
+                                        <div class="flex-item">Thickness: <input type="text" class="form-control"
+                                                name="info[thickness]" id="infoThickness" /></div>
+                                        <div class="flex-item">Pixel Length UM: <input type="text" class="form-control"
+                                                name="pixelLengthUM" id="pixelLengthUM" /></div>
+                                        <div class="flex-item">Z Skip: <input type="number" class="form-control"
+                                                name="zskip" id="zSkip" /></div>
+                                    </div>
+                                    <div class="xyz-container">
+                                        <div class="mb-2">Specimen: <input type="text" class="form-control"
+                                                name="info[specimen]" id="infoSpecimen" /></div>
+                                        <div class="mb-2">PI: <input type="text" class="form-control" name="info[PI]"
+                                                id="infoPI" /></div>
+                                    </div>
+                                </form>
                             </div>
                             <div class="mt-3">
                                 <button id="updateDatasetBtn" type="submit"
@@ -288,5 +374,4 @@
     </div>
 </div>
 
-
-{% endblock content %}
+{% endblock %}
