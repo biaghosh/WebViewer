@@ -14,12 +14,6 @@ window.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-window.generateAndInsertOrder = generateAndInsertOrder;
-window.showOrderDetails = showOrderDetails;
-window.submitInstitutionForm = submitInstitutionForm;
-window.deleteInstitution = deleteInstitution;
-window.updateInstitutionDetails = updateInstitutionDetails;
-
 function renderDatasetList(datasets) {
     const tbody = document.getElementById('datasetTableBody');
     tbody.innerHTML = ''; // 清除现有内容
@@ -62,7 +56,6 @@ function renderDatasetList(datasets) {
                 .then(response => response.json())
                 .then(data => {
                     updateDatasetList(data);
-                    populatePoNumberSelect(data[0].institution, data[0].ponum);
                 })
                 .catch(error => console.error('Error:', error));
         }
@@ -155,7 +148,10 @@ function updateDatasetList(datasets) {
     });
     document.getElementById('institutionSelect').innerHTML = institutionSelectHTML;
 
-    populatePoNumberSelect(dataset.institution, dataset.ponum);
+    // 只在更新数据集信息时调用 populatePoNumberSelect
+    if (dataset.ponum) {
+        populatePoNumberSelect(dataset.institution, dataset.ponum);
+    }
 
     const form = document.querySelector('.dataset-info-form');
     form.addEventListener('submit', function (e) {
@@ -185,7 +181,6 @@ document.getElementById('updateDatasetBtn').addEventListener('click', function (
     document.querySelector('.dataset-info-form').dispatchEvent(new Event('submit'));
     window.location.reload();
 });
-
 
 function populateFilter() {
     const filter = document.getElementById('institutionFilter');
@@ -230,149 +225,6 @@ function getInstitutions() {
             console.error('Error:', error);
             return [];
         });
-}
-
-function showInstitutionDetails(institution) {
-    const institutionDetails = document.getElementById('institutionDetails');
-
-    const typeOptions = ['Industry', 'Academic', 'Government', 'Others'];
-    const statusOptions = ['Active', 'Inactive', 'Pending'];
-
-    const typeSelectHTML = typeOptions.map(option => `<option value="${option}" ${institution.type === option ? 'selected' : ''}>${option}</option>`).join('');
-    const statusSelectHTML = statusOptions.map(option => `<option value="${option}" ${institution.status === option ? 'selected' : ''}>${option}</option>`).join('');
-
-    const ordersHeader = `
-    <div class="list-group-item header">
-        <div class="order-info-header">
-            <span class="po-number-header">PO Number</span>
-            <span class="order-date-header">Order Date</span>
-        </div>
-    </div>
-`;
-
-    const ordersHTML = institution.orders.map(order => `
-    <div class="list-group-item list-group-item-action" onclick="showOrderDetails('${institution.name}', '${order.PO_number}')">
-        <div class="order-info">
-            <span class="po-number">${order.PO_number}</span>
-            <span class="order-date">${order.date}</span>
-        </div>
-    </div>
-`).join('');
-
-    const ordersListHTML = ordersHeader + ordersHTML;
-
-    institutionDetails.innerHTML = `
-        <form id="institutionForm">
-            <div class="xyz-container">
-                <div class="flex-item title">Name:</div>
-                <div class="flex-item"><input type="text" class="form-control" name="name" value="${institution.name}"></div>
-                <div class="flex-item title">Type:</div>
-                <div class="flex-item"><select class="form-control" name="type">
-                    ${typeSelectHTML}
-                </select></div>
-            </div>  
-            <div class="xyz-container">
-                <div class="flex-item title">Phone Number:</div>
-                <div class="flex-item"><input type="text" class="form-control" name="phone" value="${institution.phone}"></div>
-                <div class="flex-item title">Email:</div>
-                <div class="flex-item"><input type="text" class="form-control" name="Email" value="${institution.Email}"></div>
-            </div>
-            <div class="form-group">
-                <div class="flex-item title">Address:</div>
-                <input type="text" class="form-control" name="address" value="${institution.address}">
-            </div>
-            <div class="form-group">
-                <div class="flex-item title">Website:</div>
-                <input type="text" class="form-control" name="website" value="${institution.website}">
-            </div>
-            <div class="form-group">
-                <div class="flex-item title">Status:</div>
-                <select class="form-control" name="status">
-                    ${statusSelectHTML}
-                </select>
-            </div>
-            <div class="form-group">
-                <div class="flex-item title">Orders:</div>
-                <div class="orders-container">
-                    <div class="orders list-group">
-                        ${ordersListHTML}
-                    </div>
-                    <div id="orderDetails" class="order-details"></div>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="flex-row-container" style="display: flex; align-items: center; justify-content: space-between;">
-                    <div class="flex-item" style="flex-grow: 1; margin-right: 10px;"><input type="text" class="form-control" placeholder="Enter PO Number" id="newPoNumber"></div>
-                    <div class="flex-item"><button class="btn btn-sm btn-primary" onclick="generateAndInsertOrder('${institution.name}')">Generate Order</button></div>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-sm btn-primary btn-icon-only">Update</button>
-            <button type="button" class="btn btn-sm btn-danger ml-2 btn-icon-only" onclick="deleteInstitution()"><i class="fas fa-trash"></i></button>
-        </form>
-    `;
-
-    document.getElementById('institutionForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        updateInstitutionDetails();
-    });
-}
-
-function updateInstitutionDetails() {
-    const form = document.getElementById('institutionForm');
-    const formData = new FormData(form);
-    const updatedDetails = {};
-    formData.forEach((value, key) => {
-        updatedDetails[key] = value;
-    });
-
-    fetch('/updateInstitution', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedDetails),
-    })
-        .then(response => response.json())
-        .then(data => {
-            window.location.reload();
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-}
-
-function deleteInstitution() {
-    const institutionName = document.querySelector('#institutionForm [name="name"]').value;
-    if (confirm(`Are you sure you want to delete the institution "${institutionName}"?`)) {
-        fetch('/deleteInstitution', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ name: institutionName }),
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert('Institution deleted successfully!');
-                    window.location.reload();
-                } else {
-                    alert('Failed to delete institution.');
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    }
-}
-
-function submitInstitutionForm() {
-    const form = document.getElementById('institutionForm');
-    const formData = new FormData(form);
-    let institutionData = {};
-    formData.forEach((value, key) => {
-        institutionData[key] = value;
-    });
-
-    updateInstitutionDetails();
 }
 
 document.getElementById('submitBtn').addEventListener('click', async function () {
@@ -466,66 +318,9 @@ function getProgress() {
         });
 }
 
-function showOrderDetails(institutionName, poNumber) {
-    fetch(`/getOrderDetails/${institutionName}/${poNumber}`)
-        .then(response => response.json())
-        .then(orderDetails => {
-            const tableHTML = `
-            <table class="table">
-                <tbody>
-                    ${orderDetails.datasets.map(dataset => `
-                        <tr>
-                            <td>${dataset.name}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-            document.getElementById('orderDetails').innerHTML = tableHTML;
-        })
-        .catch(error => console.error('Error fetching order details:', error));
-}
 
-function generateAndInsertOrder(institutionName) {
-    if (!document.getElementById('newPoNumber').value.length) {
-        alert("Please enter a valid institution name.");
-        return;
-    }
 
-    const today = new Date().toISOString().slice(0, 10);
-    const newOrder = {
-        PO_number: document.getElementById('newPoNumber').value,
-        date: today,
-        datasets: []
-    };
 
-    fetch('/insertOrder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ institutionName, newOrder }),
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                alert('Order generated and inserted successfully!');
-                currentSelectedInstitutionName = institutionName;
-                getInstitutions().then(institutions => {
-                    renderInstitutionList(institutions);
-                    if (currentSelectedInstitutionName) {
-                        const items = document.querySelectorAll('#institutionList .list-group-item');
-                        items.forEach(item => {
-                            if (item.textContent === currentSelectedInstitutionName) {
-                                item.click();
-                            }
-                        });
-                    }
-                });
-            } else {
-                alert('Failed to generate and insert order.');
-            }
-        })
-        .catch(error => console.error('Error:', error));
-}
 
 function populatePoNumberSelect(institutionName, currentPoNumber) {
     const poNumberSelect = document.getElementById('poNumberSelect');
@@ -566,19 +361,4 @@ function deleteWavelength(type, exposure, wavelength) {
     console.log(`Request sent to delete wavelength: ${wavelength} from type: ${type}, exposure: ${exposure}, for dataset: ${selectedDatasetName}`);
 }
 
-function updateOrderList(institutionName) {
-    fetch(`/getOrdersByInstitution/${institutionName}`)
-        .then(response => response.json())
-        .then(orders => {
-            const ordersContainer = document.querySelector('.orders-container');
-            ordersContainer.innerHTML = '';
 
-            orders.forEach(order => {
-                console.log(order)
-                const orderElement = document.createElement('div');
-                orderElement.textContent = `PO Number: ${order.PO_number}, Date: ${order.date}`;
-                ordersContainer.appendChild(orderElement);
-            });
-        })
-        .catch(error => console.error('Error updating orders:', error));
-}
