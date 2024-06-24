@@ -373,6 +373,54 @@
     .action-buttons button {
         margin: 0 10px;
     }
+
+    /* 模态框标题样式 */
+    .modal-title {
+        font-weight: bold;
+        font-size: 1.5rem;
+    }
+
+    /* 详细信息部分样式 */
+    .detail-section {
+        margin-bottom: 1.5rem;
+        font-size: 1rem;
+    }
+
+    /* 表格样式 */
+    .table-responsive {
+        margin-top: 1rem;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table-bordered {
+        border: 1px solid #dee2e6;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* 表头样式 */
+    .thead-dark th {
+        background-color: #343a40;
+        color: #fff;
+    }
+
+    /* 模态框关闭按钮样式 */
+    .close {
+        font-size: 1.5rem;
+        color: #000;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: #000;
+        text-decoration: none;
+        opacity: 0.75;
+    }
 </style>
 
 <div class="container-fluid" style="height: 100vh;">
@@ -511,17 +559,18 @@
 
                 <div id="viewCard" class="card-body tab-pane">
                     <p>This will save the camera viewport, slice, and image type to be able to return to.</p>
-                    <form onSubmit="return false;">
-                        <div class="form-row">
-                            <div class="col">
-                                <input id="viewName" type="text" class="form-control" placeholder="View name">
+                    <form onsubmit="return false;" class="form-inline">
+                        <div class="form-row align-items-center">
+                            <div class="col-auto">
+                                <input id="viewName" type="text" class="form-control mb-2" placeholder="View name">
                             </div>
-                            <div class="col">
-                                <button id="saveViewBtn" type="button" class="btn btn-secondary" disabled>Save
+                            <div class="col-auto">
+                                <button id="saveViewBtn" type="button" class="btn btn-secondary mb-2" disabled>Save
                                     View</button>
                             </div>
                         </div>
                     </form>
+
                     <div class="row">
                         <div class="col-12">
                             <label for="viewsTable">Go to View:</label>
@@ -1167,9 +1216,10 @@
 </div> -->
 
 <!-- 模态框结构 -->
+<!-- 模态框结构 -->
 <div class="modal fade" id="viewDetailModal" tabindex="-1" role="dialog" aria-labelledby="viewDetailModalLabel"
     aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="viewDetailModalLabel">View Detail</h5>
@@ -1178,16 +1228,18 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p><strong>View Name:</strong> <span id="viewNameDetail"></span></p>
-                <p><strong>Creator:</strong> <span id="viewCreatorDetail"></span></p>
-                <p><strong>Overall load times:</strong> <span id="loadtimesDetail"></span></p>
+                <div class="detail-section">
+                    <p><strong>View Name:</strong> <span id="viewNameDetail"></span></p>
+                    <p><strong>Creator:</strong> <span id="viewCreatorDetail"></span></p>
+                    <p><strong>Overall Load Times:</strong> <span id="loadtimesDetail"></span></p>
+                </div>
                 <div class="table-responsive">
-                    <table class="table">
-                        <thead>
+                    <table class="table table-bordered table-striped">
+                        <thead class="thead-dark">
                             <tr>
                                 <th scope="col">User</th>
-                                <th scope="col">Load times</th>
-                                <th scope="col">Last time load</th>
+                                <th scope="col">Load Times</th>
+                                <th scope="col">Last Time Load</th>
                             </tr>
                         </thead>
                         <tbody id="viewDetailsTableBody">
@@ -1202,6 +1254,7 @@
         </div>
     </div>
 </div>
+
 
 <script>
     //Globals (shared between 2D and 3D)
