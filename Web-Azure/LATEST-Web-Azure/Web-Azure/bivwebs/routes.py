@@ -202,7 +202,6 @@ def updateAnnotation():
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     ds = db.annotations
-    print(json)
     ds.update_one({
         "dataset": json["dataset"],
         "plane":json["plane"],
@@ -250,7 +249,6 @@ def deleteAnnotation():
         return redirect(url_for('login'))
     
     json_data = request.get_json()
-    print(json_data)
     
     client = MongoClient(app.config['mongo'])
     db = client.BIV
@@ -468,7 +466,6 @@ def createUser():
 
     # Get the form information submitted by the web page
     json = request.get_json()
-    print(json)
     # Establish database connection
     client = MongoClient(app.config['mongo'])
 
@@ -644,7 +641,6 @@ def getView():
 @app.route('/updateViewDetail', methods=['POST'])
 def update_view_detail():
     data = request.get_json()
-    print(data)
     dataset = data.get('dataset')
     view_name = data.get('name')
     user_email = data.get('user')
@@ -652,7 +648,6 @@ def update_view_detail():
     view = MongoClient(app.config['mongo']).BIV.views.find_one({'name': view_name, 'dataset':dataset})
     if not view:
         return jsonify({'error': 'View not found'}), 404
-    print(view)
     if 'Visit' not in view:
         view['Visit'] = []
 
@@ -1199,10 +1194,8 @@ def po2Dims(mongoRecord,jobNum):
 
 def startProcess(mongoRecord, jobNum, zdown):
     global progress
-    # print("startProcess")
     total_tasks = mongoRecord[jobNum]['imageDims']['z'] + (mongoRecord[jobNum]['imageDims']['y'] - 1) // 4 + (mongoRecord[jobNum]['imageDims']['x'] - 1) // 4
     completed_tasks = 0
-    # print("startprocess")
     po2Dims(mongoRecord,jobNum)
 
     maxWorkers = 4
@@ -1361,7 +1354,6 @@ def driver():
             # print("firstFile",firstFile)
             tiff = Image.open(BytesIO(firstFile))
             tifCounter = tiff.n_frames
-            # print("tifCounter",tifCounter)
             mongoRecord[str(job[0])]['imageDims'] = {}
             mongoRecord[str(job[0])]['imageDims']['x'], mongoRecord[str(job[0])]['imageDims']['y'] = tiff.size
             mongoRecord[str(job[0])]['imageDims']['z'] = tifCounter
@@ -1372,7 +1364,6 @@ def driver():
             startProcess(mongoRecord, str(job[0]), 1 )
 
         mongoRecord[str(job[0])]["processedTime"] = datetime.now().time()
-        # print("mongoRecord",mongoRecord)
         base_dir = os.path.join(temp_dir, mongoRecord[str(job[0])]['name'],'basis', mongoRecord[str(job[0])]['type'], mongoRecord[str(job[0])]['exp'], mongoRecord[str(job[0])]['wv'])
         files_and_dirs = os.listdir(base_dir)
 
@@ -1519,7 +1510,6 @@ def download_file():
 
         download_url = f"https://{azure_storage_account_name}.blob.core.windows.net/{container_name}/{blob.name}?{sas_token}"
         download_urls.append(download_url)
-    # print(download_urls)
     return jsonify({'download_urls': download_urls})
 
 @app.route('/deleteDataset', methods=['POST'])
@@ -1541,7 +1531,6 @@ def delete_dataset():
 def update_dataset():
     try:
         data = request.json
-        print(data)
         client = MongoClient(app.config['mongo'])
         db = client.BIV 
         collection = db.Institution
@@ -1611,7 +1600,6 @@ def get_institutions():
 @app.route('/insertInstitution',methods=['POST'])
 def create_institution():
     data = request.json
-    print(data)
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     
@@ -1640,7 +1628,6 @@ def create_institution():
 @app.route('/updateInstitution', methods=['POST'])
 def update_institution():
     data = request.json
-    print(data)
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     
@@ -1739,7 +1726,6 @@ def delete_wavelength():
     collection = db.datasets
 
     data = request.json
-    print(data)
     type = data.get('type')
     datasetName = data.get('datasetName')
     exposure = data.get('exposure')
