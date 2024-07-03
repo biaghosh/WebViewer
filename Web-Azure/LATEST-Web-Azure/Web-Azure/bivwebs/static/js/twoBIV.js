@@ -945,8 +945,8 @@ function drawLine() {
 
     lineTextGroup.add(line)
     var texture_placeholder = document.createElement('canvas');
-    texture_placeholder.width = 200;  // 增加画布的宽度
-    texture_placeholder.height = 40;  // 增加画布的高度
+    texture_placeholder.width = 200;  // Increase canvas width
+    texture_placeholder.height = 40;  // Increase the height of the canvas
     var context = texture_placeholder.getContext('2d');
     context.clearRect(0, 0, 200, 40)
     context.fillStyle = '#00FFFF';
@@ -1583,11 +1583,11 @@ function addAnnotationEvents() {
     // Event handling for moving annotations
     if (!canvasXY.hasAttribute('data-move-listener')) {
         canvasXY.addEventListener("click", moveAnn);
-        canvasXY.setAttribute('data-move-listener', 'true'); // 标记已添加监听器
+        canvasXY.setAttribute('data-move-listener', 'true'); // Mark listener added
     }
 
     function moveAnn() {
-        // 这里添加移动注释的代码
+        // Add the code for moving comments here
     }
 }
 

@@ -87,10 +87,10 @@ var alreadyOn = false
 function takeScreenshot3D(width, height, axis) {
     const screenHeight = window.innerHeight;
 
-    // 创建场景对象
+    // Create scene object
     const scene = new THREE.Scene();
 
-    // 创建相机对象
+    // Create camera object
     const camera = new THREE.OrthographicCamera(
         renderer.domElement.width / -2,
         renderer.domElement.width / 2,
@@ -100,22 +100,22 @@ function takeScreenshot3D(width, height, axis) {
         8000
     );
 
-    // 创建渲染器对象
+    // Create renderer object
     const renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
     });
 
-    // 如果 width 为 0，计算一个默认值
+    // If width is 0, calculate a default value
     if (width == 0) {
         height = Math.round((dsInfo["imageDims"]["y"] / dsInfo["imageDims"]["x"]) * 1024);
         width = Math.round((dsInfo["imageDims"]["x"] / dsInfo["imageDims"]["y"]) * height);
     }
 
-    // 如果 axis 为 "3D"
+    // If axis is "3D"
     if (axis == "3D") {
 
-        // 设置相机的 left、right、top 和 bottom 属性
+        // Set the left, right, top and bottom properties of the camera
         const aspect = width / height;
         const cameraLeft = -(100 * aspect);
         const cameraRight = 100 * aspect;
@@ -126,16 +126,16 @@ function takeScreenshot3D(width, height, axis) {
         camera.top = cameraTop;
         camera.bottom = cameraBottom;
 
-        // 更新相机的投影矩阵和渲染器的大小
+        // Update the camera's projection matrix and renderer size
         camera.updateProjectionMatrix();
         renderer.setSize(width, height);
 
-        // 渲染场景，并保存截图
+        // Render the scene and save the screenshot
         renderer.render(scene, camera, null, false);
         const dataURL = renderer.domElement.toDataURL('image/png');
         saveDataURI(defaultFileName('.png'), dataURL);
 
-        // 更新相机的 left、right、top 和 bottom 属性和渲染器的大小
+        // Update the camera's left, right, top and bottom properties and the renderer's size
         const divWidth = $(oDivs['yz']).width() - 30;
         const divHeight = screenHeight / 3;
         const divAspect = divWidth / divHeight;
@@ -169,31 +169,31 @@ function saveDataURI(name, dataURI) {
     link.click();
 }
 
-window.isVrTabSelected = false; // 初始化为未选中状态
+window.isVrTabSelected = false; // Initialized to unselected state
 window.isOrthoTabSelected = true;
 
 function clearScene() {
     while (scene.children.length > 0) {
         let object = scene.children[0];
         if (object.dispose) {
-            object.dispose(); // 如果对象有 dispose 方法，调用它
+            object.dispose(); // If the object has a dispose method, call it
         }
-        scene.remove(object); // 从场景中移除对象
+        scene.remove(object); // Remove objects from the scene
     }
 }
 
 document.getElementById('vrTab').addEventListener('click', () => {
     window.isVrTabSelected = true;
     window.isOrthoTabSelected = false;
-    clearScene(); // 清空场景
-    init2(true); // 初始化 VR 视图
+    clearScene(); // Clear scene
+    init2(true); // Initialize VR view
 });
 
 document.getElementById('orthoTab').addEventListener('click', () => {
     window.isVrTabSelected = false;
     window.isOrthoTabSelected = true;
-    window.cancelAnimationFrame(animationId); // 取消当前的动画帧
-    clearScene(); // 清空场景
+    window.cancelAnimationFrame(animationId); // Cancel the current animation frame
+    clearScene(); // Clear scene
 });
 
 

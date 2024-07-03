@@ -16,7 +16,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 function renderDatasetList(datasets) {
     const tbody = document.getElementById('datasetTableBody');
-    tbody.innerHTML = ''; // 清除现有内容
+    tbody.innerHTML = ''; 
 
     datasets.forEach(dataset => {
         const row = document.createElement('tr');
@@ -148,7 +148,7 @@ function updateDatasetList(datasets) {
     });
     document.getElementById('institutionSelect').innerHTML = institutionSelectHTML;
 
-    // 只在更新数据集信息时调用 populatePoNumberSelect
+    // populatePoNumberSelect is only called when updating dataset information
     if (dataset.ponum) {
         populatePoNumberSelect(dataset.institution, dataset.ponum);
     }
@@ -317,9 +317,6 @@ function getProgress() {
             console.error('Fetch error:', error);
         });
 }
-
-
-
 
 
 function populatePoNumberSelect(institutionName, currentPoNumber) {

@@ -34,7 +34,6 @@
         cursor: not-allowed;
     }
 
-    /* 控制按钮的间距 */
     #arrowControls button {
         margin: 0 4px;
     }
@@ -208,17 +207,10 @@
     }
 
     .my-container {
-        /* margin-left: 320px; */
-        /* 留出足够的空间给左侧的 toolsCol */
-        /* 允许在需要时垂直滚动 */
         height: calc(100vh - 50px);
-        /* 减去导航栏的高度，如果你希望 my-container 高度撑满剩余的视口 */
         padding: 20px;
-        /* 给内容区域一些内边距 */
         top: 50px;
-        /* 设定顶部开始的位置，对齐导航栏的底部 */
         position: relative;
-        /* 如果需要的话，可以设置为绝对定位 (absolute) 或固定定位 (fixed)，根据布局需求调整 */
     }
 
 
@@ -242,14 +234,12 @@
     /* Adjust color of Measure */
     .btn-measure {
         background-color: #17a2b8;
-        /* Bootstrap的info颜色 */
         color: white;
     }
 
     /* Adjust color of Clear */
     .btn-clear {
         background-color: #dc3545;
-        /* Bootstrap的danger颜色 */
         color: white;
     }
 
@@ -270,37 +260,30 @@
 
     .card-body .form-group {
         margin-right: 100px !important;
-        /* 增加间隔，并确保应用 */
     }
 
     .card-body dt {
         font-weight: bold !important;
-        /* 标题加粗，并确保应用 */
     }
 
     .small {
         font-size: 0.8rem;
-        /* 维持较小的字体尺寸 */
     }
 
     .mb-0 {
         margin-bottom: 0;
-        /* 移除底部外边距 */
     }
 
     #myTabNav .nav-link {
         font-weight: bold;
-        /* 设置字体加粗 */
     }
 
     .form-group label {
         font-weight: bold;
-        /* 设置字体加粗 */
     }
 
     .card-header .nav-link {
         font-weight: bold;
-        /* 设置字体加粗 */
     }
 
     .btn-icon {
@@ -310,7 +293,6 @@
 
     .table-responsive {
         max-height: 300px;
-        /* 你可以根据需要调整高度 */
         overflow-y: auto;
     }
 
@@ -374,19 +356,16 @@
         margin: 0 10px;
     }
 
-    /* 模态框标题样式 */
     .modal-title {
         font-weight: bold;
         font-size: 1.5rem;
     }
 
-    /* 详细信息部分样式 */
     .detail-section {
         margin-bottom: 1.5rem;
         font-size: 1rem;
     }
 
-    /* 表格样式 */
     .table-responsive {
         margin-top: 1rem;
     }
@@ -403,13 +382,11 @@
         background-color: rgba(0, 0, 0, 0.05);
     }
 
-    /* 表头样式 */
     .thead-dark th {
         background-color: #343a40;
         color: #fff;
     }
 
-    /* 模态框关闭按钮样式 */
     .close {
         font-size: 1.5rem;
         color: #000;
@@ -946,7 +923,6 @@
                             <div class="row h-100" style="display: flex;">
                                 <form id="xyForm" class="form-inline d-flex justify-content-between" style="flex: 3;"
                                     onSubmit="return false;">
-                                    <!-- 左侧按钮和控制 -->
                                     <div class="d-flex">
                                         <div id="arrowControls" class="form-group mb-2 d-flex justify-content-center"
                                             style="flex: 4; margin-left: 20px;">
@@ -973,7 +949,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- 右侧选择和全屏按钮 -->
                                     <div class="form d-flex align-items-center ml-auto"
                                         style="flex: 2; min-width: 600px;">
                                         <select id="FullScreenSelect"
@@ -1172,7 +1147,6 @@
 </div>
 
 
-<!-- 模态框结构 -->
 <div class="modal fade" id="viewDetailModal" tabindex="-1" role="dialog" aria-labelledby="viewDetailModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -1199,7 +1173,7 @@
                             </tr>
                         </thead>
                         <tbody id="viewDetailsTableBody">
-                            <!-- 动态添加表格内容 -->
+                            
                         </tbody>
                     </table>
                 </div>

@@ -1,3 +1,11 @@
+let institutionsList = [];
+let shouldContinue = true;
+let currentSelectedInstitutionName = null;
+let selectedUserEmail;
+let selectedDatasetName;
+let selectedAssignedDatasetName;
+const assignedDatasetsTitle = document.getElementById('assignedDatasetsTitle');
+
 window.addEventListener("DOMContentLoaded", usersTable())
 window.addEventListener("DOMContentLoaded", renderDatasetList())
 window.addEventListener("DOMContentLoaded", function () {
@@ -8,13 +16,6 @@ window.addEventListener("DOMContentLoaded", function () {
         populateUserInstitutionSelect(institutions);
     });
 });
-let institutionsList = [];
-let shouldContinue = true;
-let currentSelectedInstitutionName = null;
-let selectedUserEmail;
-let selectedDatasetName;
-let selectedAssignedDatasetName;
-const assignedDatasetsTitle = document.getElementById('assignedDatasetsTitle');
 
 function addAssignedDataset(email, datasetName) {
     if (!email || !datasetName) {
@@ -65,8 +66,8 @@ document.getElementById('createUserBtn').addEventListener('click', function () {
     const level = document.getElementById('levelSelect').value;
 
     if (!email.trim()) {
-        alert('Please enter an email address.');  // 提示用户输入邮箱
-        return;  // 终止函数执行
+        alert('Please enter an email address.');  
+        return; 
     }
 
     fetch('/createUser', {
@@ -219,7 +220,6 @@ function renderUserTable(data) {
         <td style="width: 30%;">${user.institution}</td>
         <td style="width: 30%;">${date}</td>
     </tr>`;
-        // 默认选择第一项
         if (index === 0) {
             selectedUserEmail = user.email;
         }
@@ -234,7 +234,6 @@ function renderUserTable(data) {
     // Add click event listeners to the user rows for selection functionality
     usersCard.querySelectorAll('.selectable-user').forEach((row, index) => {
         row.addEventListener('click', (event) => handleTableRowClick(event));
-        // 默认选择第一项
         if (index === 0) {
             row.classList.add('selected-user');
             handleSelectedUser(selectedUserEmail);
@@ -332,7 +331,7 @@ function populateInstitutionSelect(institutions) {
 
 function populateUserInstitutionSelect(institutions) {
     const select = document.getElementById('userInstitutionFilter');
-    select.innerHTML = '<option value="all">All Institutions</option>'; // 允许用户选择所有机构
+    select.innerHTML = '<option value="all">All Institutions</option>'; // Allow users to select all institutions
 
     institutions.forEach(institution => {
         const option = document.createElement('option');
@@ -344,7 +343,7 @@ function populateUserInstitutionSelect(institutions) {
 
 document.getElementById('userInstitutionFilter').addEventListener('change', function () {
     const selectedInstitution = this.value;
-    usersTable(selectedInstitution); // 传入选定的机构
+    usersTable(selectedInstitution); // Pass in selected institution
 });
 
 function getInstitutions() {
