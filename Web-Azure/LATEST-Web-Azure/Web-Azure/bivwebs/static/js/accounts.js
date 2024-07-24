@@ -55,9 +55,8 @@ function removeAssignedDataset(email, datasetName) {
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
-        }); 3
+        });
 }
-
 
 document.getElementById('createUserBtn').addEventListener('click', function () {
     const email = document.getElementById('email').value;
