@@ -1,5 +1,4 @@
 let institutionsList = [];
-let shouldContinue = true;
 let currentSelectedInstitutionName = null;
 let selectedUserEmail;
 let selectedDatasetName;
@@ -384,6 +383,7 @@ function renderInstitutionList(institutions) {
         }
     });
 }
+
 function showInstitutionDetails(institution) {
     const form = document.getElementById('institutionForm');
     form.elements['name'].value = institution.name;
@@ -442,7 +442,6 @@ function CreateInstitution() {
             // Handle error conditions
         });
 }
-
 
 function updateInstitutionDetails() {
     const form = document.getElementById('institutionForm');
@@ -523,8 +522,6 @@ function showOrderDetails(institutionName, poNumber) {
         })
         .catch(error => console.error('Error fetching order details:', error));
 }
-
-
 
 
 function generateAndInsertOrder(institutionName) {

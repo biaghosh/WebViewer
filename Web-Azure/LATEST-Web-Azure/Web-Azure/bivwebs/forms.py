@@ -15,7 +15,3 @@ class EmailOTPForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     otp = IntegerField('OTP', validators=[DataRequired()])
     submit = SubmitField('Verify OTP')
-
-# class RmbkgdForm(FlaskForm):
-#     image = FileField('Select Image:', validators=[FileRequired()])
-#     submit = SubmitField('Upload')

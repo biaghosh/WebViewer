@@ -20,5 +20,4 @@ app.config.update(
     MAIL_PASSWORD='wV!05162024CvZ781'
 )
 
-
 from bivwebs import routes
