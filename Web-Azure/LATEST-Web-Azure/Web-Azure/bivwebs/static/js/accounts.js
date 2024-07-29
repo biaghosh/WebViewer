@@ -1,5 +1,5 @@
 let institutionsList = [];
-let currentSelectedInstitutionName = null;
+let currentSelectedInstitutionName;
 let selectedUserEmail;
 let selectedDatasetName;
 let selectedAssignedDatasetName;
@@ -372,6 +372,8 @@ function renderInstitutionList(institutions) {
             // Add 'selected' class to clicked item
             item.classList.add('selected-inst');
             showInstitutionDetails(institution);
+            currentSelectedInstitutionName = institution.name;
+            console.log(currentSelectedInstitutionName)
         };
         institutionList.appendChild(item);
 
@@ -523,7 +525,8 @@ function showOrderDetails(institutionName, poNumber) {
 }
 
 
-function generateAndInsertOrder(institutionName) {
+document.getElementById('generateAndInsertOrderBtn').addEventListener('click', function () {
+
     if (!document.getElementById('newPoNumber').value.length) {
         alert("Please enter a valid Po Number.");
         return; // Early return to stop the function execution
@@ -535,22 +538,21 @@ function generateAndInsertOrder(institutionName) {
         date: today,
         datasets: [] // Assume that the new order does not have a data set
     };
-
+    console.log(currentSelectedInstitutionName, newOrder)
     fetch('/insertOrder', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ institutionName, newOrder }),
+        body: JSON.stringify({ currentSelectedInstitutionName, newOrder }),
     })
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                alert('Order generated and inserted successfully!');
-                currentSelectedInstitutionName = institutionName; // Save current selected institution name
+                alert('Order generated and inserted successfully!'); // Save current selected institution name
                 getInstitutions().then(institutions => {
                     institutionsList = institutions;
-                    renderInstitutionList(institutions);
+                    // renderInstitutionList(institutions);
                     if (currentSelectedInstitutionName) {
                         const items = document.querySelectorAll('#institutionList .list-group-item');
                         items.forEach(item => {
@@ -565,7 +567,7 @@ function generateAndInsertOrder(institutionName) {
             }
         })
         .catch(error => console.error('Error:', error));
-}
+});
 
 function populatePoNumberSelect(institutionName, currentPoNumber) {
     const poNumberSelect = document.getElementById('poNumberSelect');

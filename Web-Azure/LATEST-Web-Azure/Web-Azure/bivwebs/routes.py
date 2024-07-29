@@ -1692,15 +1692,15 @@ def insert_order():
     collection = db.Institution
 
     data = request.json
-    institution_name = data['institutionName']
+    institution_name = data['currentSelectedInstitutionName']
     new_order = data['newOrder']
-
+    
     # Insert a new order into the order list of the corresponding institution
     result = collection.update_one(
         {'name': institution_name},
         {'$push': {'orders': new_order}}
     )
-
+    print(institution_name,new_order)
     if result.modified_count > 0:
         return jsonify({'status': 'success'})
     else:
