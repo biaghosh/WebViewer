@@ -16,11 +16,11 @@ window.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-function addAssignedDataset(email, datasetName) {
-    if (!email || !datasetName) {
+document.getElementById('addDatasetBtn').addEventListener('click', function () {
+    if (!selectedUserEmail || !selectedDatasetName) {
         return;
     }
-    fetch(`/addAssignedDataset/${email}/${datasetName}`, { method: 'POST' })
+    fetch(`/addAssignedDataset/${selectedUserEmail}/${selectedDatasetName}`, { method: 'POST' })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -34,14 +34,14 @@ function addAssignedDataset(email, datasetName) {
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
-}
+});
 
 // Delete selected datasets from Assigned Datasets
-function removeAssignedDataset(email, datasetName) {
-    if (!email || !datasetName) {
+document.getElementById('removeDatasetBtn').addEventListener('click', function () {
+    if (!selectedUserEmail || !selectedDatasetName) {
         return;
     }
-    fetch(`/removeUserDataset/${email}/${datasetName}`, { method: 'POST' })
+    fetch(`/removeUserDataset/${selectedUserEmail}/${selectedDatasetName}`, { method: 'POST' })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -56,7 +56,7 @@ function removeAssignedDataset(email, datasetName) {
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
-}
+});
 
 document.getElementById('createUserBtn').addEventListener('click', function () {
     const email = document.getElementById('email').value;
@@ -64,8 +64,8 @@ document.getElementById('createUserBtn').addEventListener('click', function () {
     const level = document.getElementById('levelSelect').value;
 
     if (!email.trim()) {
-        alert('Please enter an email address.');  
-        return; 
+        alert('Please enter an email address.');
+        return;
     }
 
     fetch('/createUser', {

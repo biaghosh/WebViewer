@@ -1,6 +1,7 @@
 {% extends 'layout.html' %}
 {% block content %}
 <script type="module" src="/static/js/accounts.js"></script>
+
 <head>
     <style>
         .scrollable-orders {
@@ -223,12 +224,10 @@
                     </div>
                     <div class="col-md-2 d-flex align-items-center justify-content-center">
                         <div class="btn-group-vertical">
-                            <button id="addDatasetBtn" type="button" class="btn btn-sm btn-primary btn-icon-only"
-                                onclick="addAssignedDataset(selectedUserEmail, selectedDatasetName)">
+                            <button id="addDatasetBtn" type="button" class="btn btn-sm btn-primary btn-icon-only">
                                 <i class="bi bi-arrow-right-circle-fill"></i> Add
                             </button>
-                            <button id="removeDatasetBtn" type="button" class="btn btn-sm btn-primary btn-icon-only"
-                                onclick="removeAssignedDataset(selectedUserEmail, selectedAssignedDatasetName)">
+                            <button id="removeDatasetBtn" type="button" class="btn btn-sm btn-primary btn-icon-only">
                                 <i class="bi bi-arrow-left-circle-fill"></i> Remove
                             </button>
                         </div>
@@ -479,4 +478,8 @@
         </div>
     </div>
 </div>
+
+<script>
+
+</script>
 {% endblock %}
