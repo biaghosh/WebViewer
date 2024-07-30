@@ -343,7 +343,6 @@ document.getElementById('userInstitutionFilter').addEventListener('change', func
     const selectedInstitution = this.value;
     usersTable(selectedInstitution); // Pass in selected institution
 });
-updateInstitutionDetails
 
 function getInstitutions() {
     return fetch('/getInstitutions')
@@ -374,6 +373,7 @@ function renderInstitutionList(institutions) {
             item.classList.add('selected-inst');
             showInstitutionDetails(institution);
             currentSelectedInstitutionName = institution.name;
+            console.log(currentSelectedInstitutionName)
         };
         institutionList.appendChild(item);
 
@@ -419,6 +419,31 @@ document.getElementById('institutionForm').addEventListener('submit', function (
     updateInstitutionDetails(); // Implement this function to handle form submission
 });
 
+function CreateInstitution() {
+    const form = document.getElementById('NewinstitutionForm');
+    const formData = new FormData(form);
+    const updatedDetails = {};
+    formData.forEach((value, key) => {
+        updatedDetails[key] = value;
+    });
+    fetch('/insertInstitution', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedDetails),
+    })
+        .then(response => response.json())
+        .then(data => {
+            window.location.reload();
+            $('#newInstitutionModal').modal('hide'); // Hide the modal after insertion
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            // Handle error conditions
+        });
+}
+
 function updateInstitutionDetails() {
     const form = document.getElementById('institutionForm');
     const formData = new FormData(form);
@@ -443,57 +468,7 @@ function updateInstitutionDetails() {
         });
 }
 
-document.getElementById('CreateInstitutionBtn').addEventListener('click', function (e) {
-    const form = document.getElementById('NewinstitutionForm');
-    const formData = new FormData(form);
-    const updatedDetails = {};
-    formData.forEach((value, key) => {
-        updatedDetails[key] = value;
-    });
-    fetch('/insertInstitution', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedDetails),
-    })
-        .then(response => response.json())
-        .then(data => {
-            window.location.reload();
-            $('#newInstitutionModal').modal('hide'); // Hide the modal after insertion
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            // Handle error conditions
-        });
-});
-
-document.getElementById('updateInstitutionDetailsBtn').addEventListener('click', function (e) {
-
-    const form = document.getElementById('institutionForm');
-    const formData = new FormData(form);
-    const updatedDetails = {};
-    formData.forEach((value, key) => {
-        updatedDetails[key] = value;
-    });
-    fetch('/updateInstitution', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedDetails),
-    })
-        .then(response => response.json())
-        .then(data => {
-            window.location.reload();
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            // Handle error conditions
-        });
-});
-
-document.getElementById('deleteInstitutionBtn').addEventListener('click', function (e) {
+function deleteInstitution() {
     const institutionName = document.querySelector('#institutionForm [name="name"]').value;
     let isConfirmed = confirm(`Are you sure you want to delete the institution "${institutionName}"?`);
     if (!isConfirmed) {
@@ -516,7 +491,7 @@ document.getElementById('deleteInstitutionBtn').addEventListener('click', functi
             }
         })
         .catch(error => console.error('Error:', error));
-});
+}
 
 function submitInstitutionForm() {
     const form = document.getElementById('institutionForm');
