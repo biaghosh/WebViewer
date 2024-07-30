@@ -963,15 +963,6 @@ def store_image():
     content_settings = ContentSettings(content_type=content_type)
     container_client.upload_blob(blob_name, file.stream, overwrite=True, content_settings=content_settings)
 
-    # Generate the Blob URL
-    sas_token = generate_blob_sas(
-        account_name=blob_service_client.account_name,
-        container_name=container_name,
-        blob_name=blob_name,
-        account_key=blob_service_client.credential.account_key,
-        permission=BlobSasPermissions(read=True),
-        expiry=datetime.utcnow() + timedelta(hours=1)
-    )
     blob_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{container_name}/{blob_name}"
 
     # MongoDB Document

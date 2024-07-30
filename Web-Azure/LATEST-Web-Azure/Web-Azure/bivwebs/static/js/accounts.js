@@ -31,9 +31,9 @@ function renderInstitutionList(institutions) {
             });
             // Add 'selected' class to clicked item
             item.classList.add('selected-inst');
+            
             showInstitutionDetails(institution);
             currentSelectedInstitutionName = institution.name;
-            console.log(currentSelectedInstitutionName)
         };
         institutionList.appendChild(item);
 
