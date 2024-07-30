@@ -21,6 +21,7 @@ let measureData = {
     yz: { clicks: [], lines: [] }
 };
 
+
 dsSelect.addEventListener("change", () => {
     if (!dsSelect.value) return;
     fetch('/getDatasetInfo', {
@@ -73,6 +74,7 @@ dsSelect.addEventListener("change", () => {
             console.error('Error:', error);
         });
 });
+
 
 modSelect.addEventListener("change", changeMod)
 function changeMod() {

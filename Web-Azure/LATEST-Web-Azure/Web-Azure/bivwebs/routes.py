@@ -1316,10 +1316,10 @@ def createYzViewTIFF(index, mongoRecord, jobNum):
 # Set a global variable to track progress
 @app.route('/UploadDataset', methods=['POST'])
 def driver():
-    global progress
     client = MongoClient(app.config['mongo'])
     db = client.BIV
     datasets = db.datasets
+    global progress
     progress = {'status': 'started', 'progress': 0.0}
     # Reset progress at the start of a new job
     data = request.form
