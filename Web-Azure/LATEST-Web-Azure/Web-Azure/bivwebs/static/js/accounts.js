@@ -16,6 +16,35 @@ window.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+function renderInstitutionList(institutions) {
+    const institutionList = document.getElementById('institutionList');
+    institutionList.innerHTML = ''; // Clear existing content
+
+    institutions.forEach((institution, index) => {
+        const item = document.createElement('div');
+        item.className = 'list-group-item list-group-item-action list-group';
+        item.textContent = institution.name;
+        item.onclick = () => {
+            // Remove 'selected' class from all items
+            document.querySelectorAll('#institutionList .list-group-item').forEach(el => {
+                el.classList.remove('selected-inst');
+            });
+            // Add 'selected' class to clicked item
+            item.classList.add('selected-inst');
+            showInstitutionDetails(institution);
+            currentSelectedInstitutionName = institution.name;
+            console.log(currentSelectedInstitutionName)
+        };
+        institutionList.appendChild(item);
+
+        // Automatically select the first institution only if no current selection is stored
+        if (index === 0 && !currentSelectedInstitutionName) {
+            item.classList.add('selected-inst');
+            showInstitutionDetails(institution);
+        }
+    });
+}
+
 document.getElementById('addDatasetBtn').addEventListener('click', function () {
     if (!selectedUserEmail || !selectedDatasetName) {
         return;
@@ -356,173 +385,13 @@ function getInstitutions() {
         });
 }
 
-function renderInstitutionList(institutions) {
-    const institutionList = document.getElementById('institutionList');
-    institutionList.innerHTML = ''; // Clear existing content
 
-    institutions.forEach((institution, index) => {
-        const item = document.createElement('div');
-        item.className = 'list-group-item list-group-item-action list-group';
-        item.textContent = institution.name;
-        item.onclick = () => {
-            // Remove 'selected' class from all items
-            document.querySelectorAll('#institutionList .list-group-item').forEach(el => {
-                el.classList.remove('selected-inst');
-            });
-            // Add 'selected' class to clicked item
-            item.classList.add('selected-inst');
-            showInstitutionDetails(institution);
-            currentSelectedInstitutionName = institution.name;
-            console.log(currentSelectedInstitutionName)
-        };
-        institutionList.appendChild(item);
-
-        // Automatically select the first institution only if no current selection is stored
-        if (index === 0 && !currentSelectedInstitutionName) {
-            item.classList.add('selected-inst');
-            showInstitutionDetails(institution);
-        }
-    });
-}
-
-function showInstitutionDetails(institution) {
-    const form = document.getElementById('institutionForm');
-    form.elements['name'].value = institution.name;
-    form.elements['abbr'].value = institution.abbr;
-    form.elements['type'].value = institution.type;
-    form.elements['phone'].value = institution.phone;
-    form.elements['email'].value = institution.email;
-    form.elements['address'].value = institution.address;
-    form.elements['website'].value = institution.website;
-    form.elements['status'].value = institution.status;
-
-    // Populate orders
-    const ordersContainer = document.querySelector('.scrollable-orders tbody');
-    ordersContainer.innerHTML = institution.orders.map(order => `
-        <tr>
-            <td>${order.PO_number}</td>
-            <td>${order.date}</td>
-            <td>
-                <button class="btn btn-danger btn-sm" type="button" onclick="deleteOrder('${institution.name}', '${order.PO_number}', event)">
-                    <i class="fas fa-trash"></i>
-                </button>
-                <button class="btn btn-primary btn-sm" type="button" onclick="showOrderDetails('${institution.name}', '${order.PO_number}')">
-                    <i class="fas fa-search"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
-}
 
 document.getElementById('institutionForm').addEventListener('submit', function (e) {
     e.preventDefault();
     updateInstitutionDetails(); // Implement this function to handle form submission
 });
 
-function CreateInstitution() {
-    const form = document.getElementById('NewinstitutionForm');
-    const formData = new FormData(form);
-    const updatedDetails = {};
-    formData.forEach((value, key) => {
-        updatedDetails[key] = value;
-    });
-    fetch('/insertInstitution', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedDetails),
-    })
-        .then(response => response.json())
-        .then(data => {
-            window.location.reload();
-            $('#newInstitutionModal').modal('hide'); // Hide the modal after insertion
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            // Handle error conditions
-        });
-}
-
-function updateInstitutionDetails() {
-    const form = document.getElementById('institutionForm');
-    const formData = new FormData(form);
-    const updatedDetails = {};
-    formData.forEach((value, key) => {
-        updatedDetails[key] = value;
-    });
-    fetch('/updateInstitution', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedDetails),
-    })
-        .then(response => response.json())
-        .then(data => {
-            window.location.reload();
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            // Handle error conditions
-        });
-}
-
-function deleteInstitution() {
-    const institutionName = document.querySelector('#institutionForm [name="name"]').value;
-    let isConfirmed = confirm(`Are you sure you want to delete the institution "${institutionName}"?`);
-    if (!isConfirmed) {
-        return; // If the user clicked "Cancel", exit the function early
-    }
-    fetch('/deleteInstitution', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: institutionName }),
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                alert('Institution deleted successfully!');
-                window.location.reload(); // Refresh the page to update the list of institutions
-            } else {
-                alert('Failed to delete institution.');
-            }
-        })
-        .catch(error => console.error('Error:', error));
-}
-
-function submitInstitutionForm() {
-    const form = document.getElementById('institutionForm');
-    const formData = new FormData(form);
-    let institutionData = {};
-    formData.forEach((value, key) => {
-        institutionData[key] = value;
-    });
-    updateInstitutionDetails();
-}
-
-function showOrderDetails(institutionName, poNumber) {
-    fetch(`/getOrderDetails/${institutionName}/${poNumber}`)
-        .then(response => response.json())
-        .then(orderDetails => {
-            // Set the PO Number and Order Date in the modal
-            document.getElementById('orderPoNumber').textContent = poNumber;
-            document.getElementById('orderDate').textContent = orderDetails.date;
-
-            // Populate the order details table
-            const tableBody = document.getElementById('orderDetailsTableBody');
-            tableBody.innerHTML = orderDetails.datasets.map(dataset => `
-                <tr>
-                    <td>${dataset.name}</td>
-                </tr>
-            `).join('');
-            // Show the modal
-            $('#orderDetailsModal').modal('show');
-        })
-        .catch(error => console.error('Error fetching order details:', error));
-}
 
 
 document.getElementById('generateAndInsertOrderBtn').addEventListener('click', function () {
@@ -627,29 +496,4 @@ function updateOrderList(institutionName) {
         .catch(error => console.error('Error updating orders:', error));
 }
 
-function deleteOrder(institutionName, poNumber, event) {
-    if (event) event.preventDefault(); // Prevent default behavior if event is passed
-    if (confirm(`Are you sure you want to delete order ${poNumber} from ${institutionName}?`)) {
-        fetch(`/deleteOrder/${institutionName}/${poNumber}`, { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                alert('Order deleted successfully!');
-                currentSelectedInstitutionName = institutionName; // Save current selected institution name
-                getInstitutions().then(institutions => {
-                    institutionsList = institutions;
-                    renderInstitutionList(institutions);
-                    if (currentSelectedInstitutionName) {
-                        const items = document.querySelectorAll('#institutionList .list-group-item');
-                        items.forEach(item => {
-                            if (item.textContent === currentSelectedInstitutionName) {
-                                item.click();
-                            }
-                        });
-                    }
-                });
-            })
-            .catch(error => console.error('Error:', error));
-    } else {
-        return;
-    }
-}
+

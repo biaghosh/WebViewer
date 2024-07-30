@@ -1692,9 +1692,10 @@ def insert_order():
     collection = db.Institution
 
     data = request.json
+    print(data)
     institution_name = data['currentSelectedInstitutionName']
     new_order = data['newOrder']
-    
+    print(institution_name,new_order)
     # Insert a new order into the order list of the corresponding institution
     result = collection.update_one(
         {'name': institution_name},
