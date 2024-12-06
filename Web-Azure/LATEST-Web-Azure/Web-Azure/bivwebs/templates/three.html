@@ -186,6 +186,20 @@
         transform: translateX(0);
     }
 
+
+    .my-container {
+        height: calc(100vh - 50px);
+        padding: 20px;
+        top: 50px;
+        position: relative;
+        margin-left: 0; /* Default when sidebar is hidden */
+        transition: margin-left 0.5s;
+    }
+
+    #mySidebar.show ~ .my-container {
+        margin-left: 400px; /* Adjust according to sidebar width */
+    }
+
     #mySidebar a {
         padding: 8px 8px 8px 32px;
         text-decoration: none;
@@ -401,7 +415,6 @@
 </style>
 
 <div class="container-fluid" style="height: 100vh;">
-    <div id="toolsCol" class="col-lg-3 col-md-4 float-left">
         <div id="mySidebar" class="card mt-1 shadow">
             <!-- <button class="openbtn" onclick="toggleNav()">☰</button> -->
             <a href="javascript:void(0)" class="closebtn" onclick="toggleNav()">☰</a>
@@ -708,271 +721,270 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="my-container">
-        <div class="row">
-            <div class="col-lg-12 col-md-6 ml-auto" style="height: 50%;">
-                <div class="d-flex justify-content-end">
-                    <div id="UpMainDiv" style="width: 95%;">
-                        <div class="card shadow">
-                            <div class="card-header">
-                                <div class="d-flex flex-column">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <!-- Tab Navigation -->
-                                        <ul class="nav nav-tabs flex-row d-none" id="myTabNav">
-                                            <li class="nav-item">
-                                                <a id="orthoTab" class="nav-link px-2 disabled" data-toggle="tab"
-                                                    href="#orthoCard">
-                                                    Orthographic Views
-                                                </a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a id="vrTab" class="nav-link px-2 disabled" data-toggle="tab"
-                                                    href="#vrCard">
-                                                    Volume Rendering
-                                                </a>
-                                            </li>
-                                        </ul>
-                                        <!-- Form Selection -->
-                                        <form class="form d-flex align-items-center ml-auto">
-                                            <div class="form-group d-flex align-items-center mx-2 my-0"
-                                                style="align-items: center;">
-                                                <label for="dsSelect" class="mr-1 align-self-center"
-                                                    style="margin-bottom: 0;">Dataset:</label>
-                                                <select id="dsSelect" class="form-control form-control-sm"
-                                                    style="width: 120px;">
-                                                    <option value="" selected>Choose..</option>
-                                                    {% for ds in datasets %}
-                                                    <option value="{{ ds }}">{{ ds }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
+        <div class="my-container">
+            <div class="row">
+                <div class="col-lg-12 col-md-6 ml-auto" style="height: 50%;">
+                    <div class="d-flex justify-content-end">
+                        <div id="UpMainDiv" style="width: 95%;">
+                            <div class="card shadow">
+                                <div class="card-header">
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <!-- Tab Navigation -->
+                                            <ul class="nav nav-tabs flex-row d-none" id="myTabNav">
+                                                <li class="nav-item">
+                                                    <a id="orthoTab" class="nav-link px-2 disabled" data-toggle="tab"
+                                                        href="#orthoCard">
+                                                        Orthographic Views
+                                                    </a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a id="vrTab" class="nav-link px-2 disabled" data-toggle="tab"
+                                                        href="#vrCard">
+                                                        Volume Rendering
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                            <!-- Form Selection -->
+                                            <form class="form d-flex align-items-center ml-auto">
+                                                <div class="form-group d-flex align-items-center mx-2 my-0"
+                                                    style="align-items: center;">
+                                                    <label for="dsSelect" class="mr-1 align-self-center"
+                                                        style="margin-bottom: 0;">Dataset:</label>
+                                                    <select id="dsSelect" class="form-control form-control-sm"
+                                                        style="width: 120px;">
+                                                        <option value="" selected>Choose..</option>
+                                                        {% for ds in datasets %}
+                                                        <option value="{{ ds }}">{{ ds }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
 
-                                            <div class="form-group d-flex align-items-center mx-2 my-0"
-                                                style="align-items: center;">
-                                                <label for="modSelect" class="mr-1 align-self-center"
-                                                    style="margin-bottom: 0;">Modality:</label>
-                                                <select id="modSelect"
-                                                    class="form-control form-control-sm align-self-center"
-                                                    style="width: 120px; height: calc(1.5em + .75rem + 2px);"
-                                                    disabled></select>
-                                            </div>
+                                                <div class="form-group d-flex align-items-center mx-2 my-0"
+                                                    style="align-items: center;">
+                                                    <label for="modSelect" class="mr-1 align-self-center"
+                                                        style="margin-bottom: 0;">Modality:</label>
+                                                    <select id="modSelect"
+                                                        class="form-control form-control-sm align-self-center"
+                                                        style="width: 120px; height: calc(1.5em + .75rem + 2px);"
+                                                        disabled></select>
+                                                </div>
 
-                                            <div class="form-group d-flex align-items-center mx-2 my-0"
-                                                style="align-items: center;">
-                                                <label for="exposureSelect" class="mr-1 align-self-center"
-                                                    style="margin-bottom: 0;">Exposure:</label>
-                                                <select id="exposureSelect"
-                                                    class="form-control form-control-sm align-self-center"
-                                                    style="width: 120px; height: calc(1.5em + .75rem + 2px);"
-                                                    disabled></select>
-                                            </div>
+                                                <div class="form-group d-flex align-items-center mx-2 my-0"
+                                                    style="align-items: center;">
+                                                    <label for="exposureSelect" class="mr-1 align-self-center"
+                                                        style="margin-bottom: 0;">Exposure:</label>
+                                                    <select id="exposureSelect"
+                                                        class="form-control form-control-sm align-self-center"
+                                                        style="width: 120px; height: calc(1.5em + .75rem + 2px);"
+                                                        disabled></select>
+                                                </div>
 
-                                            <div class="form-group d-flex align-items-center mx-2 my-0"
-                                                style="align-items: center;">
-                                                <label for="wavelengthSelect" class="mr-1 align-self-center"
-                                                    style="margin-bottom: 0;">Wavelength:</label>
-                                                <select id="wavelengthSelect"
-                                                    class="form-control form-control-sm align-self-center"
-                                                    style="width: 120px; height: calc(1.5em + .75rem + 2px);"
-                                                    disabled></select>
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <!-- Information Display -->
-                                    <div class="card mt-3 d-none" id="info">
-                                        <div class="card-body py-2">
-                                            <div class="d-flex flex-wrap align-items-center">
-                                                <div class="form-group mx-1 my-0 d-flex align-items-center">
-                                                    <dt class="mr-1 small">Institution Name:</dt>
-                                                    <dd id="InstitutionName" class="small mb-0"></dd>
+                                                <div class="form-group d-flex align-items-center mx-2 my-0"
+                                                    style="align-items: center;">
+                                                    <label for="wavelengthSelect" class="mr-1 align-self-center"
+                                                        style="margin-bottom: 0;">Wavelength:</label>
+                                                    <select id="wavelengthSelect"
+                                                        class="form-control form-control-sm align-self-center"
+                                                        style="width: 120px; height: calc(1.5em + .75rem + 2px);"
+                                                        disabled></select>
                                                 </div>
-                                                <div class="form-group mx-1 my-0 d-flex align-items-center">
-                                                    <dt class="mr-1 small">PI:</dt>
-                                                    <dd id="piInfo" class="small mb-0"></dd>
-                                                </div>
-                                                <div class="form-group mx-1 my-0 d-flex align-items-center">
-                                                    <dt class="mr-1 small">Specimen Name:</dt>
-                                                    <dd id="specimenInfo" class="small mb-0"></dd>
-                                                </div>
-                                                <div class="form-group mx-1 my-0 d-flex align-items-center">
-                                                    <dt class="mr-1 small">Voxel Size:</dt>
-                                                    <dd id="voxelInfo" class="small mb-0"></dd>
-                                                </div>
-                                                <div class="form-group mx-1 my-0 d-flex align-items-center">
-                                                    <dt class="mr-1 small">Section Thickness:</dt>
-                                                    <dd id="thicknessInfo" class="small mb-0"></dd>
+                                            </form>
+                                        </div>
+                                        <!-- Information Display -->
+                                        <div class="card mt-3 d-none" id="info">
+                                            <div class="card-body py-2">
+                                                <div class="d-flex flex-wrap align-items-center">
+                                                    <div class="form-group mx-1 my-0 d-flex align-items-center">
+                                                        <dt class="mr-1 small">Institution Name:</dt>
+                                                        <dd id="InstitutionName" class="small mb-0"></dd>
+                                                    </div>
+                                                    <div class="form-group mx-1 my-0 d-flex align-items-center">
+                                                        <dt class="mr-1 small">PI:</dt>
+                                                        <dd id="piInfo" class="small mb-0"></dd>
+                                                    </div>
+                                                    <div class="form-group mx-1 my-0 d-flex align-items-center">
+                                                        <dt class="mr-1 small">Specimen Name:</dt>
+                                                        <dd id="specimenInfo" class="small mb-0"></dd>
+                                                    </div>
+                                                    <div class="form-group mx-1 my-0 d-flex align-items-center">
+                                                        <dt class="mr-1 small">Voxel Size:</dt>
+                                                        <dd id="voxelInfo" class="small mb-0"></dd>
+                                                    </div>
+                                                    <div class="form-group mx-1 my-0 d-flex align-items-center">
+                                                        <dt class="mr-1 small">Section Thickness:</dt>
+                                                        <dd id="thicknessInfo" class="small mb-0"></dd>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div id="xy-card-body" class="card-body d-none">
-                                <div id="xyDiv" style="cursor: crosshair;"><label
-                                        style="display: block; text-align: center; font-weight: bold;">XY</label></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-12 col-md-6 float-right" style="height: 50%;">
-                <div class="d-flex justify-content-end">
-                    <div id="DownMainDiv" class="d-none" style="width: 95%;">
-                        <div class="card shadow">
-                            <div class="tab-content">
-                                <div id="orthoCard" class="card-body tab-pane active">
-                                    <div style="display: flex;gap: 10px;">
-                                        <div id="xzDiv" style="cursor: crosshair; flex: 1;">
-                                            <label
-                                                style="display: block; text-align: center;font-weight: bold;">XZ</label>
-                                        </div>
-
-                                        <div id="yzDiv" style="cursor: crosshair; flex: 1;">
-                                            <label
-                                                style="display: block; text-align: center;font-weight: bold;">YZ</label>
-                                        </div>
-
-                                    </div>
-                                    <div id="orthoOverlayDiv"
-                                        class="d-none justify-content-center align-items-center overlay">
-                                        <div class="w-100 justify-content-center align-items-center">
-                                            <div class="spinner"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="vrCard" class="card-body tab-pane">
-                                    <div id="progressDiv" class="progress d-none">
-                                        <div id="3dProgress" class="progress-bar" role="progressbar" style="width: 0%;"
-                                            aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                    <div style="display: flex; justify-content: center; align-items: center;">
-                                        <canvas id="c"></canvas>
-                                    </div>
-                                    <div id="toolbars" class="height: 160px">
-                                        <form class="form-inline" onSubmit="return false;">
-                                            <div class="form-group">
-                                                <label class="form-check-label mr-1" for="zLockCheckbox">Z Lock:
-                                                    <i class="fas fa-info-circle d-none" data-toggle="popover"
-                                                        data-placement="top" title="Z Lock"
-                                                        data-content="The 3D viewer will clip at the Z slice selected in the 2D viewer"></i>&nbsp;</label>
-                                                <input class="form-check-input" type="checkbox" id="zLockCheckbox"
-                                                    checked>
-
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="zSliceInput">Z Clip:
-                                                    <input class="form-check-input ml-1" type="checkbox"
-                                                        id="clipZCheckbox" disabled>
-                                                </label>
-                                                <input id="zSliceInput" class="mx-1 form-control" step="1" type="number"
-                                                    max="700" disabled>
-                                                <label for="ySliceInput">Y Clip:
-                                                    <input class="form-check-input ml-1" type="checkbox"
-                                                        id="clipYCheckbox" disabled>
-                                                </label>
-                                                <input id="ySliceInput" class="mx-1 form-control" step="4" type="number"
-                                                    disabled>
-                                                <label for="ySliceInput">X Clip:
-                                                    <input class="form-check-input ml-1" type="checkbox"
-                                                        id="clipXCheckbox" disabled>
-                                                </label>
-                                                <input id="xSliceInput" class="mx-1 form-control" step="4" type="number"
-                                                    disabled>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="shaderSelect">Shader</label>
-                                                <select id="shaderSelect" class="form-control ml-1">
-                                                    <option value="2" selected> Surface </option>
-                                                    <option value="0"> MIP </option>
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="opacity" class="ml-1">Opacity</label>
-                                                <input type="range" class="ml-1" id="opacity" min="0" max="10" step=".1"
-                                                    value="10">
-                                                <input class="form-check-input ml-1" type="checkbox" id="edgesCheckbox">
-                                                <label class="form-check-label ml-1" for="edgesCheckbox">Bounding
-                                                    Box</label>
-                                                <button id="3dFullIconBtn" class="btn btn-primary" type="button"
-                                                    disabled>
-                                                    <i class="fas fa-expand"></i>&nbsp Fullscreen&nbsp3D
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <div id="vrOverlayDiv"
-                                        class="d-none justify-content-center align-items-center overlay">
-                                        <div class="w-100 justify-content-center align-items-center">
-                                            <div class="spinner"></div>
-                                        </div>
-                                    </div>
+                                <div id="xy-card-body" class="card-body d-none">
+                                    <div id="xyDiv" style="cursor: crosshair;"><label
+                                            style="display: block; text-align: center; font-weight: bold;">XY</label></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-12 col-md-6 float-right" style="height: 50%;">
-                <div class="d-flex justify-content-end">
-                    <div id="DownToolDiv" class="d-none" style="width: 95%;">
-                        <div class="card shadow">
-                            <div class="row h-100" style="display: flex;">
-                                <form id="xyForm" class="form-inline d-flex justify-content-between" style="flex: 3;"
-                                    onSubmit="return false;">
-                                    <div class="d-flex">
-                                        <div id="arrowControls" class="form-group mb-2 d-flex justify-content-center"
-                                            style="flex: 4; margin-left: 20px;">
-                                            <button id="stepBackBtn" class="cust-full" type="button" disabled><i
-                                                    class="mx-1 fa-lg fas fa-step-backward"></i></button>
-                                            <button id="backBtn" class="cust-full" type="button" disabled><i
-                                                    class="mx-1 fa-lg fas fa-arrow-left"></i></button>
-                                            <button id="forwardBtn" class="cust-full" type="button" disabled><i
-                                                    class="mx-1 fa-lg fas fa-arrow-right"></i></button>
-                                            <button id="stepForwardBtn" class="cust-full" type="button" disabled><i
-                                                    class="mx-1 fa-lg fas fa-step-forward"></i></button>
-                                        </div>
+            <div class="row">
+                <div class="col-lg-12 col-md-6 float-right" style="height: 50%;">
+                    <div class="d-flex justify-content-end">
+                        <div id="DownMainDiv" class="d-none" style="width: 95%;">
+                            <div class="card shadow">
+                                <div class="tab-content">
+                                    <div id="orthoCard" class="card-body tab-pane active">
+                                        <div style="display: flex;gap: 10px;">
+                                            <div id="xzDiv" style="cursor: crosshair; flex: 1;">
+                                                <label
+                                                    style="display: block; text-align: center;font-weight: bold;">XZ</label>
+                                            </div>
 
-                                        <div id="sliceDiv" class="form-group mb-2 d-flex align-items-center">
-                                            <label for="sliceInput" class="mb-0" style="margin-right: 10px;">Slice
-                                                Navigator:</label>
-                                            <input id="sliceInput" class="form-control" type="number" max="700"
-                                                disabled>
-                                        </div>
+                                            <div id="yzDiv" style="cursor: crosshair; flex: 1;">
+                                                <label
+                                                    style="display: block; text-align: center;font-weight: bold;">YZ</label>
+                                            </div>
 
-                                        <div id="sliderDiv" class="form-group mb-2" style="flex: 2; margin-left: 20px;">
-                                            <input id="sliceRange" class="form-control-range mt-3" type="range"
-                                                disabled>
+                                        </div>
+                                        <div id="orthoOverlayDiv"
+                                            class="d-none justify-content-center align-items-center overlay">
+                                            <div class="w-100 justify-content-center align-items-center">
+                                                <div class="spinner"></div>
+                                            </div>
                                         </div>
                                     </div>
+                                    <div id="vrCard" class="card-body tab-pane">
+                                        <div id="progressDiv" class="progress d-none">
+                                            <div id="3dProgress" class="progress-bar" role="progressbar" style="width: 0%;"
+                                                aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <div style="display: flex; justify-content: center; align-items: center;">
+                                            <canvas id="c"></canvas>
+                                        </div>
+                                        <div id="toolbars" class="height: 160px">
+                                            <form class="form-inline" onSubmit="return false;">
+                                                <div class="form-group">
+                                                    <label class="form-check-label mr-1" for="zLockCheckbox">Z Lock:
+                                                        <i class="fas fa-info-circle d-none" data-toggle="popover"
+                                                            data-placement="top" title="Z Lock"
+                                                            data-content="The 3D viewer will clip at the Z slice selected in the 2D viewer"></i>&nbsp;</label>
+                                                    <input class="form-check-input" type="checkbox" id="zLockCheckbox"
+                                                        checked>
 
-                                    <div class="form d-flex align-items-center ml-auto"
-                                        style="flex: 2; min-width: 600px;">
-                                        <select id="FullScreenSelect"
-                                            class="form-control d-flex align-items-center mx-2 my-0 ml-auto">
-                                            <option value="0" selected>XY</option>
-                                            <option value="1">XZ</option>
-                                            <option value="2">YZ</option>
-                                        </select>
-                                        <button id="FullScreenBtn" class="btn btn-primary" type="button" disabled
-                                            style="width: 25%; margin-right: 40px;">
-                                            <i class="fas fa-expand"></i> FullScreen
-                                        </button>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="zSliceInput">Z Clip:
+                                                        <input class="form-check-input ml-1" type="checkbox"
+                                                            id="clipZCheckbox" disabled>
+                                                    </label>
+                                                    <input id="zSliceInput" class="mx-1 form-control" step="1" type="number"
+                                                        max="700" disabled>
+                                                    <label for="ySliceInput">Y Clip:
+                                                        <input class="form-check-input ml-1" type="checkbox"
+                                                            id="clipYCheckbox" disabled>
+                                                    </label>
+                                                    <input id="ySliceInput" class="mx-1 form-control" step="4" type="number"
+                                                        disabled>
+                                                    <label for="ySliceInput">X Clip:
+                                                        <input class="form-check-input ml-1" type="checkbox"
+                                                            id="clipXCheckbox" disabled>
+                                                    </label>
+                                                    <input id="xSliceInput" class="mx-1 form-control" step="4" type="number"
+                                                        disabled>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="shaderSelect">Shader</label>
+                                                    <select id="shaderSelect" class="form-control ml-1">
+                                                        <option value="2" selected> Surface </option>
+                                                        <option value="0"> MIP </option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="opacity" class="ml-1">Opacity</label>
+                                                    <input type="range" class="ml-1" id="opacity" min="0" max="10" step=".1"
+                                                        value="10">
+                                                    <input class="form-check-input ml-1" type="checkbox" id="edgesCheckbox">
+                                                    <label class="form-check-label ml-1" for="edgesCheckbox">Bounding
+                                                        Box</label>
+                                                    <button id="3dFullIconBtn" class="btn btn-primary" type="button"
+                                                        disabled>
+                                                        <i class="fas fa-expand"></i>&nbsp Fullscreen&nbsp3D
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div id="vrOverlayDiv"
+                                            class="d-none justify-content-center align-items-center overlay">
+                                            <div class="w-100 justify-content-center align-items-center">
+                                                <div class="spinner"></div>
+                                            </div>
+                                        </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 col-md-6 float-right" style="height: 50%;">
+                    <div class="d-flex justify-content-end">
+                        <div id="DownToolDiv" class="d-none" style="width: 95%;">
+                            <div class="card shadow">
+                                <div class="row h-100" style="display: flex;">
+                                    <form id="xyForm" class="form-inline d-flex justify-content-between" style="flex: 3;"
+                                        onSubmit="return false;">
+                                        <div class="d-flex">
+                                            <div id="arrowControls" class="form-group mb-2 d-flex justify-content-center"
+                                                style="flex: 4; margin-left: 20px;">
+                                                <button id="stepBackBtn" class="cust-full" type="button" disabled><i
+                                                        class="mx-1 fa-lg fas fa-step-backward"></i></button>
+                                                <button id="backBtn" class="cust-full" type="button" disabled><i
+                                                        class="mx-1 fa-lg fas fa-arrow-left"></i></button>
+                                                <button id="forwardBtn" class="cust-full" type="button" disabled><i
+                                                        class="mx-1 fa-lg fas fa-arrow-right"></i></button>
+                                                <button id="stepForwardBtn" class="cust-full" type="button" disabled><i
+                                                        class="mx-1 fa-lg fas fa-step-forward"></i></button>
+                                            </div>
 
-                                </form>
+                                            <div id="sliceDiv" class="form-group mb-2 d-flex align-items-center">
+                                                <label for="sliceInput" class="mb-0" style="margin-right: 10px;">Slice
+                                                    Navigator:</label>
+                                                <input id="sliceInput" class="form-control" type="number" max="700"
+                                                    disabled>
+                                            </div>
 
+                                            <div id="sliderDiv" class="form-group mb-2" style="flex: 2; margin-left: 20px;">
+                                                <input id="sliceRange" class="form-control-range mt-3" type="range"
+                                                    disabled>
+                                            </div>
+                                        </div>
+
+                                        <div class="form d-flex align-items-center ml-auto"
+                                            style="flex: 2; min-width: 600px;">
+                                            <select id="FullScreenSelect"
+                                                class="form-control d-flex align-items-center mx-2 my-0 ml-auto">
+                                                <option value="0" selected>XY</option>
+                                                <option value="1">XZ</option>
+                                                <option value="2">YZ</option>
+                                            </select>
+                                            <button id="FullScreenBtn" class="btn btn-primary" type="button" disabled
+                                                style="width: 25%; margin-right: 40px;">
+                                                <i class="fas fa-expand"></i> FullScreen
+                                            </button>
+                                        </div>
+
+                                    </form>
+
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 </div>
 
 <div class="container-fluid d-none">
