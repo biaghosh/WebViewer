@@ -910,6 +910,13 @@ function getSceneClicks(evt) {
     }
 }
 
+var texture_placeholder; 
+var context;
+var middleX;
+var middleY;
+var pixelDistance;
+var text;
+
 function drawLine() {
     var material3 = new THREE.LineBasicMaterial({
         color: 0xFF0000,
@@ -937,34 +944,58 @@ function drawLine() {
         new THREE.Vector3(measureCoords[1].x, measureCoords[1].y + 5, 0.5),
     )
 
-    var middleX = measureCoords[1].x - measureCoords[0].x
-    var middleY = measureCoords[1].y - measureCoords[0].y
-    var pixelDistance = Math.sqrt(Math.pow(middleX, 2) + Math.pow(middleY, 2))
+    middleX = measureCoords[1].x - measureCoords[0].x
+    middleY = measureCoords[1].y - measureCoords[0].y
+    pixelDistance = Math.sqrt(Math.pow(middleX, 2) + Math.pow(middleY, 2))
     pixelDistance = pixelDistance.toFixed(4)
     var line = new THREE.Line(geometry3, material3)
 
     lineTextGroup.add(line)
-    var texture_placeholder = document.createElement('canvas');
+    texture_placeholder = document.createElement('canvas');
     texture_placeholder.width = 200;  // Increase canvas width
     texture_placeholder.height = 40;  // Increase the height of the canvas
-    var context = texture_placeholder.getContext('2d');
+    context = texture_placeholder.getContext('2d');
     context.clearRect(0, 0, 200, 40)
     context.fillStyle = '#00FFFF';
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.font = `${annFontNumber.value}px`;
+    context.font = `${annFontNumber.value*14}px serif`;
+    var texture = new THREE.Texture(texture_placeholder);
 
     context.fillText(`${(pixelDistance * dsInfo['info']['voxels']).toFixed(2)}µ`, texture_placeholder.width / 2, texture_placeholder.height / 2);
-    var texture = new THREE.Texture(texture_placeholder);
+    
     texture.needsUpdate = true;
     var material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
     var plane = new THREE.PlaneGeometry(400, 80);
-    var text = new THREE.Mesh(plane, material)
+    text = new THREE.Mesh(plane, material)
     text.translateX(measureCoords[0].x + (middleX / 2))
     text.translateY(measureCoords[0].y + (middleY / 2) - 20)
     text.rotateZ(Math.atan2(middleY, middleX))
     lineTextGroup.add(text)
 }
+
+annFontNumber.addEventListener('input', (event) => {
+    lineTextGroup.remove(text);
+    
+    context.clearRect(0, 0, 200, 40)
+    context.fillStyle = '#00FFFF';
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.font = `${annFontNumber.value*14}px serif`;
+    var texture = new THREE.Texture(texture_placeholder);
+
+    context.fillText(`${(pixelDistance * dsInfo['info']['voxels']).toFixed(2)}µ`, texture_placeholder.width / 2, texture_placeholder.height / 2);
+    
+    texture.needsUpdate = true;
+    var material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
+    var plane = new THREE.PlaneGeometry(400, 80);
+    text = new THREE.Mesh(plane, material)
+    text.translateX(measureCoords[0].x + (middleX / 2))
+    text.translateY(measureCoords[0].y + (middleY / 2) - 20)
+    text.rotateZ(Math.atan2(middleY, middleX))
+    lineTextGroup.add(text)
+});
+
 
 function drawAnnotation(p, t, x, y) {
     //  (p, t, x, y)
@@ -977,7 +1008,8 @@ function drawAnnotation(p, t, x, y) {
     context.fillStyle = '#00FFFF';
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.font = `${annFontNumber.value}px`;
+    //context.font = `${annFontNumber.value}px serif`;
+    context.font = `${annFontNumber.value*14}px serif`;
     for (let l = 0; l < multiT.length; l++)
         context.fillText(`${multiT[l]}`, 60 / 2, texture_placeholder.height * (l + 1 * .5) / 2);
     var texture = new THREE.Texture(texture_placeholder);
