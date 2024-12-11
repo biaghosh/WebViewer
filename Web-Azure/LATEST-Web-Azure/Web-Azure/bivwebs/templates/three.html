@@ -394,6 +394,10 @@
         color: #fff;
     }
 
+    .selected {
+        background-color: lightblue; /* Highlight color */
+    } 
+
     .close {
         font-size: 1.5rem;
         color: #000;
@@ -636,17 +640,18 @@
                         </table>
                     </div>
 
-                    <div class="row mx-2 my-1 p-1">
+                    <!--<div class="row mx-2 my-1 p-1">
                         <label class="mt-2" for="maskLoadInput">Mask Name</label>
                         <input id="maskLoadInput" type="text" class="form-control col-7 mx-1" disabled>
-                        <!-- <button id="loadMaskBtn" type="button" class="btn btn-primary col-4" disabled>Load</button>
-                        <p class="mb-1"></p> -->
-                    </div>
+                         <button id="loadMaskBtn" type="button" class="btn btn-primary col-4" disabled>Load</button>
+                        <p class="mb-1"></p>
+                    </div> -->
 
                     <div class="row mx-2 my-1 p-1">
                         <!-- <label class="mt-2" for="maskLoadInput">Mask Name</label>
                         <input id="maskLoadInput" type="text" class="form-control col-4 mx-1" disabled> -->
                         <button id="loadMaskBtn" type="button" class="btn btn-primary col-12" disabled>Load</button>
+                        <button id="deleteMaskBtn" type="button" class="btn btn-primary col-12" disabled>Delete</button>
                         <p class="mb-1"></p>
                     </div>
                 </div>

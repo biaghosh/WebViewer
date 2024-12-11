@@ -22,6 +22,9 @@ let measureData = {
 };
 
 
+let selectedRowName;
+
+
 dsSelect.addEventListener("change", () => {
     if (!dsSelect.value) return;
     fetch('/getDatasetInfo', {
@@ -197,8 +200,9 @@ let forwardBtn = document.getElementById("forwardBtn"),
     startMaskBtn = document.getElementById("startMaskBtn"),
     eraseMaskBtn = document.getElementById("eraseMaskBtn"),
     finishedMaskBtn = document.getElementById("finishedMaskBtn"),
-    maskLoadInput = document.getElementById("maskLoadInput"),
+    //maskLoadInput = document.getElementById("maskLoadInput"),
     loadMaskBtn = document.getElementById("loadMaskBtn"),
+    deleteMaskBtn = document.getElementById("deleteMaskBtn"),
     copySliceBox = document.getElementById("copySliceBox"),
     measureClearBtn = document.getElementById("measureClearBtn"),
     // viewSelect = document.getElementById("viewsSelect"),
@@ -622,8 +626,9 @@ function drawMask() {
 startMaskBtn.addEventListener('click', () => {
     startMaskBtn.disabled = true
     maskInput.disabled = true
-    maskLoadInput.disabled = true
+    //maskLoadInput.disabled = true
     loadMaskBtn.disabled = true
+    deleteMaskBtn.disabled = true
     eraseMaskBtn.disabled = false
     finishedMaskBtn.disabled = false
 
@@ -797,13 +802,15 @@ finishedMaskBtn.addEventListener('click', () => {
             }
             drawMask()
             loadMasks()
-            maskLoadInput.disabled = false
+            //maskLoadInput.disabled = false
             loadMaskBtn.disabled = false
+            deleteMaskBtn.disabled = false
         })
         .catch((error) => {
             console.error('Error:', error)
         })
 })
+
 
 function loadMasks() {
     fetch('/getMasks', {
@@ -811,13 +818,13 @@ function loadMasks() {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        body: JSON.stringify({  
             'dataset': dsInfo["name"]
         }),
     })
         .then(response => response.json())
         .then(data => {
-            maskLoadInput.disabled = false
+            //maskLoadInput.disabled = false
             // maskInput.value = ''
             brushGroup.remove(...brushGroup.children)
             brushflag = false
@@ -825,12 +832,26 @@ function loadMasks() {
             maskTableBody.innerHTML = ``
             for (let i = 0; i < data.length; i++) {
                 loadMaskBtn.disabled = false
+                deleteMaskBtn.disabled = false
                 var newRow = maskTableBody.insertRow()
                 let dt = new Date(data[i]['datetime'])
                 newRow.insertCell(0).appendChild(document.createTextNode(data[i]['name']))
                 newRow.insertCell(1).appendChild(document.createTextNode(data[i]['interpolated']))
                 newRow.insertCell(2).appendChild(document.createTextNode(dt.toDateString()))
                 newRow.insertCell(3).appendChild(document.createTextNode(data[i]['user'].split("@")[0]))
+
+                newRow.addEventListener("click", function() {
+                    let rows = maskTableBody.getElementsByTagName("tr");
+
+                    // Clear existing selection
+                    for (let j = 0; j < rows.length; j++) {
+                        rows[j].classList.remove("selected");
+                    }
+
+                    // Highlight the selected row
+                    this.classList.add("selected");
+                    selectedRowName = this.cells[0].textContent; 
+                });
             }
         })
         .catch((error) => {
@@ -839,60 +860,107 @@ function loadMasks() {
 
 }
 
-maskLoadInput = document.getElementById("maskLoadInput"),
-    loadMaskBtn.addEventListener("click", () => {
-        if (maskLoadInput.value == '')
-            return //maybe alert
+loadMaskBtn.addEventListener("click", () => {
+    if (selectedRowName == '')
+        return //maybe alert
 
-        fetch('/getMaskSlices', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                'dataset': dsInfo["name"],
-                'name': maskLoadInput.value
-            }),
-        })
-            .then(response => response.json())
-            .then(data => {
-                //slow iteration, see if there's a modern approach
-                vertsHolder = []
-                let verts = [];
-                for (let s = 0; s < data.length; s++) {
-                    if ('verts' in data[s]) {
-                        vertsHolder.push({ slice: data[s].slice, verts: data[s].verts })
-                    }
-                    else {
-                        let rawMask = data[s].mask
-                        //generated
-                        for (let y = 0; y < rawMask.length; y++) {
-                            for (let x = 0; x < rawMask[y].length; x++) {
-                                if (rawMask[y][x] > 0) {
-                                    verts.push(x - (dsInfo["imageDims"]["x"] / 2))
-                                    verts.push(y - (dsInfo["imageDims"]["y"] / 2))
+    fetch('/getMaskSlices', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            'dataset': dsInfo["name"],
+            'name': selectedRowName
+        }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            //slow iteration, see if there's a modern approach
+            vertsHolder = []
+            let verts = [];
+            for (let s = 0; s < data.length; s++) {
+                if ('verts' in data[s]) {
+                    vertsHolder.push({ slice: data[s].slice, verts: data[s].verts })
+                }
+                else {
+                    let rawMask = data[s].mask
+                    //generated
+                    for (let y = 0; y < rawMask.length; y++) {
+                        for (let x = 0; x < rawMask[y].length; x++) {
+                            if (rawMask[y][x] > 0) {
+                                verts.push(x - (dsInfo["imageDims"]["x"] / 2))
+                                verts.push(y - (dsInfo["imageDims"]["y"] / 2))
 
-                                }
                             }
                         }
-                        vertsHolder.push({ slice: data[s].slice, verts: verts })
-                        verts = []
                     }
-
+                    vertsHolder.push({ slice: data[s].slice, verts: verts })
+                    verts = []
                 }
-                drawMask() // Go to slice automatically?
 
-                // maskInput.value = maskLoadInput.value
-                //view only or edits?
-                //eraseMaskBtn.disabled = false
-                // maskLoadInput.value = ''
+            }
+            drawMask() // Go to slice automatically?
 
-            })
-            .catch((error) => {
-                alert("No masks found with that name")
-            })
+            // maskInput.value = maskLoadInput.value
+            //view only or edits?
+            //eraseMaskBtn.disabled = false
+            // maskLoadInput.value = ''
 
+        })
+        .catch((error) => {
+            alert("No masks found with that name")
+        })
+
+})
+
+deleteMaskBtn.addEventListener("click", () => {
+    if (!selectedRowName) {
+        //alert("Please select a row first."); // Alert if no row is selected
+        return;
+    }
+
+    fetch('/deleteMask', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            'dataset': dsInfo["name"],
+            'name': selectedRowName
+        }),
     })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to delete the mask.");
+            }
+            return response.json();
+        })
+        .then(() => {
+            // Find the row corresponding to the selected mask name and remove it
+            let maskTableBody = document.getElementById("maskTbody");
+            let rows = maskTableBody.getElementsByTagName("tr");
+
+            for (let i = 0; i < rows.length; i++) {
+                if (rows[i].cells[0].textContent === selectedRowName) {
+                    brushGroup.remove(...brushGroup.children)
+                    maskTableBody.deleteRow(i);
+                    selectedRowName = null; // Clear the selectedRowName after deletion
+                    loadMaskBtn.disabled = true
+                    deleteMaskBtn.disabled = true
+                    break;
+                }
+            }
+
+            //alert(`Mask "${selectedRowName}" has been deleted successfully.`);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert("Failed to delete the mask.");
+        });
+});
+
+
 
 /*** END SECTION */
 

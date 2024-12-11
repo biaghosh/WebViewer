@@ -792,6 +792,42 @@ def getMaskSlices():
         "name": json["name"]
     })
     return make_response(dumps(data), 200)
+
+
+@app.route("/deleteMask", methods=['DELETE'])
+def deleteMask():
+    # Ensure the user is logged in
+    if 'email' not in session:
+        return redirect(url_for('login'))
+
+    # Parse the incoming JSON request
+    json_data = request.get_json()
+    if not json_data or 'dataset' not in json_data or 'name' not in json_data:
+        return make_response({"error": "Dataset and name are required."}, 400)
+
+    # Connect to MongoDB
+    client = MongoClient(app.config['mongo'])
+    db = client.BIV
+    masks_collection = db.masks
+
+    try:
+        # Delete the mask document
+        result = masks_collection.delete_one({
+            "dataset": json_data["dataset"],
+            "name": json_data["name"],
+            "user": session['email']
+        })
+
+        # Check if a document was deleted
+        if result.deleted_count == 1:
+            return make_response({"message": "Mask deleted successfully."}, 200)
+        else:
+            return make_response({"error": "Mask not found."}, 404)
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error deleting mask: {e}")
+        return make_response({"error": "Failed to delete mask. Please try again later."}, 500)
+    
     #############################
     ### INTERPOLATION SECTION ###
 
